@@ -27,10 +27,15 @@ export function Toast({ messages }: { messages: Record<string, string> }) {
     next.delete('toast');
     const qs = next.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-    const timer = setTimeout(() => setMessage(null), 3000);
-    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code]);
+
+  // 사라지는 타이머는 따로 둔다. 위 효과의 정리 함수에 두면 주소에서 toast를 지우는 순간(code가 바뀜) 타이머가 취소돼 알림이 계속 남는다.
+  useEffect(() => {
+    if (!message) return;
+    const timer = setTimeout(() => setMessage(null), 3000);
+    return () => clearTimeout(timer);
+  }, [message]);
 
   return (
     <div aria-live="polite" role="status" className="pointer-events-none fixed inset-x-0 bottom-24 z-50 flex justify-center px-4">

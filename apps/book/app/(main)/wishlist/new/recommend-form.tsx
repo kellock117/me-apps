@@ -42,7 +42,7 @@ export function RecommendForm() {
 
       <div>
         <label htmlFor="reason" className="mb-2 block text-sm font-medium">
-          추천 이유 <span className="text-danger">*</span>
+          추천 이유 <span className="font-normal text-muted">(선택)</span>
         </label>
         <textarea
           id="reason"

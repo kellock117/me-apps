@@ -29,7 +29,7 @@ export async function selectBook(_prev: BookFormState, formData: FormData): Prom
   // 2) 검증
   let bookId: string;
   let createdHere = false;
-  let reason: string;
+  let reason: string | null;
   let selectedBy: string;
   let date: string;
 

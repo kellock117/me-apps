@@ -218,10 +218,10 @@ export function BookFields({ errors = EMPTY, values: serverValues = EMPTY }: { e
         </div>
         <div>
           <label htmlFor="genre" className="mb-1 block text-sm font-medium">
-            장르
+            장르 <span className="text-danger">*</span>
           </label>
           <select id="genre" name="genre" defaultValue={v('genre', '')} className={input}>
-            <option value="">선택 안 함</option>
+            <option value="">선택해 주세요</option>
             {GENRES.map((g) => (
               <option key={g} value={g}>
                 {g}

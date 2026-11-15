@@ -47,7 +47,7 @@ export default async function WishlistPage() {
       </Card>
 
       {cards.length === 0 ? (
-        <Card className="text-center text-muted">아직 추천된 책이 없어요. 첫 책을 추천해 보세요.</Card>
+        <Card className="text-center text-muted">위시리스트가 비어 있어요. 첫 책을 추가해 보세요.</Card>
       ) : (
         <ul className="space-y-3">
           {cards.map(({ b, who, mineOn }) => (

@@ -100,7 +100,7 @@ export function SelectForm({ members, defaultSelectedBy, wishlist }: Props) {
 
       <div>
         <label htmlFor="reason" className="mb-2 block text-sm font-medium">
-          선정 이유 <span className="text-danger">*</span>
+          선정 이유 <span className="font-normal text-muted">(선택)</span>
         </label>
         <textarea id="reason" name="reason" rows={3} maxLength={500} defaultValue={v.reason ?? ''} className="w-full rounded-xl border border-line bg-surface px-4 py-3 text-base" aria-invalid={e.reason ? true : undefined} />
         <Err msgs={e.reason} />
