@@ -2,6 +2,7 @@
 #
 # 왜: 백업이 같은 Supabase 프로젝트에만 있으면 프로젝트를 잃을 때 같이 사라진다.
 # 주의: 이 저장소(me-apps)는 공개라서 백업을 여기에 올리거나 아티팩트로 남기면 누구나 받을 수 있다. 반드시 비공개 저장소로만 보낸다.
+# 저장 위치: 비공개 저장소의 <연>/<월>/YYYY-MM-DD.json (예: 2026/11/2026-11-15.json)
 # 알림: 최신 백업이 36시간보다 오래됐거나(크론 실패) 복사가 실패하면 이 작업이 실패해 GitHub이 메일을 보낸다.
 #
 # 필요한 설정(Settings → Secrets and variables → Actions):
@@ -54,7 +55,11 @@ jobs:
         run: |
           git config user.name "backup-mirror"
           git config user.email "backup-mirror@users.noreply.github.com"
-          git add "$name"
+          # 파일이 쌓여도 목록이 길어지지 않게 연/월 폴더로 나눈다 (2026-11-15.json → 2026/11/)
+          dir="${name:0:4}/${name:5:2}"
+          mkdir -p "$dir"
+          mv "$name" "$dir/$name"
+          git add "$dir/$name"
           if git diff --cached --quiet; then echo "새 파일 없음"; exit 0; fi
           git commit -m "backup $name"
           git push
