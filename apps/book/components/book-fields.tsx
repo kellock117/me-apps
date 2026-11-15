@@ -102,14 +102,28 @@ export function BookFields({ errors = EMPTY, values: serverValues = EMPTY }: { e
           />
         </div>
         <div aria-live="polite" className="space-y-2">
-          {loading && <p className="text-sm text-muted">검색 중…</p>}
+          {loading && (
+            <div role="status" className="space-y-2">
+              <span className="sr-only">검색 중…</span>
+              {[0, 1, 2].map((i) => (
+                <div key={i} aria-hidden className="flex min-h-16 animate-pulse gap-3 rounded-xl border border-line bg-surface p-2">
+                  <span className="h-20 w-14 shrink-0 rounded bg-line" />
+                  <span className="flex-1 space-y-2 py-1">
+                    <span className="block h-4 w-3/4 rounded bg-line" />
+                    <span className="block h-3 w-1/2 rounded bg-line" />
+                    <span className="block h-3 w-1/3 rounded bg-line" />
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
           {searchError && (
             <p role="alert" className="text-sm font-medium text-danger">
               {searchError}
             </p>
           )}
           {!loading && !searchError && results && results.length === 0 && <p className="text-sm text-muted">검색 결과가 없어요. 직접 입력해 보세요.</p>}
-          {results && results.length > 0 && (
+          {!loading && results && results.length > 0 && (
             <ul className="space-y-2">
               {results.map((c, i) => (
                 <li key={`${c.isbn13 ?? c.title}-${i}`}>
@@ -126,6 +140,7 @@ export function BookFields({ errors = EMPTY, values: serverValues = EMPTY }: { e
                       <span className="block text-xs text-muted">
                         {[c.publisher, c.publishedDate?.slice(0, 4)].filter(Boolean).join(' · ')}
                       </span>
+                      <span className="block text-xs text-muted">{c.pages ? `${c.pages}쪽` : '쪽수 정보 없음'}</span>
                     </span>
                   </button>
                 </li>
