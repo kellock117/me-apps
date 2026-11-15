@@ -68,7 +68,7 @@ export function RecommendForm() {
       )}
 
       <button type="submit" disabled={pending} className="min-h-12 w-full rounded-xl bg-accent px-4 text-base font-semibold text-accent-ink disabled:opacity-60">
-        {pending ? '저장 중…' : '추천하기'}
+        {pending ? '저장 중…' : '추가하기'}
       </button>
     </form>
   );

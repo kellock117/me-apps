@@ -32,7 +32,7 @@ export type BookFields = z.infer<typeof bookFieldsSchema>;
 
 const reason = (label: string) => z.string().trim().min(1, `${label}를 적어 주세요`).max(500, '500자까지 쓸 수 있어요');
 
-/** 책 추천하기 */
+/** 위시리스트 추가하기 */
 export const recommendSchema = bookFieldsSchema.extend({ reason: reason('추천 이유') });
 
 const selectCommon = {
