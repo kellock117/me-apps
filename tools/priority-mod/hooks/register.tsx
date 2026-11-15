@@ -1,13 +1,48 @@
 /**
  * 우선순위 mod: 세션 작업 폴더의 docs/TODO.md를 등급별로 보여 주는 패널(읽기 전용).
- * 파일이 없는 프로젝트에서는 아무것도 열지 않는다. 체크·되돌리기는 이후 티켓에서 붙인다.
+ * 항목 옆 버튼으로 체크하면 TODO.md에서 빼 DONE.md 맨 위로 옮긴다(쓰기 직전에 두 파일을 다시 읽어 확인).
+ * 파일이 없는 프로젝트에서는 아무것도 열지 않는다. 커밋은 하지 않는다. 되돌리기는 이후 티켓에서 붙인다.
  */
-import type { Register } from 'claude-code'
+import type { Engine, Register } from 'claude-code'
 
-import { parseTodo } from './todo'
+import { checkItem, parseTodo } from './todo'
+import type { TodoItem } from './todo'
 
 const PANE = 'priority-todo'
 const TODO_PATH = 'docs/TODO.md'
+const DONE_PATH = 'docs/DONE.md'
+const REASON = {
+  'not-found': '그 항목을 TODO.md에서 찾을 수 없어요',
+  changed: '그 사이 파일이 바뀌었어요',
+  'already-done': '이미 DONE.md에 있어요',
+} as const
+
+/** 한국 날짜(YYYY-MM-DD). */
+function seoulDate(): string {
+  return new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10)
+}
+
+/** 체크 버튼: 파일을 다시 읽어 확인한 뒤 DONE → TODO 순서로 쓴다(중간에 실패해도 항목이 사라지지 않는다). */
+async function check($: Engine, item: TodoItem) {
+  if (!item.id) return
+  const [todo, done] = await Promise.all([
+    $.fs.read(TODO_PATH).catch(() => undefined),
+    $.fs.read(DONE_PATH).catch(() => undefined),
+  ])
+  if (todo === undefined || done === undefined) {
+    $.ui.toast('TODO.md나 DONE.md를 읽을 수 없어요')
+    return
+  }
+  const r = checkItem(todo, done, { id: item.id, text: item.text }, seoulDate())
+  if (!r.ok) {
+    $.ui.toast(`${REASON[r.reason]}. 새로고침했어요`)
+  } else {
+    await $.fs.write(DONE_PATH, r.done)
+    await $.fs.write(TODO_PATH, r.todo)
+    $.ui.toast('DONE.md로 옮겼어요')
+  }
+  $.ui.invalidate('ui.render')
+}
 
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
@@ -40,11 +75,14 @@ export const register: Register = on => {
             </Text>
             {section.items.length === 0 && <Text dimColor>  (없음)</Text>}
             {section.items.map(item => (
-              <Text key={item.id ?? item.text}>
-                {'  '}
-                {item.who ? `(${item.who}) ` : ''}
-                {item.text}
-              </Text>
+              <Box key={item.id ?? item.text}>
+                {item.id ? <Button key={`check-${item.id}`} onPress={() => check($, item)}>✓</Button> : <Text>  </Text>}
+                <Text>
+                  {' '}
+                  {item.who ? `(${item.who}) ` : ''}
+                  {item.text}
+                </Text>
+              </Box>
             ))}
           </Box>
         ))}

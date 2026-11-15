@@ -26,3 +26,53 @@ export function parseTodo(markdown: string): Section[] {
   }
   return sections
 }
+
+export type CheckResult =
+  | { ok: true; todo: string; done: string }
+  | { ok: false; reason: 'not-found' | 'changed' | 'already-done' }
+
+/** DONE.md 머리글 뒤 첫 체크 줄 앞에 넣을 자리를 찾는다. 체크 줄이 없으면 맨 끝. */
+function doneInsertIndex(lines: string[]): number {
+  const first = lines.findIndex(line => line.startsWith('- [x]'))
+  if (first >= 0) return first
+  return lines.length > 0 && lines[lines.length - 1] === '' ? lines.length - 1 : lines.length
+}
+
+/**
+ * TODO.md에서 `id` 줄을 빼 DONE.md 맨 위에 `- [x] 날짜 (P등급·누가) 내용 <!-- id:... -->`로 옮긴 두 텍스트를 돌려준다.
+ * `expected.text`는 화면에 보였던 내용이다. 그 사이 줄이 바뀌었으면 쓰지 않도록 'changed'로 거절한다.
+ * 입력은 바꾸지 않고, 옮기는 줄 외의 모든 줄은 그대로 둔다.
+ */
+export function checkItem(
+  todoText: string,
+  doneText: string,
+  expected: { id: string; text: string },
+  date: string,
+): CheckResult {
+  if (!expected.id) return { ok: false, reason: 'not-found' }
+  const todoLines = todoText.split('\n')
+  let grade: number | undefined
+  let at = -1
+  let item: TodoItem | undefined
+  for (let i = 0; i < todoLines.length; i++) {
+    const head = SECTION.exec(todoLines[i])
+    if (head) {
+      grade = Number(head[1])
+      continue
+    }
+    const m = ITEM.exec(todoLines[i])
+    if (m && m[3] === expected.id && grade !== undefined) {
+      at = i
+      item = { id: m[3], who: m[1] as Who | undefined, text: m[2] }
+      break
+    }
+  }
+  if (!item || at < 0 || grade === undefined) return { ok: false, reason: 'not-found' }
+  if (item.text !== expected.text) return { ok: false, reason: 'changed' }
+  if (doneText.includes(`<!-- id:${expected.id} -->`)) return { ok: false, reason: 'already-done' }
+
+  const line = `- [x] ${date} (P${grade}${item.who ? `·${item.who}` : ''}) ${item.text} <!-- id:${item.id} -->`
+  const doneLines = doneText.split('\n')
+  doneLines.splice(doneInsertIndex(doneLines), 0, line)
+  return { ok: true, todo: todoLines.filter((_, i) => i !== at).join('\n'), done: doneLines.join('\n') }
+}
