@@ -4,12 +4,10 @@
  *   npm run migrate:notion                              노션 API에서 읽어 옮긴다 (NOTION_TOKEN 필요)
  *   npm run migrate:notion -- --dump snap.json          노션에서 읽은 내용을 파일로 저장하고 끝낸다
  *   npm run migrate:notion -- --from-snapshot snap.json 노션 대신 저장해 둔 파일에서 읽는다
- *   --no-enrich                                         알라딘 보강을 건너뛴다
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@me/core/database';
-import { enrichBooks } from './migrate/enrich';
 import { loadFromNotionApi } from './migrate/from-notion-api';
 import { countRows, importSnapshot } from './migrate/import';
 import { snapshotSchema } from './migrate/snapshot';
@@ -48,14 +46,6 @@ async function main() {
   });
 
   await importSnapshot(db, snapshot);
-
-  const ttbKey = process.env.ALADIN_TTB_KEY;
-  if (flag('--no-enrich')) console.log('알라딘 보강: 건너뜀(--no-enrich)');
-  else if (!ttbKey) console.log('알라딘 보강: ALADIN_TTB_KEY가 없어 건너뜀. 키를 넣고 다시 실행하면 ISBN이 없는 책만 채운다.');
-  else {
-    const { enriched, skipped } = await enrichBooks(db, ttbKey);
-    console.log(`알라딘 보강: ${enriched}권 완료${skipped.length ? `, 건너뜀 ${skipped.length}권 (${skipped.join(', ')})` : ''}`);
-  }
 
   console.log('\n현재 행 수:', await countRows(db));
 }

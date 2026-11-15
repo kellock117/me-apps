@@ -14,7 +14,7 @@ export type Candidate = {
   coverUrl: string | null;
   description: string | null;
   pages: number | null;
-  source: 'aladin' | 'kakao';
+  source: 'kakao';
 };
 
 type Picked = { candidate: Candidate | null }; // null = 직접 입력
