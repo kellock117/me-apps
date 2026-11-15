@@ -77,6 +77,19 @@
 - 로컬 DB: Docker를 켜고 `npx supabase start && npx supabase db reset`. 마이그레이션을 바꾸면 `pnpm --filter @me/core db:types`.
 - 새 앱 추가 절차는 `docs/ADDING-AN-APP.md`.
 
+## 개발 방식 (SDD, 스펙 먼저)
+- 상세 흐름과 단계 설명은 `docs/reference/sdd.md`. 전체 흐름: `/grill-me` → `/to-spec` → `/to-tickets` → `/implement` → 검증·PR → `/retro`.
+- **새 기능이나 동작이 바뀌는 변경(화면 흐름, 규칙, 데이터 구조, 권한)은 스펙이 승인되기 전에 코드를 쓰지 않는다.** 요청이 이런 변경이면 구현을 시작하지 말고 먼저 "`/grill-me`로 시작할까요?"라고 안내한다. 이 스킬들은 사용자만 실행할 수 있다(`disable-model-invocation`). 결정(ADR)이 나올 것 같으면 `/grill-with-docs`를 권한다.
+- 예외(스펙 없이 진행): 오타·문구 수정, 문서만 바뀌는 일, 운영 장애 핫픽스. 끝난 뒤 `docs/NOTES.md`나 PR에 한 줄 남긴다. 경계가 애매하면 사용자에게 묻는다.
+- 구현 중 스펙이 틀린 걸 알게 되면 코드보다 스펙(GitHub 이슈)을 먼저 고치고 사용자에게 알린다. 스펙에 없는 것은 만들지 않는다.
+- 단위가 끝나면 스펙의 완료 기준을 하나씩 대조한 결과를 보여 주고 멈춘다. PR 본문에는 `Closes #스펙번호`를 단다.
+- 스펙·티켓은 GitHub 이슈, 개인이 할 일은 `docs/TODO.md`(이슈 규칙은 `docs/agents/issue-tracker.md`). 공개 레포이므로 이슈에도 실명·키·개인 기록을 쓰지 않는다.
+
+## 대화 시작 시 (할 일 인지)
+- 새 대화를 시작하면 `docs/TODO.md`의 1·2등급과 `docs/DONE.md` 최근 항목을 읽고, 지금 작업과 관련 있는 것만 한두 줄로 알린다. 읽기 전에 작업부터 시작하지 않는다.
+- `docs/TODO.md`는 등급별로 묶여 있고 줄마다 `<!-- id:... -->`가 있다(우선순위 mod가 체크·되돌리기에 쓴다). 줄을 고칠 때 id를 지우거나 바꾸지 않는다. 항목을 끝내면 `DONE.md` 맨 위에 `- [x] YYYY-MM-DD (P등급) 내용 <!-- id:... -->`로 옮긴다.
+- 새 할 일이 생기면 등급(기준은 `docs/TODO.md` 머리)을 매겨 제안하고, 사용자가 확인한 뒤 추가한다.
+
 ## Agent skills
 
 ### Issue tracker

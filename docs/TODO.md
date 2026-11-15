@@ -2,26 +2,50 @@
 
 끝내면 항목을 `docs/DONE.md`로 옮긴다(날짜와 함께). 아이디어·계획은 README "앞으로"에, 동작 특이사항은 `NOTES.md`에 둔다. 이 파일은 "하기로 했는데 아직 안 한 일"만 모은다.
 
-## 확인 (코드는 끝났고 눈으로/실행으로 봐야 하는 것)
-- [ ] 로그아웃 상태(시크릿 창)에서 두 사이트가 읽기 전용으로 열리는지 확인
-- [ ] 워크아웃 게스트 화면: 팝업 → `/login` 링크로 바꾼 뒤 화면 재확인, 로그인 후 `?next=` 복귀 확인
-- [ ] 로그인한 상태의 기존 흐름(평점, 선정, 기록 저장)이 그대로인지 확인
-- [ ] iPhone 홈 화면 추가(PWA) 동작 확인
+## 쓰는 법
 
-## 설정 (사용자가 직접 해야 하는 것)
-- [ ] 백업 미러: 비공개 레포 만들기 → fine-grained 토큰 발급 → 시크릿 `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `BACKUP_REPO_TOKEN`, 변수 `BACKUP_REPO` 등록 → `backup-mirror` 수동 실행 (워크플로는 아직 한 번도 안 돌았음)
-- [ ] 로컬 git 원격 주소를 `me-apps`로 변경
-- [ ] workout Vercel 프로젝트 env 확인
-- [ ] book Vercel 프로젝트에 `LIBRARY_API_KEY`(국립중앙도서관 인증키) 등록 — 없으면 운영에서 쪽수만 비어 있다
+- **등급**: 1이 가장 급하고 5가 가장 여유 있다. 같은 등급 안에서는 위에 있는 것이 먼저다. 한 번 매긴 등급은 근거가 바뀔 때만 바꾼다.
+- **줄 형식**: `- [ ] (누가) 내용 <!-- id:고유이름 -->`. `(직접)`은 사용자가, `(Claude)`는 Claude가, `(함께)`는 둘이 한다. `id`는 우선순위 mod가 체크·되돌리기에 쓰니 지우지 않는다.
+- **앱 기능 항목**(보안, 테스트, 새 앱 등)은 [SDD](reference/sdd.md)대로 먼저 `/grill-me` → `/to-spec`으로 GitHub 이슈를 만든다. 이슈가 생기면 줄 끝에 `#번호`를 붙인다. 이 파일에는 한 줄과 번호만 둔다.
+- **끝낼 때**: 체크하면 `DONE.md`로 날짜·등급과 함께 옮겨진다.
 
-## 정리
-- [ ] `CLAUDE.md`, `docs/NOTES.md`의 `book.<도메인>` 자리표시자를 실제 주소로 바꿀지 결정
-- [ ] 노션 개발자 위키의 스키마 부분이 옛 테이블 이름(book_ 접두사 전)인 것 고치기
-- [ ] 노션 🏋️ DB를 계속 쓸지 결정
-- [ ] `workout-log` SKILL.md(아티팩트 기준)와 작업로그를 웹앱 기준으로 갱신
-- [ ] `supabase/config.toml`의 `project_id = "book-club"`: 의도적으로 남김, 바꿀지 결정
+| 등급 | 기준 |
+| --- | --- |
+| 1 | 지금 깨져 있거나, 안 하면 데이터를 잃거나, 다른 일을 막고 있다 |
+| 2 | 멤버가 곧 겪거나 알림이 계속 오는데, 당장 깨진 건 아니다 |
+| 3 | 목표(안정성, 구직 준비)에 직결되는 계획 작업과 확인. 미뤄도 당장 피해는 없다 |
+| 4 | 선행 조건이 있는 기능, 정리, 결정, 문서 |
+| 5 | 아이디어, 하면 좋은 것 |
 
-## 나중에
-- [ ] 운동 세션 요약 view(`workout_session_summary`)
-- [ ] Web Push 알림
-- [ ] 허브 페이지(두 앱 진입점) 여부
+## 1등급: 막힘·장애
+- [ ] (함께) `feat/nlk-pages` PR 만들고 머지 → 운영 책 검색에서 쪽수가 채워지는지 확인 <!-- id:merge-nlk-pages -->
+
+## 2등급: 곧 문제
+- [ ] (직접) 백업 미러: 비공개 레포 만들기 → fine-grained 토큰 발급 → 시크릿 `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `BACKUP_REPO_TOKEN`, 변수 `BACKUP_REPO` 등록 → `backup-mirror` 수동 실행. 워크플로가 한 번도 안 돌았고 지금은 매일 실패할 수 있다 <!-- id:backup-mirror -->
+- [ ] (직접) workout Vercel 프로젝트 env 확인 <!-- id:workout-vercel-env -->
+- [ ] (함께) 보안 점검: 범위를 `/grill-me`로 좁힌 뒤 이슈로 만든다(시크릿 스캔, 의존성 감사, 쿠키 속성·보안 헤더, rate-limit 등) <!-- id:security-review -->
+
+## 3등급: 목표 직결 (구직 준비 12월 중순~말)
+- [ ] (직접) 워크아웃 게스트 화면 재확인: 팝업 → `/login` 링크로 바꾼 뒤 화면 <!-- id:workout-guest-check -->
+- [ ] (직접) iPhone 홈 화면 추가(PWA) 동작 확인 <!-- id:pwa-install-check -->
+- [ ] (Claude) ADR 소급 작성: 알라딘 종료 → 카카오·국립중앙도서관, 데이터 캐시 제거, RLS 켜고 정책 없음, 모노레포·테이블 접두사. `/grill-with-docs`로 사용자와 확인하며 `docs/adr/`에 쓴다 <!-- id:adr-backfill -->
+- [ ] (함께) 지표 기준선 측정: 백업 복원 소요 시간, Lighthouse, 테스트 수·커버리지, `npm audit`. 값은 `docs/reference/`에 기록한다 <!-- id:metrics-baseline -->
+- [ ] (함께) 핵심 흐름 e2e와 테스트 보강(로그인, 평점, 선정, 기록, 백업). SDD로 진행 <!-- id:full-tests -->
+- [ ] (함께) AI 기능 1개를 SDD로 끝까지 구현(제안 단계, 확정 전): 책 정보 기반 토론 질문 초안 생성 등. 비용 한도·실패 시 대체 동작 포함 <!-- id:ai-feature -->
+- [ ] (함께) admin 통합 대시보드: 백업 상태 등(백업 미러 선행) <!-- id:admin-dashboard -->
+- [ ] (함께) 포트폴리오·소개 페이지(구직용·소개용). 위 항목들의 결과와 수치를 넣는다 <!-- id:portfolio-page -->
+- [ ] (함께) 우선순위 mod 만들기: SDD로 진행, 첫 사례 <!-- id:priority-mod -->
+
+## 4등급: 선행 조건·정리·결정
+- [ ] (함께) 경제 앱 추가(보안·테스트가 안정된 뒤. 구직 이후 권장) <!-- id:money-app -->
+- [ ] (함께) PWA 완성도: 무엇이 모자란지 먼저 정한다(아이콘, 오프라인, 설치 안내?) <!-- id:pwa-polish -->
+- [ ] (직접) `CLAUDE.md`, `docs/NOTES.md`의 `book.<도메인>` 자리표시자를 실제 주소로 바꿀지 결정. README에는 이미 실제 주소가 있다 <!-- id:domain-placeholder -->
+- [ ] (직접) 노션 개발자 위키의 스키마 부분이 옛 테이블 이름(book_ 접두사 전)인 것 고치기 <!-- id:notion-wiki-schema -->
+- [ ] (직접) 노션 🏋️ DB를 계속 쓸지 결정 <!-- id:notion-workout-db -->
+- [ ] (함께) `workout-log` SKILL.md(아티팩트 기준)와 작업로그를 웹앱 기준으로 갱신 <!-- id:workout-log-skill -->
+
+## 5등급: 아이디어
+- [ ] (함께) 알림: Web Push, 모임 리마인더, health check. PWA 완성도 뒤, health check는 admin 대시보드와 겹친다 <!-- id:notifications -->
+- [ ] (함께) 운동 세션 요약 view(`workout_session_summary`) <!-- id:workout-session-summary -->
+- [ ] (직접) 허브 페이지(두 앱 진입점) 여부 <!-- id:hub-page -->
+- [ ] (직접) `supabase/config.toml`의 `project_id = "book-club"`: 로컬 Docker 이름표일 뿐이라 바꾸지 않기를 권장. 결정만 한다 <!-- id:supabase-project-id -->

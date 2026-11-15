@@ -51,6 +51,10 @@
 - **함정과 가정을 기록합니다.** 코드로 알 수 없는 것(플랫폼 제약, 임시로 둔 가정, 사용자가 해야 할 일)은 [`docs/NOTES.md`](docs/NOTES.md)에 바로바로 적습니다.
 - **새 앱 추가 절차를 문서화했습니다.** [`docs/ADDING-AN-APP.md`](docs/ADDING-AN-APP.md)의 체크리스트대로 하면 앱 하나가 더 붙습니다.
 
+## 개발 방식: 스펙 먼저 (SDD)
+
+앞으로 새 기능이나 동작이 바뀌는 변경은 코드보다 스펙을 먼저 만듭니다. 질문으로 요구를 다듬고(그릴링), 스펙을 GitHub 이슈로 올리고, 얇은 수직 조각 티켓으로 쪼갠 뒤, 테스트를 먼저 쓰며 구현하고, 완료 기준을 대조해 PR로 닫습니다. 이 방식을 도입하기 전에 만든 기능은 이 절차를 따르지 않았습니다. 단계별 설명은 [`docs/reference/sdd.md`](docs/reference/sdd.md)에 있습니다.
+
 ## 앞으로
 
 확정이 아니라 후보입니다.
@@ -71,5 +75,5 @@ packages/
   ui/        화면 공용: Section/Card, Toast, 로그인 폼, 테마
   config/    tsconfig 기본값
 supabase/    마이그레이션 (DB 하나를 앱들이 나눠 씀)
-docs/        NOTES, ADDING-AN-APP
+docs/        NOTES, ADDING-AN-APP, TODO·DONE, reference(개발 방식)
 ```

@@ -1,6 +1,11 @@
 # 끝낸 것
 
-`docs/TODO.md`에서 끝난 항목을 여기로 옮긴다. 형식: `- [x] YYYY-MM-DD 내용`. 새 항목은 위에 쓴다.
+`docs/TODO.md`에서 끝난 항목을 여기로 옮긴다. 형식: `- [x] YYYY-MM-DD 내용`. 새 항목은 위에 쓴다. 등급과 id는 되돌릴 때 쓴다.
+- [x] 2026-11-15 (P3) 로그인한 상태의 기존 흐름(평점, 선정, 기록 저장) 확인 <!-- id:login-flow-check -->
+- [x] 2026-11-15 (P3) 로그아웃 상태(시크릿 창)에서 두 사이트가 읽기 전용으로 열리는지 확인 <!-- id:guest-readonly-check -->
+- [x] 2026-11-15 (P2) book Vercel 프로젝트에 `LIBRARY_API_KEY` 등록 <!-- id:library-api-key -->
+- [x] 2026-11-15 (P2) 로컬 git 원격 주소를 `me-apps`로 변경 <!-- id:git-remote-me-apps -->
+- [x] 2026-11-15 로그인 후 `?next=` 복귀 확인은 필요 없다고 정해 삭제
 - [x] 2026-11-13 책 검색 쪽수 보강: 국립중앙도서관 ISBN 서지정보(`lib/book-api/nlk.ts`)로 카카오 후보의 쪽수를 채움. 알라딘 코드(어댑터·노션 이전 보강) 삭제, `.env.example`을 현재 변수 목록으로 갱신
 - [x] 2026-11-13 위조 쿠키 시험: 운영 두 사이트에 `club_member` 등 위조 쿠키만 넣고 쓰기 화면·API를 불러 모두 `/login` 이동 또는 401 확인. 액션 단계는 `member.test.ts`(로그인 없이 `club_member`만 있으면 null)로 고정
 - [x] 2026-11-13 main 배포(CI & Deploy, PR #4 머지분) 성공 확인
