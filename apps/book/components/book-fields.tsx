@@ -158,12 +158,19 @@ export function BookFields({ errors = EMPTY, values: serverValues = EMPTY }: { e
 
   const c = picked.candidate;
   const v = (name: string, fallback: string) => values[name] ?? fallback;
+  // 검색으로 고른 책이면 제목·저자는 읽기 전용. 오류로 돌아와 candidate가 없어져도 서버가 돌려준 출처로 잠금을 유지한다.
+  const source = v('infoSource', c ? c.source : 'manual');
+  const locked = source === 'kakao';
+  const lockedInput = locked ? ' bg-line/40 text-muted' : '';
   const hidden = (name: string, fallback: string) => <input type="hidden" name={name} value={v(name, fallback)} />;
 
   return (
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-3">
-        <p className="text-sm font-medium">{c ? '고른 책' : '직접 입력'}</p>
+        <p className="text-sm font-medium">
+          {locked ? '고른 책' : '직접 입력'}
+          {locked && <span className="ml-2 font-normal text-muted">제목·저자를 바꾸려면 다시 고르세요</span>}
+        </p>
         <button type="button" onClick={() => setPicked(null)} className="min-h-11 text-sm text-muted underline underline-offset-2">
           다시 고르기
         </button>
@@ -175,7 +182,7 @@ export function BookFields({ errors = EMPTY, values: serverValues = EMPTY }: { e
       {hidden('isbn13', c?.isbn13 ?? '')}
       {hidden('description', c?.description ?? '')}
       {hidden('coverUrl', c?.coverUrl ?? '')}
-      {hidden('infoSource', c ? c.source : 'manual')}
+      {hidden('infoSource', source)}
 
       <div className="flex gap-3">
         {c?.coverUrl && (
@@ -187,7 +194,7 @@ export function BookFields({ errors = EMPTY, values: serverValues = EMPTY }: { e
             <label htmlFor="title" className="mb-1 block text-sm font-medium">
               제목 <span className="text-danger">*</span>
             </label>
-            <input id="title" name="title" defaultValue={v('title', c?.title ?? '')} autoComplete="off" className={input} aria-invalid={errors.title ? true : undefined} />
+            <input id="title" name="title" defaultValue={v('title', c?.title ?? '')} autoComplete="off" readOnly={locked} className={input + lockedInput} aria-invalid={errors.title ? true : undefined} />
             <Err msgs={errors.title} />
           </div>
         </div>
@@ -197,7 +204,7 @@ export function BookFields({ errors = EMPTY, values: serverValues = EMPTY }: { e
         <label htmlFor="authors" className="mb-1 block text-sm font-medium">
           저자 <span className="font-normal text-muted">(쉼표로 구분)</span>
         </label>
-        <input id="authors" name="authors" defaultValue={v('authors', c?.authors.join(', ') ?? '')} autoComplete="off" className={input} />
+        <input id="authors" name="authors" defaultValue={v('authors', c?.authors.join(', ') ?? '')} autoComplete="off" readOnly={locked} className={input + lockedInput} />
         <Err msgs={errors.authors} />
       </div>
 
