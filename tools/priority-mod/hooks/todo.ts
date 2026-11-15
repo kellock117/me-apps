@@ -76,3 +76,54 @@ export function checkItem(
   doneLines.splice(doneInsertIndex(doneLines), 0, line)
   return { ok: true, todo: todoLines.filter((_, i) => i !== at).join('\n'), done: doneLines.join('\n') }
 }
+
+export type DoneItem = { id: string; date: string; grade: number; who: Who | undefined; text: string }
+
+const DONE_ITEM = /^- \[x\]\s+(\d{4}-\d{2}-\d{2})\s+\(P(\d)(?:·(직접|Claude|함께))?\)\s+(.*?)\s*<!--\s*id:(\S+?)\s*-->\s*$/
+
+/** DONE.md의 `- [x] 날짜 (P등급·누가) 내용 <!-- id -->` 줄을 위에서부터 읽는다. 형식이 다르거나 id가 없는 줄은 건너뛴다. */
+export function parseDone(markdown: string): DoneItem[] {
+  const items: DoneItem[] = []
+  for (const line of markdown.split('\n')) {
+    const m = DONE_ITEM.exec(line)
+    if (m) items.push({ id: m[5], date: m[1], grade: Number(m[2]), who: m[3] as Who | undefined, text: m[4] })
+  }
+  return items
+}
+
+export type RollbackResult =
+  | { ok: true; todo: string; done: string }
+  | { ok: false; reason: 'not-found' | 'changed' | 'already-todo' | 'no-section' }
+
+/**
+ * DONE.md의 `id` 줄을 빼 TODO.md 그 등급 섹션 맨 끝에 `- [ ] (누가) 내용 <!-- id:... -->`로 붙인 두 텍스트를 돌려준다.
+ * 누가가 없는 옛 줄은 (함께). 원래 위치는 저장돼 있지 않아 복원하지 않는다. 그 외 줄은 그대로 둔다.
+ */
+export function rollbackItem(
+  todoText: string,
+  doneText: string,
+  expected: { id: string; text: string },
+): RollbackResult {
+  const doneLines = doneText.split('\n')
+  const at = doneLines.findIndex(line => DONE_ITEM.exec(line)?.[5] === expected.id)
+  if (at < 0) return { ok: false, reason: 'not-found' }
+  const m = DONE_ITEM.exec(doneLines[at])!
+  if (m[4] !== expected.text) return { ok: false, reason: 'changed' }
+  if (todoText.includes(`<!-- id:${expected.id} -->`)) return { ok: false, reason: 'already-todo' }
+
+  const grade = Number(m[2])
+  const todoLines = todoText.split('\n')
+  const start = todoLines.findIndex(line => {
+    const head = SECTION.exec(line)
+    return head !== null && Number(head[1]) === grade
+  })
+  if (start < 0) return { ok: false, reason: 'no-section' }
+  let end = start + 1
+  while (end < todoLines.length && !SECTION.test(todoLines[end])) end++
+  let last = end - 1
+  while (last > start && todoLines[last].trim() === '') last--
+
+  const line = `- [ ] (${m[3] ?? '함께'}) ${m[4]} <!-- id:${expected.id} -->`
+  todoLines.splice(last + 1, 0, line)
+  return { ok: true, todo: todoLines.join('\n'), done: doneLines.filter((_, i) => i !== at).join('\n') }
+}
