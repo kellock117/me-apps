@@ -5,7 +5,7 @@
 export const TOAST_MESSAGES: Record<string, string> = {
   rated: '평점을 남겼어요',
   deleted: '삭제했어요',
-  recommended: '책을 추천했어요',
+  recommended: '위시리스트에 추가했어요',
   selected: '이번 달 책을 정했어요',
   saved: '저장했어요',
 };

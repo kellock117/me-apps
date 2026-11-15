@@ -32,7 +32,7 @@ function Err({ msgs }: { msgs?: string[] }) {
 
 /**
  * 책 검색 → 고르기 → 정보 확인(수정 가능). 서버 액션에 보낼 입력 칸을 모두 이 안에 그린다.
- * 검색에 없는 책은 "직접 입력"으로 제목·저자만 넣을 수 있다.
+ * 검색에 없는 책은 "직접 입력"으로 넣는다(제목과 쪽수는 필수).
  */
 const EMPTY: Record<string, never> = {};
 
@@ -102,14 +102,28 @@ export function BookFields({ errors = EMPTY, values: serverValues = EMPTY }: { e
           />
         </div>
         <div aria-live="polite" className="space-y-2">
-          {loading && <p className="text-sm text-muted">검색 중…</p>}
+          {loading && (
+            <div role="status" className="space-y-2">
+              <span className="sr-only">검색 중…</span>
+              {[0, 1, 2].map((i) => (
+                <div key={i} aria-hidden className="flex min-h-16 animate-pulse gap-3 rounded-xl border border-line bg-surface p-2">
+                  <span className="h-20 w-14 shrink-0 rounded bg-line" />
+                  <span className="flex-1 space-y-2 py-1">
+                    <span className="block h-4 w-3/4 rounded bg-line" />
+                    <span className="block h-3 w-1/2 rounded bg-line" />
+                    <span className="block h-3 w-1/3 rounded bg-line" />
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
           {searchError && (
             <p role="alert" className="text-sm font-medium text-danger">
               {searchError}
             </p>
           )}
           {!loading && !searchError && results && results.length === 0 && <p className="text-sm text-muted">검색 결과가 없어요. 직접 입력해 보세요.</p>}
-          {results && results.length > 0 && (
+          {!loading && results && results.length > 0 && (
             <ul className="space-y-2">
               {results.map((c, i) => (
                 <li key={`${c.isbn13 ?? c.title}-${i}`}>
@@ -126,6 +140,7 @@ export function BookFields({ errors = EMPTY, values: serverValues = EMPTY }: { e
                       <span className="block text-xs text-muted">
                         {[c.publisher, c.publishedDate?.slice(0, 4)].filter(Boolean).join(' · ')}
                       </span>
+                      <span className="block text-xs text-muted">{c.pages ? `${c.pages}쪽` : '쪽수 정보 없음'}</span>
                     </span>
                   </button>
                 </li>
@@ -143,12 +158,19 @@ export function BookFields({ errors = EMPTY, values: serverValues = EMPTY }: { e
 
   const c = picked.candidate;
   const v = (name: string, fallback: string) => values[name] ?? fallback;
+  // 검색으로 고른 책이면 제목·저자는 읽기 전용. 오류로 돌아와 candidate가 없어져도 서버가 돌려준 출처로 잠금을 유지한다.
+  const source = v('infoSource', c ? c.source : 'manual');
+  const locked = source === 'kakao';
+  const lockedInput = locked ? ' bg-line/40 text-muted' : '';
   const hidden = (name: string, fallback: string) => <input type="hidden" name={name} value={v(name, fallback)} />;
 
   return (
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-3">
-        <p className="text-sm font-medium">{c ? '고른 책' : '직접 입력'}</p>
+        <p className="text-sm font-medium">
+          {locked ? '고른 책' : '직접 입력'}
+          {locked && <span className="ml-2 font-normal text-muted">제목·저자를 바꾸려면 다시 고르세요</span>}
+        </p>
         <button type="button" onClick={() => setPicked(null)} className="min-h-11 text-sm text-muted underline underline-offset-2">
           다시 고르기
         </button>
@@ -160,7 +182,7 @@ export function BookFields({ errors = EMPTY, values: serverValues = EMPTY }: { e
       {hidden('isbn13', c?.isbn13 ?? '')}
       {hidden('description', c?.description ?? '')}
       {hidden('coverUrl', c?.coverUrl ?? '')}
-      {hidden('infoSource', c ? c.source : 'manual')}
+      {hidden('infoSource', source)}
 
       <div className="flex gap-3">
         {c?.coverUrl && (
@@ -172,7 +194,7 @@ export function BookFields({ errors = EMPTY, values: serverValues = EMPTY }: { e
             <label htmlFor="title" className="mb-1 block text-sm font-medium">
               제목 <span className="text-danger">*</span>
             </label>
-            <input id="title" name="title" defaultValue={v('title', c?.title ?? '')} autoComplete="off" className={input} aria-invalid={errors.title ? true : undefined} />
+            <input id="title" name="title" defaultValue={v('title', c?.title ?? '')} autoComplete="off" readOnly={locked} className={input + lockedInput} aria-invalid={errors.title ? true : undefined} />
             <Err msgs={errors.title} />
           </div>
         </div>
@@ -182,24 +204,24 @@ export function BookFields({ errors = EMPTY, values: serverValues = EMPTY }: { e
         <label htmlFor="authors" className="mb-1 block text-sm font-medium">
           저자 <span className="font-normal text-muted">(쉼표로 구분)</span>
         </label>
-        <input id="authors" name="authors" defaultValue={v('authors', c?.authors.join(', ') ?? '')} autoComplete="off" className={input} />
+        <input id="authors" name="authors" defaultValue={v('authors', c?.authors.join(', ') ?? '')} autoComplete="off" readOnly={locked} className={input + lockedInput} />
         <Err msgs={errors.authors} />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label htmlFor="pages" className="mb-1 block text-sm font-medium">
-            쪽수
+            쪽수 <span className="text-danger">*</span>
           </label>
-          <input id="pages" name="pages" type="number" inputMode="numeric" min={1} max={10000} defaultValue={v('pages', c?.pages ? String(c.pages) : '')} placeholder="모르면 비워 두기" className={input} />
+          <input id="pages" name="pages" type="number" inputMode="numeric" min={1} max={10000} defaultValue={v('pages', c?.pages ? String(c.pages) : '')} className={input} />
           <Err msgs={errors.pages} />
         </div>
         <div>
           <label htmlFor="genre" className="mb-1 block text-sm font-medium">
-            장르
+            장르 <span className="text-danger">*</span>
           </label>
           <select id="genre" name="genre" defaultValue={v('genre', '')} className={input}>
-            <option value="">선택 안 함</option>
+            <option value="">선택해 주세요</option>
             {GENRES.map((g) => (
               <option key={g} value={g}>
                 {g}

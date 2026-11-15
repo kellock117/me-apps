@@ -42,7 +42,7 @@ export function RecommendForm() {
 
       <div>
         <label htmlFor="reason" className="mb-2 block text-sm font-medium">
-          추천 이유 <span className="text-danger">*</span>
+          추천 이유 <span className="font-normal text-muted">(선택)</span>
         </label>
         <textarea
           id="reason"
@@ -68,7 +68,7 @@ export function RecommendForm() {
       )}
 
       <button type="submit" disabled={pending} className="min-h-12 w-full rounded-xl bg-accent px-4 text-base font-semibold text-accent-ink disabled:opacity-60">
-        {pending ? '저장 중…' : '추천하기'}
+        {pending ? '저장 중…' : '추가하기'}
       </button>
     </form>
   );

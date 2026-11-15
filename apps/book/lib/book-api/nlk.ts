@@ -6,13 +6,15 @@ const ENDPOINT = 'https://www.nl.go.kr/seoji/SearchApi.do';
 const TIMEOUT_MS = 3000;
 const CACHE_SEC = 7 * 24 * 60 * 60; // 서지 정보는 거의 안 바뀐다
 
-/** "448", "328p.", "xii, 320 p." 같은 값에서 쪽수를 뽑는다. 숫자가 없거나 0이면 null. */
+/**
+ * "448", "328p.", "xii, 320 p.", "328, 16 p." 같은 값에서 쪽수를 뽑는다. 숫자가 없거나 0이거나 10000 초과면 null.
+ * 첫 숫자가 본문 쪽수다. 로마숫자는 숫자가 아니라 건너뛰고, 뒤따르는 "16 p.", "[22] p.", "도판 [1]장"은 무시한다.
+ */
 export function parseNlkPage(raw: unknown): number | null {
   if (typeof raw !== 'string' && typeof raw !== 'number') return null;
-  const nums = String(raw).match(/\d+/g);
-  if (!nums) return null;
-  // 로마숫자 앞쪽은 숫자가 아니라 무시되고, 여러 숫자면 마지막(본문 쪽수)을 쓴다
-  const n = Number(nums[nums.length - 1]);
+  const first = String(raw).match(/\d+/);
+  if (!first) return null;
+  const n = Number(first[0]);
   return Number.isInteger(n) && n > 0 && n <= 10000 ? n : null;
 }
 

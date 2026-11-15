@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { isAllowedCoverUrl } from '../books/cover';
-import { genreField, list, optional, pagesField } from './admin';
+import { GENRES, genreField, list, optional, pagesField } from './admin';
 
 /** 검색에서 고르거나 직접 입력한 책 정보 (추천·선정 화면 공통) */
 export const bookFieldsSchema = z.object({
@@ -18,8 +18,8 @@ export const bookFieldsSchema = z.object({
     .trim()
     .transform((s) => (s === '' ? null : s))
     .pipe(z.string().regex(/^\d{13}$/, 'ISBN은 13자리 숫자예요').nullable()),
-  pages: pagesField,
-  genre: genreField,
+  pages: pagesField.pipe(z.number('쪽수를 입력해 주세요')), // 새 책은 쪽수 필수(관리자 수정 폼은 선택)
+  genre: genreField.pipe(z.enum(GENRES, '장르를 선택해 주세요')), // 새 책은 장르 필수(관리자 수정 폼은 선택)
   description: optional(3000),
   coverUrl: z
     .string()
@@ -30,14 +30,19 @@ export const bookFieldsSchema = z.object({
 });
 export type BookFields = z.infer<typeof bookFieldsSchema>;
 
-const reason = (label: string) => z.string().trim().min(1, `${label}를 적어 주세요`).max(500, '500자까지 쓸 수 있어요');
+/** 추천·선정 이유는 선택. 비우면 null로 저장한다. */
+const reason = z
+  .string()
+  .trim()
+  .max(500, '500자까지 쓸 수 있어요')
+  .transform((s) => (s === '' ? null : s));
 
-/** 책 추천하기 */
-export const recommendSchema = bookFieldsSchema.extend({ reason: reason('추천 이유') });
+/** 위시리스트 추가하기 */
+export const recommendSchema = bookFieldsSchema.extend({ reason: reason });
 
 const selectCommon = {
   selectedBy: z.uuid('선정자를 골라 주세요'),
-  reason: reason('선정 이유'),
+  reason: reason,
   date: z.iso.date('모임 날짜를 골라 주세요'),
 };
 /** 이번 달 책 정하기: 위시리스트에서 고르기 */

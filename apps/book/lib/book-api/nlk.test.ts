@@ -9,6 +9,14 @@ describe('parseNlkPage', () => {
     expect(parseNlkPage('xii, 320 p.')).toBe(320);
     expect(parseNlkPage(256)).toBe(256);
   });
+  it('조사에서 나온 모양은 첫 숫자(본문 쪽수)를 쓴다', () => {
+    expect(parseNlkPage('167 p.')).toBe(167);
+    expect(parseNlkPage('328, 16 p.')).toBe(328);
+    expect(parseNlkPage('309, [22] p.')).toBe(309);
+    expect(parseNlkPage('약 300페이지 내외')).toBe(300);
+    expect(parseNlkPage('xiii, 250 p.')).toBe(250);
+    expect(parseNlkPage('338 p., 도판 [1]장 (접지)')).toBe(338);
+  });
   it('없거나 이상하면 null', () => {
     expect(parseNlkPage('')).toBeNull();
     expect(parseNlkPage('0')).toBeNull();
