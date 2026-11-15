@@ -32,7 +32,7 @@ function Err({ msgs }: { msgs?: string[] }) {
 
 /**
  * 책 검색 → 고르기 → 정보 확인(수정 가능). 서버 액션에 보낼 입력 칸을 모두 이 안에 그린다.
- * 검색에 없는 책은 "직접 입력"으로 제목·저자만 넣을 수 있다.
+ * 검색에 없는 책은 "직접 입력"으로 넣는다(제목과 쪽수는 필수).
  */
 const EMPTY: Record<string, never> = {};
 
@@ -204,9 +204,9 @@ export function BookFields({ errors = EMPTY, values: serverValues = EMPTY }: { e
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label htmlFor="pages" className="mb-1 block text-sm font-medium">
-            쪽수
+            쪽수 <span className="text-danger">*</span>
           </label>
-          <input id="pages" name="pages" type="number" inputMode="numeric" min={1} max={10000} defaultValue={v('pages', c?.pages ? String(c.pages) : '')} placeholder="모르면 비워 두기" className={input} />
+          <input id="pages" name="pages" type="number" inputMode="numeric" min={1} max={10000} defaultValue={v('pages', c?.pages ? String(c.pages) : '')} className={input} />
           <Err msgs={errors.pages} />
         </div>
         <div>

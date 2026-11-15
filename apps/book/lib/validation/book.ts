@@ -18,7 +18,7 @@ export const bookFieldsSchema = z.object({
     .trim()
     .transform((s) => (s === '' ? null : s))
     .pipe(z.string().regex(/^\d{13}$/, 'ISBN은 13자리 숫자예요').nullable()),
-  pages: pagesField,
+  pages: pagesField.pipe(z.number('쪽수를 입력해 주세요')), // 새 책은 쪽수 필수(관리자 수정 폼은 선택)
   genre: genreField,
   description: optional(3000),
   coverUrl: z

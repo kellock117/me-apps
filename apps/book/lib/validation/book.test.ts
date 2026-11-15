@@ -9,7 +9,7 @@ const ok = {
   publisher: '민음사',
   publishedDate: '2009-01-20',
   isbn13: '9788937460449',
-  pages: '',
+  pages: '448',
   genre: '',
   description: '',
   coverUrl: 'https://t1.daumcdn.net/lbook/image/540810',
@@ -18,9 +18,17 @@ const ok = {
 
 describe('bookFieldsSchema', () => {
   it('정상 입력', () => {
-    expect(bookFieldsSchema.parse(ok)).toMatchObject({ title: '데미안', authors: ['헤르만 헤세'], isbn13: '9788937460449', pages: null, genre: null, description: null });
+    expect(bookFieldsSchema.parse(ok)).toMatchObject({ title: '데미안', authors: ['헤르만 헤세'], isbn13: '9788937460449', pages: 448, genre: null, description: null });
   });
-  it('직접 입력은 제목만 있어도 된다', () => {
+  it('쪽수는 필수: 비어 있으면 "쪽수를 입력해 주세요"', () => {
+    const r = bookFieldsSchema.safeParse({ ...ok, pages: '' });
+    expect(r.success).toBe(false);
+    expect(r.error?.issues[0]?.message).toBe('쪽수를 입력해 주세요');
+    expect(bookFieldsSchema.safeParse({ ...ok, pages: '0' }).success).toBe(false);
+    expect(bookFieldsSchema.safeParse({ ...ok, pages: '10001' }).success).toBe(false);
+    expect(recommendSchema.safeParse({ ...ok, pages: '', reason: '좋아요' }).success).toBe(false);
+  });
+  it('직접 입력은 제목과 쪽수만 있어도 된다', () => {
     const r = bookFieldsSchema.parse({ ...ok, authors: '', translators: '', publisher: '', publishedDate: '', isbn13: '', coverUrl: '', infoSource: 'manual' });
     expect(r).toMatchObject({ authors: [], isbn13: null, coverUrl: null, publishedDate: null });
   });
