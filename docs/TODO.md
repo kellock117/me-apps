@@ -18,7 +18,7 @@
 | 5 | 아이디어, 하면 좋은 것 |
 
 ## 1등급: 막힘·장애
-- [ ] (함께) `feat/nlk-pages` PR 만들고 머지 → 운영 책 검색에서 쪽수가 채워지는지 확인 <!-- id:merge-nlk-pages -->
+- [ ] (직접) 운영 책 검색에서 쪽수가 채워지는지, 새 책 추가가 쪽수·장르 필수로 동작하는지 확인 <!-- id:check-nlk-pages-prod -->
 
 ## 2등급: 곧 문제
 - [ ] (직접) 백업 미러: 비공개 레포 만들기 → fine-grained 토큰 발급 → 시크릿 `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `BACKUP_REPO_TOKEN`, 변수 `BACKUP_REPO` 등록 → `backup-mirror` 수동 실행. 워크플로가 한 번도 안 돌았고 지금은 매일 실패할 수 있다 <!-- id:backup-mirror -->
@@ -47,5 +47,6 @@
 ## 5등급: 아이디어
 - [ ] (함께) 알림: Web Push, 모임 리마인더, health check. PWA 완성도 뒤, health check는 admin 대시보드와 겹친다 <!-- id:notifications -->
 - [ ] (함께) 운동 세션 요약 view(`workout_session_summary`) <!-- id:workout-session-summary -->
+- [ ] (함께) 쪽수가 빈 책 줄이기: 국립중앙도서관 서지정보 API는 `PAGE`가 빈 책이 약 10~27%(표본에 따라). 소장자료 검색(형태사항 "239p.; 23cm")이 채워 주는지, 공식 오픈 API인지 조사한다. 이미 저장된 책의 빈 쪽수 백필도 함께 정한다 <!-- id:nlk-catalog-pages -->
 - [ ] (직접) 허브 페이지(두 앱 진입점) 여부 <!-- id:hub-page -->
 - [ ] (직접) `supabase/config.toml`의 `project_id = "book-club"`: 로컬 Docker 이름표일 뿐이라 바꾸지 않기를 권장. 결정만 한다 <!-- id:supabase-project-id -->
