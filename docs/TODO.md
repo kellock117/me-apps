@@ -12,6 +12,7 @@
 - [ ] 백업 미러: 비공개 레포 만들기 → fine-grained 토큰 발급 → 시크릿 `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `BACKUP_REPO_TOKEN`, 변수 `BACKUP_REPO` 등록 → `backup-mirror` 수동 실행 (워크플로는 아직 한 번도 안 돌았음)
 - [ ] 로컬 git 원격 주소를 `me-apps`로 변경
 - [ ] workout Vercel 프로젝트 env 확인
+- [ ] book Vercel 프로젝트에 `LIBRARY_API_KEY`(국립중앙도서관 인증키) 등록 — 없으면 운영에서 쪽수만 비어 있다
 
 ## 정리
 - [ ] `CLAUDE.md`, `docs/NOTES.md`의 `book.<도메인>` 자리표시자를 실제 주소로 바꿀지 결정

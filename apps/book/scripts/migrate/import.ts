@@ -109,7 +109,7 @@ export async function importSnapshot(db: Db, snap: Snapshot, log: (s: string) =>
       recommended_by: member(b.recommendedBy[0], `${b.title} 추천자`),
       recommend_reason: blankToNull(b.recommendReason),
     };
-    if (b.pages != null) payload.pages = b.pages; // 비어 있으면 알라딘으로 채운 값을 지우지 않는다
+    if (b.pages != null) payload.pages = b.pages; // 노션 값이 비어 있으면 이미 있는 쪽수를 지우지 않는다
     const existingId = bookByTitle.get(b.title);
     if (existingId) {
       ok(await db.from('book_books').update(payload).eq('id', existingId), `책 수정(${b.title})`);
