@@ -127,3 +127,21 @@ export function rollbackItem(
   todoLines.splice(last + 1, 0, line)
   return { ok: true, todo: todoLines.join('\n'), done: doneLines.filter((_, i) => i !== at).join('\n') }
 }
+
+export type Filters = { topOnly: boolean; mineOnly: boolean }
+
+/** 표시용 필터. topOnly는 1·2등급만, mineOnly는 (직접)만. 항목은 그대로 두고 거르기만 해서 id·내용이 바뀌지 않는다. 빈 섹션은 뺀다. */
+export function filterSections(sections: Section[], { topOnly, mineOnly }: Filters): Section[] {
+  return sections
+    .filter(section => !topOnly || section.grade <= 2)
+    .map(section => ({ ...section, items: mineOnly ? section.items.filter(item => item.who === '직접') : section.items }))
+    .filter(section => !(topOnly || mineOnly) || section.items.length > 0)
+}
+
+/** `git status --porcelain` 출력에서 바뀐 파일 경로를 뽑는다(앞 두 글자는 상태 코드). */
+export function dirtyFiles(porcelain: string): string[] {
+  return porcelain
+    .split('\n')
+    .filter(line => line.trim() !== '')
+    .map(line => line.slice(3))
+}
