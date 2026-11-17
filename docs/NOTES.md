@@ -12,6 +12,7 @@
 - 독서 전용이던 쿠키 이름은 `apps/book/lib/auth/cookies.ts`, 토스트 문구는 `apps/book/lib/toast-messages.ts`.
 - `apps/book/lib/stats.ts`가 `todayInSeoul`, `daysBetween`을 core에서 다시 내보낸다(기존 import 호환용, 나중에 정리 가능).
 - 노션 스냅샷 경로는 `apps/book/scripts/fixtures/notion-snapshot.json`(개인정보, git 제외).
+- 공개 레포에 못 쓰는 실명·개인 기록은 루트 `.private/`(git 제외)에 둔다. 폴더가 없으면 만든다.
 
 ## 배포 (사용자가 할 일)
 - 기존 Vercel 프로젝트(이름은 옛 이름 `book-club` 그대로)의 Root Directory를 `apps/book`으로 바꾼다. 바꾸기 전에 main에 머지하면 배포가 깨진다.

@@ -11,6 +11,7 @@ supabase/.branches
 apps/book/scripts/fixtures/notion-snapshot.json
 supabase/seed.sql
 독서 모임 웹사이트 스펙.md
+.private/
 *.private.test.ts
 .claude/
 .vercel
