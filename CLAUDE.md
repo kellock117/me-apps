@@ -38,8 +38,7 @@
 - 테이블 이름을 바꾸면 백업 표의 `LEGACY_TABLE_RENAMES`에 옛 이름 → 새 이름을 더해 옛 백업도 복원되게 한다.
 
 ## 백업
-- 앱이 테이블을 새로 만들면 `packages/core/src/backup-tables.ts`에 등록한다. 일시 데이터(draft 등)는 뺀다.
-- 크론이 매일 한국 시간 00시(`0 15 * * *` = UTC 15시)에 전 앱 테이블을 JSON 하나(`YYYY-MM-DD.json`, 한국 날짜)로 `backups` 버킷에 저장하고 12주 지난 파일을 지운다. 복원은 `pnpm --filter book restore -- <파일>`.
+- 앱이 테이블을 새로 만들면 `packages/core/src/backup-tables.ts`에 등록한다. 일시 데이터(draft 등)는 뺀다. 크론·복원·사본 설정은 `docs/features/backup.md`.
 
 ## 코드·주석
 - 주석과 문서는 한국어. 사람이 읽을 파일(공용 패키지, 설정, 스크립트)은 머리 주석에 역할·쓰는 곳·주의를 적고, 공개 함수에는 JSDoc을 단다.
@@ -60,12 +59,11 @@
 - 개인정보가 든 입력 파일은 `.gitignore`에 넣는다. 레포에 올려도 되는 작은 픽스처만 `scripts/fixtures/`에 둔다.
 
 ## 읽기 전용 공개(게스트 모드)
-- 로그인 안 한 사람(게스트)에게는 읽는 화면만 열어 준다. 스위치(환경 변수)는 없고 항상 이렇게 동작한다.
-- 로그인은 화면 우측 상단 "로그인" 버튼(`@me/ui/guest-login`) → 따로 있는 `/login` 화면에서 비밀번호만 치면 된다. 맞으면 보던 화면으로 돌아온다(`?next=`).
-- 게스트가 볼 화면은 각 앱 `proxy.ts`의 허용 목록으로 정한다(book은 `GUEST_PAGES`, workout은 `/`만). 그 밖의 주소는 로그인으로 보낸다. 새 읽기 화면을 만들면 거기에 넣어야 게스트에게 보인다. 기본은 잠김이다.
-- **쓰기는 서버 액션 안에서 막는다.** proxy(라우터)의 허용 목록만으로는 부족하다. 서버 액션은 어느 주소로든 호출될 수 있고, 게스트가 열어 둔 화면 주소로도 보낼 수 있어서다. 모든 쓰기 액션은 로그인을 다시 확인한다(book은 `getCurrentMember()`가 세션 쿠키도 검사해 게스트면 null, workout은 `requireSite()`). 새 쓰기 액션이나 쓰기 API 라우트를 만들면 이 확인을 첫 줄에 넣는다. 화면 버튼을 숨기는 것은 편의일 뿐이다.
-- 게스트에게는 멤버 실명을 가린다("멤버 A", "멤버 B" …, `rotation_order` 순). 모든 화면이 `getClubData()`를 거치므로 거기서 한 번에 가린다(`apps/book/lib/guest-mask.ts`). 자유 글(한 줄 평 등) 속 이름도 치환한다. 새 데이터 읽기 경로를 `getClubData()` 밖에 만들면 이름이 샐 수 있으니 만들지 않는다. 파일로 된 글(`apps/book/content/*.md`)은 가릴 수 없으므로 실명을 쓰지 않는다.
-- 게스트가 못 하는 것: 평점·추천·선정·모임 수정, 책 검색 API, 관리자 화면·백업 내려받기, workout의 기록 화면(근육 지도만 보인다).
+- 로그인 안 한 사람(게스트)에게는 읽는 화면만 열어 준다. 스위치는 없고 항상 이렇게 동작한다.
+- **새 쓰기 액션이나 쓰기 API 라우트를 만들면 첫 줄에서 로그인을 확인한다**(book은 `getCurrentMember()`, workout은 `requireSite()`). proxy의 허용 목록만으로는 쓰기가 막히지 않는다. 화면 버튼을 숨기는 것은 편의일 뿐이다.
+- 게스트가 볼 새 읽기 화면은 각 앱 `proxy.ts`의 허용 목록(book `GUEST_PAGES`, workout `/`)에 넣어야 보인다. 기본은 잠김이다.
+- 멤버 실명은 `getClubData()`에서 한 번에 가린다. 새 데이터 읽기 경로를 그 밖에 만들지 않는다. 파일로 된 글(`apps/book/content/*.md`)은 가릴 수 없으므로 실명을 쓰지 않는다.
+- 구조·한계·함정은 `docs/features/guest-mode.md`.
 
 ## README와 앞으로 할 일
 - 루트 `README.md`는 남에게 보여 주는 소개서다(무엇을 만들었고, 어떤 기술·AI 활용을 했는지). 사용법·배포 절차는 넣지 않는다(그건 `docs/`).
@@ -73,8 +71,6 @@
 - 레포가 공개라서 실명·비밀번호·키·개인 기록은 README와 문서에 쓰지 않는다. 멤버는 "멤버 A"처럼 가린다.
 
 ## 명령
-- 개발 서버: `pnpm --filter book dev`(3000), `pnpm --filter workout dev`(3001). 전체는 `pnpm dev`.
-- 검사: `pnpm check` (= `turbo run typecheck test build`). 앱 하나만: `pnpm --filter workout test`.
 - 로컬 DB: Docker를 켜고 `npx supabase start && npx supabase db reset`. 마이그레이션을 바꾸면 `pnpm --filter @me/core db:types`.
 - 새 앱 추가 절차는 `docs/ADDING-AN-APP.md`.
 
