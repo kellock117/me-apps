@@ -18,10 +18,8 @@
 | 5 | 아이디어, 하면 좋은 것 |
 
 ## 1등급: 막힘·장애
-- [ ] (직접) 운영 책 검색에서 쪽수가 채워지는지, 새 책 추가가 쪽수·장르 필수로 동작하는지 확인 <!-- id:check-nlk-pages-prod -->
 
 ## 2등급: 곧 문제
-- [ ] (직접) 백업 미러: 비공개 레포 만들기 → fine-grained 토큰 발급 → 시크릿 `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `BACKUP_REPO_TOKEN`, 변수 `BACKUP_REPO` 등록 → `backup-mirror` 수동 실행. 워크플로가 한 번도 안 돌았고 지금은 매일 실패할 수 있다 <!-- id:backup-mirror -->
 - [ ] (직접) workout Vercel 프로젝트 env 확인 <!-- id:workout-vercel-env -->
 - [ ] (함께) 보안 점검: 범위를 `/grill-me`로 좁힌 뒤 이슈로 만든다(시크릿 스캔, 의존성 감사, 쿠키 속성·보안 헤더, rate-limit 등) <!-- id:security-review -->
 
@@ -42,6 +40,7 @@
 - [ ] (직접) 옛 노션 개발자 위키 맨 위에 폐기 표시 달기(`⚠️ 폐기: 레포 docs/features/로 대체`). 개발 문서 원본은 레포로 정했고, 위키의 옛 테이블 이름은 고치지 않는다. 위키에 개인 정보가 있으면 `.private/`로 옮긴다 <!-- id:notion-wiki-schema -->
 - [ ] (직접) 노션 🏋️ DB를 계속 쓸지 결정 <!-- id:notion-workout-db -->
 - [ ] (함께) `workout-log` SKILL.md(아티팩트 기준)와 작업로그를 웹앱 기준으로 갱신 <!-- id:workout-log-skill -->
+- [ ] (함께) 기능 문서 이전: 게스트 모드·백업·운동 앱 설명을 `CLAUDE.md`·`docs/NOTES.md`에서 `docs/features/`로 옮기고 CLAUDE.md를 60줄 안팎으로 줄인다. NOTES.md의 날짜 붙은 확인 기록은 지우고 못 한 확인은 TODO로 옮긴다. 문서만 바뀌므로 스펙 없이 진행 <!-- id:docs-features-migrate -->
 
 ## 5등급: 아이디어
 - [ ] (함께) 알림: Web Push, 모임 리마인더, health check. PWA 완성도 뒤, health check는 admin 대시보드와 겹친다 <!-- id:notifications -->
