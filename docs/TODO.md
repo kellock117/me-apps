@@ -26,6 +26,7 @@
 ## 3등급: 목표 직결 (구직 준비 12월 중순~말)
 - [ ] (직접) 워크아웃 게스트 화면 재확인: 팝업 → `/login` 링크로 바꾼 뒤 화면 <!-- id:workout-guest-check -->
 - [ ] (직접) iPhone 홈 화면 추가(PWA) 동작 확인 <!-- id:pwa-install-check -->
+- [ ] (직접) iPhone 실기기에서 운동 앱 확인: 화면 잠금·백그라운드 후 타이머, 1:30 삑 소리, 시간·횟수 입력(`docs/features/workout.md` 미검증 항목) <!-- id:workout-device-check -->
 - [ ] (Claude) ADR 소급 작성: 알라딘 종료 → 카카오·국립중앙도서관, 데이터 캐시 제거, RLS 켜고 정책 없음, 모노레포·테이블 접두사. `/grill-with-docs`로 사용자와 확인하며 `docs/adr/`에 쓴다 <!-- id:adr-backfill -->
 - [ ] (함께) 지표 기준선 측정: 백업 복원 소요 시간, Lighthouse, 테스트 수·커버리지, `npm audit`. 값은 `docs/reference/`에 기록한다 <!-- id:metrics-baseline -->
 - [ ] (함께) 핵심 흐름 e2e와 테스트 보강(로그인, 평점, 선정, 기록, 백업). SDD로 진행 <!-- id:full-tests -->
@@ -37,8 +38,6 @@
 - [ ] (함께) 경제 앱 추가(보안·테스트가 안정된 뒤. 구직 이후 권장) <!-- id:money-app -->
 - [ ] (함께) PWA 완성도: 무엇이 모자란지 먼저 정한다(아이콘, 오프라인, 설치 안내?) <!-- id:pwa-polish -->
 - [ ] (직접) `CLAUDE.md`, `docs/NOTES.md`의 `book.<도메인>` 자리표시자를 실제 주소로 바꿀지 결정. README에는 이미 실제 주소가 있다 <!-- id:domain-placeholder -->
-- [ ] (직접) 옛 노션 개발자 위키 맨 위에 폐기 표시 달기(`⚠️ 폐기: 레포 docs/features/로 대체`). 개발 문서 원본은 레포로 정했고, 위키의 옛 테이블 이름은 고치지 않는다. 위키에 개인 정보가 있으면 `.private/`로 옮긴다 <!-- id:notion-wiki-schema -->
-- [ ] (직접) 노션 🏋️ DB를 계속 쓸지 결정 <!-- id:notion-workout-db -->
 - [ ] (함께) `workout-log` SKILL.md(아티팩트 기준)와 작업로그를 웹앱 기준으로 갱신 <!-- id:workout-log-skill -->
 - [ ] (함께) 기능 문서 이전: 게스트 모드·백업·운동 앱 설명을 `CLAUDE.md`·`docs/NOTES.md`에서 `docs/features/`로 옮기고 CLAUDE.md를 60줄 안팎으로 줄인다. NOTES.md의 날짜 붙은 확인 기록은 지우고 못 한 확인은 TODO로 옮긴다. 문서만 바뀌므로 스펙 없이 진행 <!-- id:docs-features-migrate -->
 
