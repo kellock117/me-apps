@@ -1,6 +1,9 @@
 # 끝낸 것
 
 `docs/TODO.md`에서 끝난 항목을 여기로 옮긴다. 형식: `- [x] YYYY-MM-DD (P등급·누가) 내용 <!-- id:... -->`. 새 항목은 위에 쓴다. 등급, 누가, id는 되돌릴 때 쓴다. 2026-11-15까지의 옛 줄은 `(P등급)`뿐이라 누가가 없고, 되돌릴 때 `(함께)`로 본다.
+- [x] 2026-11-17 (P2·직접) workout Vercel 프로젝트 env 확인 <!-- id:workout-vercel-env -->
+- [x] 2026-11-17 (P4·함께) 기능 문서 이전: 게스트 모드·백업·운동 문서를 `docs/features/`로 옮김(PR #28). CLAUDE.md는 102줄에서 멈춤(보안 규칙을 남기려고 60줄 목표는 접음) <!-- id:docs-features-migrate -->
+- [x] 2026-11-17 (P4·직접) `CLAUDE.md`, `docs/NOTES.md`의 `<도메인>` 자리표시자를 실제 주소로 바꾸기로 정하고 바꿈(book.jaewon-choi.dev, workout.jaewon-choi.dev) <!-- id:domain-placeholder -->
 - [x] 2026-11-17 (P2·직접) 백업 미러: 비공개 레포 만들기 → fine-grained 토큰 발급 → 시크릿 `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `BACKUP_REPO_TOKEN`, 변수 `BACKUP_REPO` 등록 → `backup-mirror` 수동 실행. 워크플로가 한 번도 안 돌았고 지금은 매일 실패할 수 있다 <!-- id:backup-mirror -->
 - [x] 2026-11-17 (P4·직접) 옛 노션 개발자 위키(하위 9쪽, 개인 정보 없음)를 휴지통으로 옮김. 개발 문서 원본은 레포 `docs/features/` <!-- id:notion-wiki-schema -->
 - [x] 2026-11-17 (P4·직접) 노션 🏋️ DB는 더 쓰지 않기로 정함(DB 자체는 지우지 않음) <!-- id:notion-workout-db -->

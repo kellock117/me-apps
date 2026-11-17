@@ -18,11 +18,10 @@
 ## 배포 (사용자가 할 일)
 - 기존 Vercel 프로젝트(이름은 옛 이름 `book-club` 그대로)의 Root Directory를 `apps/book`으로 바꾼다. 바꾸기 전에 main에 머지하면 배포가 깨진다.
 - `workout` 프로젝트를 새로 만든다(Root Directory `apps/workout`). env: SUPABASE_URL, SUPABASE_SECRET_KEY, WORKOUT_PASSWORD.
-- 도메인: `book.<도메인>` → book, `workout.<도메인>` → workout. 기존 `*.vercel.app`은 book에 그대로 둔다.
+- 도메인: `book.jaewon-choi.dev` → book, `workout.jaewon-choi.dev` → workout. 기존 `*.vercel.app`은 book에 그대로 둔다.
 - GitHub 시크릿: `VERCEL_PROJECT_ID_BOOK`, `VERCEL_PROJECT_ID_WORKOUT`.
 
 ## 가정
-- 도메인은 구매했다고 가정하고 코드를 짰다. 실제 도메인이 정해지면 문서의 `<도메인>`을 바꾼다.
 - 운동 원본은 Supabase만. 노션 🏋️ DB는 더 쓰지 않기로 정했다(2026-11-17, DB 자체는 남아 있다).
 
 ## CI
