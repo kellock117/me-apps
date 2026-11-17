@@ -39,7 +39,7 @@
 - [ ] (함께) 경제 앱 추가(보안·테스트가 안정된 뒤. 구직 이후 권장) <!-- id:money-app -->
 - [ ] (함께) PWA 완성도: 무엇이 모자란지 먼저 정한다(아이콘, 오프라인, 설치 안내?) <!-- id:pwa-polish -->
 - [ ] (직접) `CLAUDE.md`, `docs/NOTES.md`의 `book.<도메인>` 자리표시자를 실제 주소로 바꿀지 결정. README에는 이미 실제 주소가 있다 <!-- id:domain-placeholder -->
-- [ ] (직접) 노션 개발자 위키의 스키마 부분이 옛 테이블 이름(book_ 접두사 전)인 것 고치기 <!-- id:notion-wiki-schema -->
+- [ ] (직접) 옛 노션 개발자 위키 맨 위에 폐기 표시 달기(`⚠️ 폐기: 레포 docs/features/로 대체`). 개발 문서 원본은 레포로 정했고, 위키의 옛 테이블 이름은 고치지 않는다. 위키에 개인 정보가 있으면 `.private/`로 옮긴다 <!-- id:notion-wiki-schema -->
 - [ ] (직접) 노션 🏋️ DB를 계속 쓸지 결정 <!-- id:notion-workout-db -->
 - [ ] (함께) `workout-log` SKILL.md(아티팩트 기준)와 작업로그를 웹앱 기준으로 갱신 <!-- id:workout-log-skill -->
 

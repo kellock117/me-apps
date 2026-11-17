@@ -38,7 +38,7 @@
 ## 6. 문서
 - 이 앱만의 규칙은 `CLAUDE.md`, 함정·가정은 `docs/NOTES.md`에 바로 적는다.
 - `README.md`의 앱 표와 Vercel 표에 한 줄 추가한다.
-- 노션 위키(🧰 내 앱)에 사용자용·개발자용 페이지를 추가한다.
+- `docs/features/<이름>.md`에 무엇·동작·특이사항을 쓴다. 사용자 가이드는 나중에 정한다(노션 위키는 쓰지 않는다).
 
 ## 7. 확인
 - `pnpm turbo typecheck test build`
