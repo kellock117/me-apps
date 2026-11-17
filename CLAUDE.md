@@ -6,7 +6,7 @@
 @AGENTS.md
 
 ## 구조
-- `apps/book` 독서 모임 (`book.<도메인>`), `apps/workout` 운동 기록 (`workout.<도메인>`).
+- `apps/book` 독서 모임 (`book.jaewon-choi.dev`), `apps/workout` 운동 기록 (`workout.jaewon-choi.dev`).
 - `packages/core` (`@me/core`) 서버 쪽 공용: 인증·잠금, 날짜, 백업, Supabase 클라이언트, DB 타입.
 - `packages/ui` (`@me/ui`) 화면 공용: Section/Card, Toast, LoginForm, theme.css.
 - `packages/config` (`@me/config`) tsconfig 기본값.

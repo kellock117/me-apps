@@ -20,7 +20,6 @@
 ## 1등급: 막힘·장애
 
 ## 2등급: 곧 문제
-- [ ] (직접) workout Vercel 프로젝트 env 확인 <!-- id:workout-vercel-env -->
 - [ ] (함께) 보안 점검: 범위를 `/grill-me`로 좁힌 뒤 이슈로 만든다(시크릿 스캔, 의존성 감사, 쿠키 속성·보안 헤더, rate-limit 등) <!-- id:security-review -->
 
 ## 3등급: 목표 직결 (구직 준비 12월 중순~말)
@@ -37,9 +36,7 @@
 ## 4등급: 선행 조건·정리·결정
 - [ ] (함께) 경제 앱 추가(보안·테스트가 안정된 뒤. 구직 이후 권장) <!-- id:money-app -->
 - [ ] (함께) PWA 완성도: 무엇이 모자란지 먼저 정한다(아이콘, 오프라인, 설치 안내?) <!-- id:pwa-polish -->
-- [ ] (직접) `CLAUDE.md`, `docs/NOTES.md`의 `book.<도메인>` 자리표시자를 실제 주소로 바꿀지 결정. README에는 이미 실제 주소가 있다 <!-- id:domain-placeholder -->
 - [ ] (함께) `workout-log` SKILL.md(아티팩트 기준)와 작업로그를 웹앱 기준으로 갱신 <!-- id:workout-log-skill -->
-- [ ] (함께) 기능 문서 이전: 게스트 모드·백업·운동 앱 설명을 `CLAUDE.md`·`docs/NOTES.md`에서 `docs/features/`로 옮기고 CLAUDE.md를 60줄 안팎으로 줄인다. NOTES.md의 날짜 붙은 확인 기록은 지우고 못 한 확인은 TODO로 옮긴다. 문서만 바뀌므로 스펙 없이 진행 <!-- id:docs-features-migrate -->
 
 ## 5등급: 아이디어
 - [ ] (함께) 알림: Web Push, 모임 리마인더, health check. PWA 완성도 뒤, health check는 admin 대시보드와 겹친다 <!-- id:notifications -->
