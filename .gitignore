@@ -17,3 +17,7 @@ supabase/seed.sql
 .DS_Store
 .env*
 !.env.example
+
+# 우선순위 mod: `claude plugin validate`가 다시 만드는 파일
+tools/*/tsconfig.json
+tools/*/.claude-plugin/types/

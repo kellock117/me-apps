@@ -12,6 +12,7 @@
 - `packages/config` (`@me/config`) tsconfig 기본값.
 - `supabase/` DB 하나, 마이그레이션은 모든 앱이 함께 쓴다.
 - 앱 하나 = Next 앱 하나 = Vercel 프로젝트 하나. 앱끼리 서로 import하지 않는다.
+- `apps/*`, `tools/*`의 기능을 고치기 전에 `docs/features/`에서 그 기능 문서를 읽는다(무엇·동작·특이사항).
 
 ## 패키지 경계
 - 두 앱 이상이 쓰거나 쓸 게 확실하면 packages로, 아니면 앱 안에 둔다.
