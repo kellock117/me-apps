@@ -37,6 +37,8 @@
 - [ ] (함께) 경제 앱 추가(보안·테스트가 안정된 뒤. 구직 이후 권장) <!-- id:money-app -->
 - [ ] (함께) PWA 완성도: 무엇이 모자란지 먼저 정한다(아이콘, 오프라인, 설치 안내?) <!-- id:pwa-polish -->
 - [ ] (함께) `workout-log` SKILL.md(아티팩트 기준)와 작업로그를 웹앱 기준으로 갱신 <!-- id:workout-log-skill -->
+- [ ] (함께) CI에서 `tools/` 우선순위 mod 테스트도 돌리기: 지금 `tools/`는 pnpm 워크스페이스 밖이라 verify가 검사하지 않는다. `claude` CLI가 CI에 필요한지, `tsx --test`로 대신할 수 있는지부터 정한다. `/grill-me`로 시작 <!-- id:ci-mod-tests -->
+- [ ] (함께) `docs/TODO.md`·`DONE.md` 줄 형식 검사를 `pnpm check`에 넣기: 우선순위 mod의 `parseTodo`/`parseDone`을 재사용해 id 누락·형식 오류를 잡는다. `/grill-me`로 시작 <!-- id:todo-format-check -->
 
 ## 5등급: 아이디어
 - [ ] (함께) 알림: Web Push, 모임 리마인더, health check. PWA 완성도 뒤, health check는 admin 대시보드와 겹친다 <!-- id:notifications -->
