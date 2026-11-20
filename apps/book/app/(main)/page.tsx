@@ -5,6 +5,7 @@ import { GenreBar } from '@/components/charts/genre-bar';
 import { Heatmap } from '@/components/charts/heatmap';
 import { TrendLine } from '@/components/charts/trend-line';
 import { Cover } from '@/components/cover';
+import { DailyQuoteButton } from '@/components/daily-quote';
 import { Card, Section } from '@me/ui/section';
 import { getCurrentMember } from '@/lib/auth/member';
 import { generosityRows, genreShare, heatmapRows, meetingTrend } from '@/lib/chart-data';
@@ -175,6 +176,8 @@ export default async function HomePage() {
           </ol>
         )}
       </Section>
+
+      {data.quotes.length > 0 && <DailyQuoteButton />}
 
       <p className="text-center text-sm">
         <Link href="/rules" className="inline-flex min-h-11 items-center text-muted underline underline-offset-2">
