@@ -211,20 +211,20 @@ export function pendingRatings(
 }
 
 /**
- * 평점 화면의 기본 책: 내가 아직 평점을 안 남긴 가장 최근 완료 책.
- * "최근"은 그 책의 모임 날짜가 늦은 순이고, 모임이 없는 책은 맨 뒤로 보낸다. 없으면 null.
+ * 내가 아직 별점을 안 남긴 읽은(done) 책. 홈의 미평점 책 모달이 쓴다.
+ * 모임 날짜가 늦은 책이 먼저, 모임이 없는 책은 맨 뒤.
  */
-export function latestUnratedBook(
+export function unratedBooks(
   books: StatsBook[],
   meetings: StatsMeeting[],
   ratings: StatsRating[],
   memberId: string,
-): string | null {
+): StatsBook[] {
   const mine = new Set(ratings.filter((r) => r.memberId === memberId).map((r) => r.bookId));
   const dateOf = (bookId: string) => meetings.filter((m) => m.bookId === bookId).map((m) => m.date).reduce<string>((a, b) => (a > b ? a : b), '');
-  const candidates = books
+  return books
     .filter((b) => b.status === 'done' && !mine.has(b.id))
-    .map((b) => ({ id: b.id, date: dateOf(b.id) }))
-    .sort((a, b) => (a.date === b.date ? 0 : a.date < b.date ? 1 : -1));
-  return candidates[0]?.id ?? null;
+    .map((b) => ({ b, date: dateOf(b.id) }))
+    .sort((a, b) => (a.date === b.date ? 0 : a.date < b.date ? 1 : -1))
+    .map((x) => x.b);
 }
