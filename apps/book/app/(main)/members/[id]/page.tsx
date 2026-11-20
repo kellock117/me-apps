@@ -32,7 +32,7 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
   const top = mine.length ? mine.reduce((a, b) => (b.score > a.score ? b : a)) : null;
   const low = mine.length ? mine.reduce((a, b) => (b.score < a.score ? b : a)) : null;
   const matrix = tasteMatrix(s.members, s.ratings);
-  const withLines = mine.filter((r) => r.one_liner).sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+  const withReviews = mine.filter((r) => r.review).sort((a, b) => b.updated_at.localeCompare(a.updated_at));
   const signed = gen === null ? '—' : `${gen > 0 ? '+' : ''}${gen.toFixed(2)}`;
 
   return (
@@ -99,14 +99,14 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
         </Card>
       </Section>
 
-      <Section title="남긴 한 줄 평">
-        {withLines.length === 0 ? (
-          <Card className="text-center text-sm text-muted">아직 한 줄 평이 없어요</Card>
+      <Section title="남긴 리뷰">
+        {withReviews.length === 0 ? (
+          <Card className="text-center text-sm text-muted">아직 남긴 리뷰가 없어요</Card>
         ) : (
           <ul className="space-y-2">
-            {withLines.map((r) => (
+            {withReviews.map((r) => (
               <li key={r.id} className="rounded-2xl border border-line bg-surface p-4">
-                <p>“{r.one_liner}”</p>
+                <p className="whitespace-pre-wrap break-words">{r.review}</p>
                 <p className="mt-1 text-sm text-muted">
                   <Link href={`/books/${r.book_id}`} className="underline-offset-2 hover:underline">{r.title}</Link> · ★ {fmtScore(r.score)}
                 </p>

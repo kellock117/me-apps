@@ -6,7 +6,7 @@ import {
   disagreementByBook,
   fullMonthsBetween,
   generosityIndex,
-  latestUnratedBook,
+  unratedBooks,
   meetingCount,
   memberAverage,
   monthsTogether,
@@ -201,24 +201,26 @@ describe('평점 대기', () => {
   });
 });
 
-describe('평점 화면의 기본 책', () => {
-  const books = [book('old'), book('mid'), book('new'), book('reading', { status: 'reading' }), book('nomeeting')];
+describe('내가 별점을 안 남긴 읽은 책', () => {
+  const books = [book('old'), book('mid'), book('new'), book('reading', { status: 'reading' }), book('wish', { status: 'wishlist' }), book('nomeeting')];
   const ms = [meeting(1, '2026-07-01', 'old'), meeting(2, '2026-08-01', 'mid'), meeting(3, '2026-09-01', 'new'), meeting(4, '2026-12-01', 'reading')];
-  it('내가 안 남긴 완료 책 중 모임 날짜가 가장 늦은 책', () => {
-    expect(latestUnratedBook(books, ms, [], 'x')).toBe('new');
+  const ids = (r: ReturnType<typeof unratedBooks>) => r.map((b) => b.id);
+  it('읽은 책만, 모임 날짜가 늦은 순이고 모임 없는 책은 맨 뒤', () => {
+    expect(ids(unratedBooks(books, ms, [], 'x'))).toEqual(['new', 'mid', 'old', 'nomeeting']);
   });
-  it('이미 남긴 책은 건너뛴다', () => {
-    expect(latestUnratedBook(books, ms, [rate('new', 'x', 4)], 'x')).toBe('mid');
+  it('내가 남긴 책은 뺀다', () => {
+    expect(ids(unratedBooks(books, ms, [rate('new', 'x', 4)], 'x'))).toEqual(['mid', 'old', 'nomeeting']);
   });
   it('다른 멤버가 남긴 평점은 내 기준에 영향이 없다', () => {
-    expect(latestUnratedBook(books, ms, [rate('new', 'y', 4)], 'x')).toBe('new');
+    expect(ids(unratedBooks(books, ms, [rate('new', 'y', 4)], 'x'))).toEqual(['new', 'mid', 'old', 'nomeeting']);
   });
-  it('읽는 중인 책은 후보가 아니고, 모임이 없는 책은 맨 뒤', () => {
-    const rated = [rate('old', 'x', 1), rate('mid', 'x', 1), rate('new', 'x', 1)];
-    expect(latestUnratedBook(books, ms, rated, 'x')).toBe('nomeeting');
+  it('읽는 중·읽고 싶은 책은 후보가 아니다', () => {
+    const r = ids(unratedBooks(books, ms, [], 'x'));
+    expect(r).not.toContain('reading');
+    expect(r).not.toContain('wish');
   });
-  it('남길 책이 없으면 null', () => {
+  it('남길 책이 없으면 빈 목록', () => {
     const all = ['old', 'mid', 'new', 'nomeeting'].map((id) => rate(id, 'x', 3));
-    expect(latestUnratedBook(books, ms, all, 'x')).toBeNull();
+    expect(unratedBooks(books, ms, all, 'x')).toEqual([]);
   });
 });

@@ -38,8 +38,15 @@ export type Backup = z.infer<typeof backupSchema>;
  * @param required 반드시 들어 있어야 하는 테이블 이름. 없으면 이유와 함께 거절한다.
  * @param renames 옛 테이블 이름 → 새 이름. 이름 규칙이 바뀌기 전에 만든 백업을 읽을 때 쓴다
  *                (이미 새 이름이 있으면 그대로 두고, 옛 이름은 무시한다).
+ * @param columnRenames 테이블(새 이름)별 옛 열 이름 → 새 열 이름. 열 이름이 바뀌기 전에 만든 백업을 읽을 때 쓴다
+ *                (행에 새 열이 이미 있으면 그대로 두고 옛 열만 지운다. 옛 값이 null이면 ''로 옮긴다: 새 열이 not null이라서).
  */
-export function parseBackup(text: string, required: readonly string[] = [], renames: Readonly<Record<string, string>> = {}): Backup {
+export function parseBackup(
+  text: string,
+  required: readonly string[] = [],
+  renames: Readonly<Record<string, string>> = {},
+  columnRenames: Readonly<Record<string, Readonly<Record<string, string>>>> = {},
+): Backup {
   let json: unknown;
   try {
     json = JSON.parse(text);
@@ -52,11 +59,22 @@ export function parseBackup(text: string, required: readonly string[] = [], rena
   for (const [name, rows] of Object.entries(parsed.data.tables)) {
     const next = renames[name] ?? name;
     if (next !== name && next in parsed.data.tables) continue; // 새 이름이 이미 있으면 그쪽을 쓴다
-    tables[next] = rows;
+    const cols = Object.entries(columnRenames[next] ?? {});
+    tables[next] = cols.length === 0 ? rows : rows.map((row) => renameColumns(row, cols));
   }
   const missing = required.find((t) => !(t in tables));
   if (missing) throw new Error(`백업 파일 형식이 맞지 않아요: tables.${missing}`);
   return { ...parsed.data, tables };
+}
+
+function renameColumns(row: Record<string, unknown>, cols: [string, string][]): Record<string, unknown> {
+  const out = { ...row };
+  for (const [from, to] of cols) {
+    if (!(from in out)) continue;
+    if (!(to in out)) out[to] = out[from] ?? '';
+    delete out[from];
+  }
+  return out;
 }
 
 const FILE_RE = /^(\d{4})-(\d{2})-(\d{2})\.json$/;

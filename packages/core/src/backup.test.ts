@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { splitLegacyQuotes } from './backup-tables';
 import { backupFileName, fetchAllRows, expiredBackups, latestBackup, parseBackup } from './backup';
 
 describe('backupFileName', () => {
@@ -107,5 +108,49 @@ describe('fetchAllRows 페이지 읽기', () => {
   it('0행이면 빈 배열', async () => {
     const { db } = fake(0);
     expect(await fetchAllRows(db, { name: 't', conflictKey: 'id' })).toEqual([]);
+  });
+});
+
+describe('parseBackup 옛 열 이름 변환', () => {
+  const colRenames = { book_ratings: { one_liner: 'review' } };
+  const make = (row: Record<string, unknown>) => JSON.stringify({ version: 1, createdAt: 'x', tables: { book_ratings: [row] } });
+  it('옛 열 이름의 값을 새 열로 옮긴다', () => {
+    const b = parseBackup(make({ id: 1, one_liner: '좋았다' }), [], {}, colRenames);
+    expect(b.tables.book_ratings).toEqual([{ id: 1, review: '좋았다' }]);
+  });
+  it('옛 값이 null이면 빈 문자열(리뷰는 비어 있지 않은 열)로 바꾼다', () => {
+    const b = parseBackup(make({ id: 1, one_liner: null }), [], {}, colRenames);
+    expect(b.tables.book_ratings).toEqual([{ id: 1, review: '' }]);
+  });
+  it('새 열이 이미 있으면 그대로 둔다', () => {
+    const b = parseBackup(make({ id: 1, review: '새 값', one_liner: '옛 값' }), [], {}, colRenames);
+    expect(b.tables.book_ratings).toEqual([{ id: 1, review: '새 값' }]);
+  });
+  it('옛 이름 테이블 변환과 함께 쓸 수 있다', () => {
+    const text = JSON.stringify({ version: 1, createdAt: 'x', tables: { ratings: [{ id: 1, one_liner: 'a' }] } });
+    const b = parseBackup(text, [], { ratings: 'book_ratings' }, colRenames);
+    expect(b.tables.book_ratings).toEqual([{ id: 1, review: 'a' }]);
+  });
+});
+
+describe('splitLegacyQuotes (옛 백업의 평점당 문장 1개 → book_quotes)', () => {
+  const rating = (o: Record<string, unknown>) => ({ id: 'r', book_id: 'b1', member_id: 'm1', score: 4, review: '', ...o });
+  const wrap = (tables: Record<string, Record<string, unknown>[]>) => ({ version: 1 as const, createdAt: 'x', tables });
+  it('quote가 있는 평점마다 첫 문장(ord 0)을 만들고, 평점 행에서 quote 열은 지운다', () => {
+    const out = splitLegacyQuotes(wrap({ book_ratings: [rating({ quote: '문장' }), rating({ id: 'r2', member_id: 'm2', quote: null })] }));
+    expect(out.tables.book_quotes).toEqual([{ book_id: 'b1', member_id: 'm1', ord: 0, text: '문장' }]);
+    expect(out.tables.book_ratings!.every((r) => !('quote' in r))).toBe(true);
+  });
+  it('빈 문자열·공백뿐인 quote는 문장으로 만들지 않는다', () => {
+    const out = splitLegacyQuotes(wrap({ book_ratings: [rating({ quote: '  ' })] }));
+    expect(out.tables.book_quotes).toBeUndefined();
+  });
+  it('이미 book_quotes가 있는 새 백업은 건드리지 않는다', () => {
+    const t = wrap({ book_ratings: [rating({})], book_quotes: [{ book_id: 'b1', member_id: 'm1', ord: 0, text: 'x' }] });
+    expect(splitLegacyQuotes(t)).toEqual(t);
+  });
+  it('quote 열이 아예 없는 백업은 그대로 둔다', () => {
+    const t = wrap({ book_ratings: [rating({})] });
+    expect(splitLegacyQuotes(t)).toEqual(t);
   });
 });

@@ -5,20 +5,21 @@ import { GenreBar } from '@/components/charts/genre-bar';
 import { Heatmap } from '@/components/charts/heatmap';
 import { TrendLine } from '@/components/charts/trend-line';
 import { Cover } from '@/components/cover';
+import { DailyQuoteButton } from '@/components/daily-quote';
+import { UnratedBooksModal } from '@/components/unrated-books-modal';
 import { Card, Section } from '@me/ui/section';
 import { getCurrentMember } from '@/lib/auth/member';
 import { generosityRows, genreShare, heatmapRows, meetingTrend } from '@/lib/chart-data';
 import { fmtDate, fmtDday, fmtScore } from '@/lib/format';
-import { bookAverage, latestUnratedBook, meetingCount, monthsTogether, nextMeetingDday, nextSelector, overallAverage, pendingRatings, readBookCount, totalPages } from '@/lib/stats';
+import { bookAverage, meetingCount, monthsTogether, nextMeetingDday, nextSelector, overallAverage, readBookCount, totalPages, unratedBooks } from '@/lib/stats';
 import { getView } from '@/lib/view';
 
 
 export default async function HomePage() {
   const me = await getCurrentMember(); // 게스트(읽기 전용)는 null: 개인용 안내를 건너뛴다
-  const { data, s, today, memberById, bookById, colors, meetingOfBook } = await getView();
+  const { data, s, today, memberById, colors, meetingOfBook } = await getView();
 
-  const waiting = me ? pendingRatings(s.books, s.members, s.ratings).filter((p) => p.missingMemberIds.includes(me.id)) : [];
-  const nextBookId = me ? latestUnratedBook(s.books, s.meetings, s.ratings, me.id) : null;
+  const unrated = me ? unratedBooks(s.books, s.meetings, s.ratings, me.id) : [];
   const reading = data.books.find((b) => b.status === 'reading');
   const selector = nextSelector(s.members, s.books, s.meetings);
   const iAmNext = !!me && selector?.id === me.id;
@@ -37,30 +38,17 @@ export default async function HomePage() {
     .filter((x): x is typeof x & { avg: number } => x.avg !== null)
     .sort((a, b) => b.avg - a.avg || b.n - a.n)
     .slice(0, 3);
-  const recent = [...data.ratings]
-    .filter((r) => r.one_liner)
-    .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
-    .slice(0, 5);
 
   return (
     <div className="space-y-8">
-      <h1 className="font-serif text-2xl font-bold">{me ? `${me.name}님, 안녕하세요` : '독서 모임 기록'}</h1>
+      {!me && <h1 className="font-serif text-2xl font-bold">독서 모임 기록</h1>}
+      {me && unrated.length > 0 && <UnratedBooksModal books={unrated.map((b) => ({ id: b.id, title: b.title }))} today={today} memberId={me.id} />}
 
-      {(waiting.length > 0 || (iAmNext && !reading)) && (
-        <div className="space-y-2">
-          {waiting.length > 0 && (
-            <Link href="/rate" className="block rounded-2xl border border-accent bg-surface p-4">
-              <p className="font-semibold">아직 평점을 안 남긴 책이 {waiting.length}권 있어요</p>
-              <p className="mt-1 text-sm text-muted">{bookById.get(nextBookId ?? '')?.title ?? ''}부터 남겨 볼까요? →</p>
-            </Link>
-          )}
-          {iAmNext && !reading && (
-            <Link href="/select" className="block rounded-2xl border border-accent bg-surface p-4">
-              <p className="font-semibold">이번엔 {me?.name}님이 책을 고를 차례예요</p>
-              <p className="mt-1 text-sm text-muted">이번 달 책 정하기 →</p>
-            </Link>
-          )}
-        </div>
+      {iAmNext && !reading && (
+        <Link href="/select" className="block rounded-2xl border border-accent bg-surface p-4">
+          <p className="font-semibold">이번엔 {me?.name}님이 책을 고를 차례예요</p>
+          <p className="mt-1 text-sm text-muted">이번 달 책 정하기 →</p>
+        </Link>
       )}
 
       <Section title="지금 읽는 책">
@@ -180,26 +168,7 @@ export default async function HomePage() {
         )}
       </Section>
 
-      <Section title="최근 한 줄 평">
-        {recent.length === 0 ? (
-          <Card className="text-center text-sm text-muted">아직 한 줄 평이 없어요</Card>
-        ) : (
-          <ul className="space-y-2">
-            {recent.map((r) => {
-              const m = memberById.get(r.member_id);
-              return (
-                <li key={r.id} className="rounded-2xl border border-line bg-surface p-4">
-                  <p>“{r.one_liner}”</p>
-                  <p className="mt-2 flex items-center gap-2 text-sm text-muted">
-                    {m && <Avatar id={m.id} name={m.name} color={m.color} />}
-                    {m?.name} · <Link href={`/books/${r.book_id}`} className="underline-offset-2 hover:underline">{bookById.get(r.book_id)?.title}</Link> · ★ {fmtScore(Number(r.score))}
-                  </p>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </Section>
+      {data.quotes.length > 0 && <DailyQuoteButton />}
 
       <p className="text-center text-sm">
         <Link href="/rules" className="inline-flex min-h-11 items-center text-muted underline underline-offset-2">

@@ -19,7 +19,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
         </header>
         <p className="mx-auto max-w-md px-4 pt-2 text-xs text-muted">읽기 전용으로 보는 중이에요. 멤버 이름은 가려져 있고, 로그인하면 모두 보여요.</p>
         <main className="mx-auto w-full max-w-md px-4 pb-28 pt-4">{children}</main>
-        <TabBar guest />
+        <TabBar />
       </>
     );
   }

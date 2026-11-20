@@ -1,6 +1,8 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { checkRateLimit, resetRateLimit } from './rate-limit';
 import { safeNextPath } from './redirect';
+import { isDevLoginSkip } from './dev-login';
+import { verifySiteToken } from './site-lock';
 import { createSessionToken, safeEqual, SESSION_MAX_AGE_SEC, verifySessionToken } from './session';
 
 const NOW = Date.UTC(2026, 10, 10);
@@ -65,3 +67,29 @@ describe('checkRateLimit', () => {
     expect(checkRateLimit('ip1', opt, NOW + 600_001).ok).toBe(true);
   });
 });
+
+describe('개발 모드 로그인 생략', () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  it('next dev(development)에서만 켜진다', () => {
+    vi.stubEnv('NODE_ENV', 'development');
+    expect(isDevLoginSkip()).toBe(true);
+    for (const env of ['production', 'test']) {
+      vi.stubEnv('NODE_ENV', env);
+      expect(isDevLoginSkip()).toBe(false);
+    }
+  });
+  it('개발 모드에서는 쿠키·비밀번호가 없어도 앱 잠금을 통과한다', () => {
+    vi.stubEnv('NODE_ENV', 'development');
+    expect(verifySiteToken('workout', undefined, undefined)).toBe(true);
+  });
+  it('production에서는 쿠키가 없거나 비밀번호가 없으면 막힌다', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    expect(verifySiteToken('workout', undefined, 'pw')).toBe(false);
+    expect(verifySiteToken('workout', createSiteTokenFor('pw'), undefined)).toBe(false);
+    expect(verifySiteToken('workout', createSiteTokenFor('pw'), 'pw')).toBe(true);
+  });
+});
+
+import { createSiteToken } from './site-lock';
+const createSiteTokenFor = (pw: string) => createSiteToken('workout', pw);

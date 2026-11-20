@@ -6,7 +6,7 @@
  * - 이름 규칙: 앱 테이블은 `<앱>_<이름>`(book_*, workout_*). 새 앱도 같은 규칙을 따른다 (CLAUDE.md 참고).
  * - 진행 중 상태처럼 잃어도 되는 임시 테이블(workout_drafts)은 넣지 않는다.
  */
-import type { TableSpec } from './backup';
+import type { Backup, TableSpec } from './backup';
 
 /** 독서 모임(apps/book) */
 export const BOOK_TABLES: readonly TableSpec[] = [
@@ -15,6 +15,8 @@ export const BOOK_TABLES: readonly TableSpec[] = [
   { name: 'book_meetings', conflictKey: 'id' },
   { name: 'book_meeting_attendees', conflictKey: 'meeting_id,member_id' },
   { name: 'book_ratings', conflictKey: 'id' },
+  // id가 아니라 (책, 멤버, 순서)로 같은 행을 알아본다: 옛 백업에서 변환한 행은 id가 없어서, 두 번 복원해도 늘어나지 않게
+  { name: 'book_quotes', conflictKey: 'book_id,member_id,ord' },
   { name: 'book_interests', conflictKey: 'book_id,member_id' },
 ];
 
@@ -29,6 +31,33 @@ export const LEGACY_TABLE_RENAMES: Readonly<Record<string, string>> = {
   meeting_attendees: 'book_meeting_attendees',
   ratings: 'book_ratings',
 };
+
+/**
+ * 열 이름이 바뀌기 전의 백업을 읽을 때: 테이블(새 이름) → { 옛 열 → 새 열 }.
+ * book_ratings.one_liner(한 줄 평, 2026-11-20 이전)는 review(리뷰)로 옮긴다.
+ */
+export const LEGACY_COLUMN_RENAMES: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+  book_ratings: { one_liner: 'review' },
+};
+
+/**
+ * 평점당 문장 하나(book_ratings.quote)였던 옛 백업을 새 구조로 바꾼다(2026-11-20 이전 백업).
+ * quote가 있는 평점마다 book_quotes에 첫 문장(ord 0)을 만들고, 평점 행의 quote 열은 지운다(DB에 이 열이 없다).
+ * 이미 book_quotes가 있는 새 백업은 건드리지 않는다. 열 이름 변환(LEGACY_COLUMN_RENAMES)과 별개로, 테이블이 둘로 갈라져서 따로 둔다.
+ */
+export function splitLegacyQuotes(backup: Backup): Backup {
+  const ratings = backup.tables.book_ratings;
+  if (!ratings || 'book_quotes' in backup.tables || !ratings.some((r) => 'quote' in r)) return backup;
+  const quotes: Record<string, unknown>[] = [];
+  const cleaned = ratings.map((r) => {
+    const { quote, ...rest } = r;
+    if (typeof quote === 'string' && quote.trim()) quotes.push({ book_id: r.book_id, member_id: r.member_id, ord: 0, text: quote.trim() });
+    return rest;
+  });
+  const tables: Backup['tables'] = { ...backup.tables, book_ratings: cleaned };
+  if (quotes.length > 0) tables.book_quotes = quotes;
+  return { ...backup, tables };
+}
 
 /** 운동 기록(apps/workout) */
 export const WORKOUT_TABLES: readonly TableSpec[] = [

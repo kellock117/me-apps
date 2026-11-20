@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "migrate:notion": "tsx --env-file=.env.local scripts/migrate-from-notion.ts",
     "copy:cloud": "tsx --env-file=.env.local scripts/copy-to-cloud.ts",
-    "restore": "tsx --env-file=.env.local scripts/restore.ts"
+    "backfill:book-info": "tsx --env-file=.env.local scripts/backfill-book-info.ts",
+    "restore":"tsx --env-file=.env.local scripts/restore.ts"
   },
   "dependencies": {
     "@me/core": "workspace:*",

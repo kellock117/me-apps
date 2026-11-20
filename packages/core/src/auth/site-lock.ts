@@ -8,6 +8,7 @@
  *
  * 서버 액션·레이아웃에서 쓰는 `requireSite()`는 next/headers가 필요해서 `server/require-site.ts`에 따로 있다.
  */
+import { isDevLoginSkip } from './dev-login';
 import { createSessionToken, verifySessionToken } from './session';
 
 /** 로그인 쿠키 이름. 예: `site_workout` */
@@ -24,8 +25,10 @@ export function createSiteToken(appId: string, password: string): string {
 /**
  * 쿠키의 토큰이 이 앱에서 유효한가.
  * 비밀번호가 설정되지 않았으면(환경 변수 누락) 항상 false라서 사이트가 전부 잠긴다.
+ * 단, `next dev`에서는 항상 true다(dev-login.ts).
  */
 export function verifySiteToken(appId: string, token: string | undefined, password: string | undefined): boolean {
+  if (isDevLoginSkip()) return true;
   if (!password) return false;
   return verifySessionToken(token, key(appId, password));
 }

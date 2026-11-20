@@ -6,7 +6,7 @@ const data = {
     { id: '1', name: '김가나', rotation_order: 1 },
     { id: '2', name: '이다라', rotation_order: 2 },
   ],
-  ratings: [{ one_liner: '가나가 고른 책이라 기대했다', quote: null }],
+  ratings: [{ review: '가나가 고른 책이라 기대했다', quote: null }],
   books: [{ title: '1984', recommend_reason: '이다라 추천' }],
 };
 
@@ -16,7 +16,7 @@ describe('maskClubData', () => {
   });
   it('자유 글 속의 전체 이름과 성 뗀 이름도 바꾼다', () => {
     const out = maskClubData(data);
-    expect(out.ratings[0]!.one_liner).toBe('멤버 A가 고른 책이라 기대했다');
+    expect(out.ratings[0]!.review).toBe('멤버 A가 고른 책이라 기대했다');
     expect(out.books[0]!.recommend_reason).toBe('멤버 B 추천');
   });
   it('이름이 아닌 값(id, 책 제목)은 그대로 둔다', () => {
