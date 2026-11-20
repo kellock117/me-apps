@@ -31,6 +31,7 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
   const meeting = meetingOfBook(book.id);
   const { avg, n } = bookAverage(s.ratings, book.id);
   const ratings = data.ratings.filter((r) => r.book_id === book.id);
+  const quotes = data.quotes.filter((q) => q.book_id === book.id);
   const myRating = me ? ratings.find((r) => r.member_id === me.id) : undefined;
   const missing = book.status === 'done' ? (pendingRatings(s.books, s.members, s.ratings).find((p) => p.bookId === book.id)?.missingMemberIds ?? []) : [];
   const interested = data.interests.filter((i) => i.book_id === book.id).length;
@@ -121,18 +122,23 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
         </Section>
       )}
 
-      {ratings.some((r) => r.quote) && (
+      {quotes.length > 0 && (
         <Section title="인상 깊은 문장">
-          <ul className="space-y-3">
-            {ratings
-              .filter((r) => r.quote)
-              .map((r) => (
-                <li key={r.id}>
-                  <blockquote className="border-l-4 border-accent pl-4 font-serif leading-relaxed">{r.quote}</blockquote>
-                  <p className="mt-1 pl-5 text-sm text-muted">— {memberById.get(r.member_id)?.name}</p>
-                </li>
+          <div className="space-y-5">
+            {members
+              .map((m) => ({ m, list: quotes.filter((q) => q.member_id === m.id) }))
+              .filter((x) => x.list.length > 0)
+              .map(({ m, list }) => (
+                <div key={m.id} className="space-y-3">
+                  {list.map((q) => (
+                    <blockquote key={q.id} className="whitespace-pre-wrap break-words border-l-4 border-accent pl-4 font-serif leading-relaxed">
+                      {q.text}
+                    </blockquote>
+                  ))}
+                  <p className="pl-5 text-sm text-muted">— {m.name}</p>
+                </div>
               ))}
-          </ul>
+          </div>
         </Section>
       )}
 

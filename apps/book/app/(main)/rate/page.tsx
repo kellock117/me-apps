@@ -17,9 +17,8 @@ export default async function RatePage({ searchParams }: { searchParams: Promise
   if (!book) redirect('/books');
 
   const mineForBook = data.ratings.find((r) => r.book_id === book.id && r.member_id === me.id);
-  const existing = mineForBook
-    ? { score: Number(mineForBook.score), review: mineForBook.review, quote: mineForBook.quote ?? '' }
-    : null;
+  const myQuotes = data.quotes.filter((q) => q.book_id === book.id && q.member_id === me.id).map((q) => q.text);
+  const existing = mineForBook ? { score: Number(mineForBook.score), review: mineForBook.review, quotes: myQuotes } : null;
 
   return (
     <div className="space-y-6">

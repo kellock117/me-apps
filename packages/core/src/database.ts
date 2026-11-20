@@ -276,13 +276,69 @@ export type Database = {
         };
         Relationships: [];
       };
+      book_quotes: {
+        Row: {
+          book_id: string;
+          created_at: string;
+          id: string;
+          member_id: string;
+          ord: number;
+          text: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          book_id: string;
+          created_at?: string;
+          id?: string;
+          member_id: string;
+          ord: number;
+          text: string;
+        };
+        Update: {
+          book_id?: string;
+          created_at?: string;
+          id?: string;
+          member_id?: string;
+          ord?: number;
+          text?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "book_quotes_book_id_fkey";
+            columns: ["book_id"];
+            isOneToOne: false;
+            referencedRelation: "book_books";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "book_quotes_book_id_fkey";
+            columns: ["book_id"];
+            isOneToOne: false;
+            referencedRelation: "book_stats";
+            referencedColumns: ["book_id"];
+          },
+          {
+            foreignKeyName: "book_quotes_member_id_fkey";
+            columns: ["member_id"];
+            isOneToOne: false;
+            referencedRelation: "book_member_stats";
+            referencedColumns: ["member_id"];
+          },
+          {
+            foreignKeyName: "book_quotes_member_id_fkey";
+            columns: ["member_id"];
+            isOneToOne: false;
+            referencedRelation: "book_members";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       book_ratings: {
         Row: {
           book_id: string;
           created_at: string;
           id: string;
           member_id: string;
-          quote: string | null;
           review: string;
           score: number;
           updated_at: string;
@@ -293,7 +349,6 @@ export type Database = {
           created_at?: string;
           id?: string;
           member_id: string;
-          quote?: string | null;
           review?: string;
           score: number;
           updated_at?: string;
@@ -303,7 +358,6 @@ export type Database = {
           created_at?: string;
           id?: string;
           member_id?: string;
-          quote?: string | null;
           review?: string;
           score?: number;
           updated_at?: string;

@@ -9,7 +9,7 @@
 import { readFile } from 'node:fs/promises';
 import { createClient } from '@supabase/supabase-js';
 import { countAll, parseBackup, restoreAll } from '@me/core/backup';
-import { ALL_BACKUP_TABLES, BOOK_TABLES, LEGACY_COLUMN_RENAMES, LEGACY_TABLE_RENAMES } from '@me/core/backup-tables';
+import { ALL_BACKUP_TABLES, BOOK_TABLES, LEGACY_COLUMN_RENAMES, LEGACY_TABLE_RENAMES, splitLegacyQuotes } from '@me/core/backup-tables';
 
 async function main() {
   const args = process.argv.slice(2);
@@ -22,12 +22,13 @@ async function main() {
   if (!url || !key) throw new Error('SUPABASE_URL / SUPABASE_SECRET_KEY가 .env.local에 없어요');
   const db = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
 
-  const backup = parseBackup(
+  const parsed = parseBackup(
     await readFile(file, 'utf8'),
-    BOOK_TABLES.map((t) => t.name), // 독서 모임 테이블은 반드시 있어야 한다. 운동 테이블은 옛 백업에 없어도 된다
+    BOOK_TABLES.map((t) => t.name).filter((n) => n !== 'book_quotes'), // 독서 모임 테이블은 반드시 있어야 한다(book_quotes는 옛 백업에 없다). 운동 테이블도 옛 백업에 없어도 된다
     LEGACY_TABLE_RENAMES, // book_ 접두사가 붙기 전의 백업(members, books …)도 새 이름으로 바꿔 넣는다
     LEGACY_COLUMN_RENAMES, // 한 줄 평(one_liner)이 리뷰(review)로 바뀌기 전의 백업도 새 열로 옮겨 넣는다
   );
+  const backup = splitLegacyQuotes(parsed); // 평점당 문장 하나였던 옛 백업은 book_quotes 행으로 바꾼다
   console.log(`대상: ${url}\n백업 시각: ${backup.createdAt}`);
 
   const before = await countAll(db, ALL_BACKUP_TABLES);

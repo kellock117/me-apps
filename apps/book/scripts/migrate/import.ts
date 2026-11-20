@@ -186,19 +186,26 @@ export async function importSnapshot(db: Db, snap: Snapshot, log: (s: string) =>
       member_id: member(r.memberId, `평점 #${i + 1} 멤버`)!,
       score: r.score,
       review: oneLiner ?? '', // 노션의 '한 줄 평'은 리뷰 칸으로 들어간다
-      quote: blankToNull(r.quote),
     };
+  });
+  const quoteRows = snap.ratings.flatMap((r, i) => {
+    const text = blankToNull(r.quote);
+    return text ? [{ book_id: ratingRows[i]!.book_id, member_id: ratingRows[i]!.member_id, ord: 0, text }] : [];
   });
   if (ratingRows.length) {
     ok(await db.from('book_ratings').upsert(ratingRows, { onConflict: 'book_id,member_id' }), 'book_ratings');
   }
   log(`평점 ${ratingRows.length}개 반영`);
+  if (quoteRows.length) {
+    ok(await db.from('book_quotes').upsert(quoteRows, { onConflict: 'book_id,member_id,ord' }), 'book_quotes');
+  }
+  log(`인상 깊은 문장 ${quoteRows.length}개 반영`);
 
   return { members: memberIds, books: bookIds };
 }
 
 export async function countRows(db: Db) {
-  const tables = ['book_members', 'book_books', 'book_interests', 'book_meetings', 'book_meeting_attendees', 'book_ratings'] as const;
+  const tables = ['book_members', 'book_books', 'book_interests', 'book_meetings', 'book_meeting_attendees', 'book_ratings', 'book_quotes'] as const;
   const out: Record<string, number> = {};
   for (const t of tables) {
     const { count, error } = await db.from(t).select('*', { count: 'exact', head: true });
