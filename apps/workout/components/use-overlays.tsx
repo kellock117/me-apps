@@ -4,7 +4,7 @@
  * 확인 창(ask)과 토스트(toast)를 한 번에 제공하는 훅. 쓰는 쪽은 `node`를 화면 어딘가에 그려 두면 된다.
  *
  * - ask: "정말 지울까요?" 같은 확인. danger=true면 확인 버튼이 빨강. Esc나 바깥을 누르면 취소.
- * - toast: 5초 뒤 사라지는 알림. 버튼(예: 되돌리기)을 달 수 있다.
+ * - toast: 닫기 버튼(✕)으로만 닫히는 알림. 여러 개가 쌓이고 각각 따로 닫는다. 버튼(예: 되돌리기)을 달 수 있다.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -16,6 +16,7 @@ interface Dialog {
   cb: () => void;
 }
 interface ToastState {
+  id: number;
   text: string;
   btn?: string;
   cb?: () => void;
@@ -29,15 +30,14 @@ export interface Overlays {
 
 export function useOverlays(): Overlays {
   const [dlg, setDlg] = useState<Dialog | null>(null);
-  const [toastState, setToast] = useState<ToastState | null>(null);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [toasts, setToasts] = useState<ToastState[]>([]);
+  const nextId = useRef(0);
   const okRef = useRef<HTMLButtonElement>(null);
 
   const ask = useCallback<Overlays['ask']>((title, text, ok, cb, danger = false) => setDlg({ title, text, ok, danger, cb }), []);
   const toast = useCallback<Overlays['toast']>((text, btn, cb) => {
-    setToast({ text, btn, cb });
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => setToast(null), 5000);
+    // 되돌리기 콜백은 만든 시점의 위치를 기억하므로, 새 되돌리기가 오면 옛 되돌리기 알림은 치운다(어긋난 위치에 끼워 넣지 않게)
+    setToasts((prev) => [...(btn ? prev.filter((x) => !x.btn) : prev), { id: nextId.current++, text, btn, cb }]);
   }, []);
 
   // 확인 창이 뜨면 확인 버튼에 포커스, Esc로 닫기
@@ -76,23 +76,27 @@ export function useOverlays(): Overlays {
           </div>
         </div>
       )}
-      {toastState && (
-        <div className="toast" role="status">
-          <span>{toastState.text}</span>
-          {toastState.btn && (
-            <button
-              type="button"
-              onClick={() => {
-                const f = toastState.cb;
-                setToast(null);
-                f?.();
-              }}
-            >
-              {toastState.btn}
+      <div className="toasts" role="status" aria-live="polite">
+        {toasts.map((t) => (
+          <div key={t.id} className="toast">
+            <span>{t.text}</span>
+            {t.btn && (
+              <button
+                type="button"
+                onClick={() => {
+                  setToasts((prev) => prev.filter((x) => x.id !== t.id));
+                  t.cb?.();
+                }}
+              >
+                {t.btn}
+              </button>
+            )}
+            <button type="button" className="tclose" aria-label="알림 닫기" onClick={() => setToasts((prev) => prev.filter((x) => x.id !== t.id))}>
+              ✕
             </button>
-          )}
-        </div>
-      )}
+          </div>
+        ))}
+      </div>
     </>
   );
 
