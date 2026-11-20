@@ -62,7 +62,7 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
 
       {me && book.status === 'done' && (
         <Link href={`/rate?book=${book.id}`} className="flex min-h-12 items-center justify-center rounded-xl bg-accent px-4 font-semibold text-accent-ink">
-          {myRating ? '내 평점 고치기' : '내 평점 남기기'}
+          {myRating ? '평점 고치기' : '평점 추가하기'}
         </Link>
       )}
 

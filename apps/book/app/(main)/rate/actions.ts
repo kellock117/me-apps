@@ -43,5 +43,5 @@ export async function saveRating(_prev: RateState, formData: FormData): Promise<
   if (error) return { errors: { form: ['저장하지 못했어요. 잠시 뒤에 다시 해 주세요'] }, values };
 
   revalidatePath('/', 'layout'); // 브라우저 라우터 캐시를 비워 바로 새 데이터를 보여 준다
-  redirect('/?toast=rated');
+  redirect(`/books/${input.bookId}?toast=rated`);
 }

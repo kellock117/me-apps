@@ -1,16 +1,13 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useActionState, useEffect, useState } from 'react';
 import { StarPicker } from '@/components/star-picker';
 import { REVIEW_MAX } from '@/lib/validation/rating';
 import { saveRating, type RateState } from './actions';
 
-type BookOption = { id: string; title: string; rated: boolean };
 type Existing = { score: number; review: string; quote: string };
 
-export function RatingForm({ bookId, books, existing }: { bookId: string; books: BookOption[]; existing: Existing | null }) {
-  const router = useRouter();
+export function RatingForm({ bookId, existing }: { bookId: string; existing: Existing | null }) {
   const [state, action, pending] = useActionState<RateState, FormData>(saveRating, {});
   const initialScore = state.values?.score ? Number(state.values.score) : (existing?.score ?? 0);
   const [score, setScore] = useState(initialScore);
@@ -26,30 +23,11 @@ export function RatingForm({ bookId, books, existing }: { bookId: string; books:
       <input type="hidden" name="bookId" value={bookId} />
       <input type="hidden" name="score" value={score || ''} />
 
-      <div>
-        <label htmlFor="book" className="mb-2 block text-sm font-medium">
-          책
-        </label>
-        <select
-          id="book"
-          // 제어 컴포넌트로 두면 React 19가 액션 뒤에 폼을 초기화할 때 첫 항목으로 돌아간다. 책이 바뀌면 폼 전체가 key로 새로 만들어진다.
-          defaultValue={bookId}
-          onChange={(ev) => router.replace(`/rate?book=${ev.target.value}`)}
-          className="min-h-12 w-full rounded-xl border border-line bg-surface px-3 text-base"
-        >
-          {books.map((b) => (
-            <option key={b.id} value={b.id}>
-              {b.rated ? '✓ ' : ''}
-              {b.title}
-            </option>
-          ))}
-        </select>
-        {e.bookId && (
-          <p role="alert" className="mt-2 text-sm font-medium text-danger">
-            {e.bookId[0]}
-          </p>
-        )}
-      </div>
+      {e.bookId && (
+        <p role="alert" className="text-sm font-medium text-danger">
+          {e.bookId[0]}
+        </p>
+      )}
 
       <div>
         <p className="mb-2 text-sm font-medium">별점</p>
