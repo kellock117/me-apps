@@ -8,15 +8,15 @@ import { createAdminClient } from '@me/core/server/supabase';
 import { ratingInputSchema } from '@/lib/validation/rating';
 
 export type RateState = {
-  errors?: Partial<Record<'bookId' | 'score' | 'oneLiner' | 'quote' | 'form', string[]>>;
+  errors?: Partial<Record<'bookId' | 'score' | 'review' | 'quote' | 'form', string[]>>;
   /** 실패했을 때 입력값을 그대로 돌려 준다 */
-  values?: { score: string; oneLiner: string; quote: string };
+  values?: { score: string; review: string; quote: string };
 };
 
 const str = (v: FormDataEntryValue | null) => (typeof v === 'string' ? v : '');
 
 export async function saveRating(_prev: RateState, formData: FormData): Promise<RateState> {
-  const values = { score: str(formData.get('score')), oneLiner: str(formData.get('oneLiner')), quote: str(formData.get('quote')) };
+  const values = { score: str(formData.get('score')), review: str(formData.get('review')), quote: str(formData.get('quote')) };
 
   const me = await getCurrentMember();
   if (!me) redirect('/who');
@@ -37,7 +37,7 @@ export async function saveRating(_prev: RateState, formData: FormData): Promise<
   const { error } = await db
     .from('book_ratings')
     .upsert(
-      { book_id: input.bookId, member_id: me.id, score: input.score, one_liner: input.oneLiner, quote: input.quote },
+      { book_id: input.bookId, member_id: me.id, score: input.score, review: input.review, quote: input.quote },
       { onConflict: 'book_id,member_id' },
     );
   if (error) return { errors: { form: ['저장하지 못했어요. 잠시 뒤에 다시 해 주세요'] }, values };

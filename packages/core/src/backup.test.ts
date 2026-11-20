@@ -109,3 +109,25 @@ describe('fetchAllRows 페이지 읽기', () => {
     expect(await fetchAllRows(db, { name: 't', conflictKey: 'id' })).toEqual([]);
   });
 });
+
+describe('parseBackup 옛 열 이름 변환', () => {
+  const colRenames = { book_ratings: { one_liner: 'review' } };
+  const make = (row: Record<string, unknown>) => JSON.stringify({ version: 1, createdAt: 'x', tables: { book_ratings: [row] } });
+  it('옛 열 이름의 값을 새 열로 옮긴다', () => {
+    const b = parseBackup(make({ id: 1, one_liner: '좋았다' }), [], {}, colRenames);
+    expect(b.tables.book_ratings).toEqual([{ id: 1, review: '좋았다' }]);
+  });
+  it('옛 값이 null이면 빈 문자열(리뷰는 비어 있지 않은 열)로 바꾼다', () => {
+    const b = parseBackup(make({ id: 1, one_liner: null }), [], {}, colRenames);
+    expect(b.tables.book_ratings).toEqual([{ id: 1, review: '' }]);
+  });
+  it('새 열이 이미 있으면 그대로 둔다', () => {
+    const b = parseBackup(make({ id: 1, review: '새 값', one_liner: '옛 값' }), [], {}, colRenames);
+    expect(b.tables.book_ratings).toEqual([{ id: 1, review: '새 값' }]);
+  });
+  it('옛 이름 테이블 변환과 함께 쓸 수 있다', () => {
+    const text = JSON.stringify({ version: 1, createdAt: 'x', tables: { ratings: [{ id: 1, one_liner: 'a' }] } });
+    const b = parseBackup(text, [], { ratings: 'book_ratings' }, colRenames);
+    expect(b.tables.book_ratings).toEqual([{ id: 1, review: 'a' }]);
+  });
+});

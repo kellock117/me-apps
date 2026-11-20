@@ -282,8 +282,8 @@ export type Database = {
           created_at: string;
           id: string;
           member_id: string;
-          one_liner: string | null;
           quote: string | null;
+          review: string;
           score: number;
           updated_at: string;
         };
@@ -293,8 +293,8 @@ export type Database = {
           created_at?: string;
           id?: string;
           member_id: string;
-          one_liner?: string | null;
           quote?: string | null;
+          review?: string;
           score: number;
           updated_at?: string;
         };
@@ -303,8 +303,8 @@ export type Database = {
           created_at?: string;
           id?: string;
           member_id?: string;
-          one_liner?: string | null;
           quote?: string | null;
+          review?: string;
           score?: number;
           updated_at?: string;
         };

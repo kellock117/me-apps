@@ -30,6 +30,14 @@ export const LEGACY_TABLE_RENAMES: Readonly<Record<string, string>> = {
   ratings: 'book_ratings',
 };
 
+/**
+ * 열 이름이 바뀌기 전의 백업을 읽을 때: 테이블(새 이름) → { 옛 열 → 새 열 }.
+ * book_ratings.one_liner(한 줄 평, 2026-11-20 이전)는 review(리뷰)로 옮긴다.
+ */
+export const LEGACY_COLUMN_RENAMES: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+  book_ratings: { one_liner: 'review' },
+};
+
 /** 운동 기록(apps/workout) */
 export const WORKOUT_TABLES: readonly TableSpec[] = [
   { name: 'workout_sessions', conflictKey: 'id' },

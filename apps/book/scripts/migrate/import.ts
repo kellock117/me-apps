@@ -185,7 +185,7 @@ export async function importSnapshot(db: Db, snap: Snapshot, log: (s: string) =>
       book_id: book(r.bookId, `평점 #${i + 1} 책`)!,
       member_id: member(r.memberId, `평점 #${i + 1} 멤버`)!,
       score: r.score,
-      one_liner: oneLiner,
+      review: oneLiner ?? '', // 노션의 '한 줄 평'은 리뷰 칸으로 들어간다
       quote: blankToNull(r.quote),
     };
   });

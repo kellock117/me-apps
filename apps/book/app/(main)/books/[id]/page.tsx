@@ -100,16 +100,16 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
         </Section>
       )}
 
-      {ratings.some((r) => r.one_liner) && (
-        <Section title="한 줄 평">
+      {ratings.some((r) => r.review) && (
+        <Section title="리뷰">
           <ul className="space-y-2">
             {ratings
-              .filter((r) => r.one_liner)
+              .filter((r) => r.review)
               .map((r) => {
                 const m = memberById.get(r.member_id);
                 return (
                   <li key={r.id} className="rounded-2xl border border-line bg-surface p-4">
-                    <p>“{r.one_liner}”</p>
+                    <p className="whitespace-pre-wrap break-words">{r.review}</p>
                     <p className="mt-2 flex items-center gap-2 text-sm text-muted">
                       {m && <Avatar id={m.id} name={m.name} color={m.color} />}
                       {m?.name} · ★ {fmtScore(Number(r.score))}

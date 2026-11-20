@@ -3,18 +3,18 @@
 import { useRouter } from 'next/navigation';
 import { useActionState, useEffect, useState } from 'react';
 import { StarPicker } from '@/components/star-picker';
-import { ONE_LINER_MAX } from '@/lib/validation/rating';
+import { REVIEW_MAX } from '@/lib/validation/rating';
 import { saveRating, type RateState } from './actions';
 
 type BookOption = { id: string; title: string; rated: boolean };
-type Existing = { score: number; oneLiner: string; quote: string };
+type Existing = { score: number; review: string; quote: string };
 
 export function RatingForm({ bookId, books, existing }: { bookId: string; books: BookOption[]; existing: Existing | null }) {
   const router = useRouter();
   const [state, action, pending] = useActionState<RateState, FormData>(saveRating, {});
   const initialScore = state.values?.score ? Number(state.values.score) : (existing?.score ?? 0);
   const [score, setScore] = useState(initialScore);
-  const [oneLiner, setOneLiner] = useState(state.values?.oneLiner ?? existing?.oneLiner ?? '');
+  const [review, setReview] = useState(state.values?.review ?? existing?.review ?? '');
   // 서버가 돌려준 오류는, 그 칸을 다시 고치면 지운다. 새 응답이 오면 다시 보여 준다.
   const [edited, setEdited] = useState<ReadonlySet<string>>(new Set());
   useEffect(() => setEdited(new Set()), [state]);
@@ -68,32 +68,32 @@ describedBy={e.score ? 'score-error' : undefined} invalid={!!e.score} />
       </div>
 
       <div>
-        <label htmlFor="oneLiner" className="mb-2 flex items-baseline justify-between text-sm font-medium">
+        <label htmlFor="review" className="mb-2 flex items-baseline justify-between text-sm font-medium">
           <span>
-            한 줄 평 <span className="text-danger">*</span>
+            리뷰 <span className="font-normal text-muted">(선택)</span>
           </span>
           <span className="font-normal text-muted">
-            {oneLiner.length}/{ONE_LINER_MAX}
+            {review.length}/{REVIEW_MAX}
           </span>
         </label>
-        <input
-          id="oneLiner"
-          name="oneLiner"
-          value={oneLiner}
+        <textarea
+          id="review"
+          name="review"
+          rows={5}
+          value={review}
           onChange={(ev) => {
-            setOneLiner(ev.target.value);
-            touch('oneLiner');
+            setReview(ev.target.value);
+            touch('review');
           }}
-          maxLength={ONE_LINER_MAX}
-          autoComplete="off"
-          aria-invalid={e.oneLiner ? true : undefined}
-          aria-describedby={e.oneLiner ? 'oneLiner-error' : undefined}
-          className="min-h-12 w-full rounded-xl border border-line bg-surface px-4 text-base"
-          placeholder="이 책을 한 줄로 말하면?"
+          maxLength={REVIEW_MAX}
+          aria-invalid={e.review ? true : undefined}
+          aria-describedby={e.review ? 'review-error' : undefined}
+          className="w-full rounded-xl border border-line bg-surface px-4 py-3 text-base"
+          placeholder="이 책은 어땠나요? 여러 줄로 남겨도 돼요"
         />
-        {e.oneLiner && (
-          <p id="oneLiner-error" role="alert" className="mt-2 text-sm font-medium text-danger">
-            {e.oneLiner[0]}
+        {e.review && (
+          <p id="review-error" role="alert" className="mt-2 text-sm font-medium text-danger">
+            {e.review[0]}
           </p>
         )}
       </div>

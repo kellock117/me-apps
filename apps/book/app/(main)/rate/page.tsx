@@ -31,7 +31,7 @@ export default async function RatePage({ searchParams }: { searchParams: Promise
   const options = doneBooks.map((b) => ({ id: b.id, title: b.title, rated: mine.has(b.id) }));
   const mineForBook = data.ratings.find((r) => r.book_id === bookId && r.member_id === me.id);
   const existing = mineForBook
-    ? { score: Number(mineForBook.score), oneLiner: mineForBook.one_liner ?? '', quote: mineForBook.quote ?? '' }
+    ? { score: Number(mineForBook.score), review: mineForBook.review, quote: mineForBook.quote ?? '' }
     : null;
 
   return (

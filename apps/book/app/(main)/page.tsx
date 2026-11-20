@@ -37,10 +37,6 @@ export default async function HomePage() {
     .filter((x): x is typeof x & { avg: number } => x.avg !== null)
     .sort((a, b) => b.avg - a.avg || b.n - a.n)
     .slice(0, 3);
-  const recent = [...data.ratings]
-    .filter((r) => r.one_liner)
-    .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
-    .slice(0, 5);
 
   return (
     <div className="space-y-8">
@@ -177,27 +173,6 @@ export default async function HomePage() {
               </li>
             ))}
           </ol>
-        )}
-      </Section>
-
-      <Section title="최근 한 줄 평">
-        {recent.length === 0 ? (
-          <Card className="text-center text-sm text-muted">아직 한 줄 평이 없어요</Card>
-        ) : (
-          <ul className="space-y-2">
-            {recent.map((r) => {
-              const m = memberById.get(r.member_id);
-              return (
-                <li key={r.id} className="rounded-2xl border border-line bg-surface p-4">
-                  <p>“{r.one_liner}”</p>
-                  <p className="mt-2 flex items-center gap-2 text-sm text-muted">
-                    {m && <Avatar id={m.id} name={m.name} color={m.color} />}
-                    {m?.name} · <Link href={`/books/${r.book_id}`} className="underline-offset-2 hover:underline">{bookById.get(r.book_id)?.title}</Link> · ★ {fmtScore(Number(r.score))}
-                  </p>
-                </li>
-              );
-            })}
-          </ul>
         )}
       </Section>
 
