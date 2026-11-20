@@ -11,7 +11,7 @@
 
 ## 어떻게 동작하나
 - **데이터**: `book_ratings`(책×멤버당 한 줄, `review` 열), `book_quotes`(책, 멤버, 순서 `ord`, 문장; `unique(book_id, member_id, ord)`).
-- **저장**(`app/(main)/rate/actions.ts`): 첫 줄에서 `getCurrentMember()`로 로그인 확인 → zod 검증(`lib/validation/rating.ts`: 리뷰 CRLF→LF·앞뒤 공백 자르기·빈 값은 null, 문장 빈 칸 건너뛰기, 한 번에 50개 상한) → 평점 upsert → 문장을 `ord` 기준 upsert하고 남는 `ord`는 삭제. 평점과 문장은 한 트랜잭션이 아닙니다.
+- **저장**(`app/(main)/rate/actions.ts`): 첫 줄에서 `getCurrentMember()`로 로그인 확인 → zod 검증(`lib/validation/rating.ts`: 리뷰 CRLF→LF·앞뒤 공백 자르기·빈 리뷰는 빈 문자열(null 없음), 문장 빈 칸 건너뛰기, 한 번에 50개 상한) → 평점 upsert → 문장을 `ord` 기준 upsert하고 남는 `ord`는 삭제. 평점과 문장은 한 트랜잭션이 아닙니다.
 - **오늘의 문장**(`lib/daily-quote.ts`, `daily-quote-action.ts`, `components/daily-quote.tsx`): 서울 날짜를 해시해 정렬된 문장 id 중 하나를 고르므로 하루 동안 모두에게 같습니다. "다른 문장 보기"는 안 본 것 중 무작위, 다 보면 다시 시작(직전 문장은 피함). 문장은 서버 액션으로 하나씩 가져옵니다.
 - **미평점 책 모달**(`components/unrated-books-modal.tsx`, `unratedBooks` in `lib/stats.ts`): 내가 안 남긴 읽은 책을 모임 날짜 늦은 순으로. 닫으면 `localStorage`의 `book:unrated-modal-day:<멤버id>`에 서울 날짜를 저장해 그날은 다시 안 뜹니다.
 - **공용 UI**(두 앱 모두): 클릭 요소 포인터·비활성 `not-allowed` 커서는 `packages/ui/src/theme.css`, 토스트는 타이머 없이 ✕로만 닫고 쌓입니다(`packages/ui/src/toast.tsx`, workout은 `use-overlays.tsx`).

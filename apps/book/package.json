@@ -12,6 +12,7 @@
     "migrate:notion": "tsx --env-file=.env.local scripts/migrate-from-notion.ts",
     "copy:cloud": "tsx --env-file=.env.local scripts/copy-to-cloud.ts",
     "backfill:book-info": "tsx --env-file=.env.local scripts/backfill-book-info.ts",
+    "seed:dev": "tsx --env-file=.env.local scripts/seed-dev.ts",
     "restore":"tsx --env-file=.env.local scripts/restore.ts"
   },
   "dependencies": {
