@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { isDevLoginSkip } from '@me/core/auth/dev-login';
 import { verifySessionToken } from '@me/core/auth/session';
 import { MEMBER_COOKIE, SESSION_COOKIE } from '@/lib/auth/cookies';
 
@@ -21,7 +22,7 @@ export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   if (pathname === '/login') return NextResponse.next();
 
-  const loggedIn = verifySessionToken(request.cookies.get(SESSION_COOKIE)?.value, process.env.SITE_PASSWORD);
+  const loggedIn = isDevLoginSkip() || verifySessionToken(request.cookies.get(SESSION_COOKIE)?.value, process.env.SITE_PASSWORD);
   if (!loggedIn) {
     if (GUEST_PAGES.some((re) => re.test(pathname))) return NextResponse.next();
     if (pathname.startsWith('/api/')) return NextResponse.json({ error: '로그인이 필요해요' }, { status: 401 });

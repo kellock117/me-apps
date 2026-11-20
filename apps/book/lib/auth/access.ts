@@ -1,10 +1,12 @@
 import 'server-only';
 import { cookies } from 'next/headers';
+import { isDevLoginSkip } from '@me/core/auth/dev-login';
 import { verifySessionToken } from '@me/core/auth/session';
 import { SESSION_COOKIE } from './cookies';
 
-/** 사이트 비밀번호로 로그인했는가(서명 쿠키 확인). "나는 누구" 쿠키와는 별개다. */
+/** 사이트 비밀번호로 로그인했는가(서명 쿠키 확인). "나는 누구" 쿠키와는 별개다. `next dev`에서는 항상 true. */
 export async function isLoggedIn(): Promise<boolean> {
+  if (isDevLoginSkip()) return true;
   return verifySessionToken((await cookies()).get(SESSION_COOKIE)?.value, process.env.SITE_PASSWORD);
 }
 
