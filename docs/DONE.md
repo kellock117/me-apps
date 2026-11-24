@@ -1,6 +1,7 @@
 # 끝낸 것
 
 `docs/TODO.md`에서 끝난 항목을 여기로 옮긴다. 형식: `- [x] YYYY-MM-DD (P등급·누가) 내용 <!-- id:... -->`. 새 항목은 위에 쓴다. 등급, 누가, id는 되돌릴 때 쓴다. 2026-11-15까지의 옛 줄은 `(P등급)`뿐이라 누가가 없고, 되돌릴 때 `(함께)`로 본다.
+- [x] 2026-11-24 (P3·함께) AI 기능 1개를 SDD로 끝까지 구현(제안 단계, 확정 전): 책 정보 기반 토론 질문 초안 생성 등. 비용 한도·실패 시 대체 동작 포함 <!-- id:ai-feature -->
 - [x] 2026-11-17 (P2·직접) workout Vercel 프로젝트 env 확인 <!-- id:workout-vercel-env -->
 - [x] 2026-11-17 (P4·함께) 기능 문서 이전: 게스트 모드·백업·운동 문서를 `docs/features/`로 옮김(PR #28). CLAUDE.md는 102줄에서 멈춤(보안 규칙을 남기려고 60줄 목표는 접음) <!-- id:docs-features-migrate -->
 - [x] 2026-11-17 (P4·직접) `CLAUDE.md`, `docs/NOTES.md`의 `<도메인>` 자리표시자를 실제 주소로 바꾸기로 정하고 바꿈(book.jaewon-choi.dev, workout.jaewon-choi.dev) <!-- id:domain-placeholder -->
