@@ -23,14 +23,15 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
   const sort: Sort = SORTS.some((x) => x.value === q.sort) ? (q.sort as Sort) : 'latest';
   const { data, s, memberById, meetingOfBook } = await getView();
 
-  const done = data.books.filter((b) => b.status === 'done');
-  const genres = [...new Set(done.map((b) => b.genre).filter((g): g is string => !!g))].sort();
-  const selectors = data.members.filter((m) => done.some((b) => b.selected_by === m.id));
+  // 책장에는 읽은 책(done)과 읽는 중인 책(reading)이 일반 책처럼 섞여 나온다. 통계(아래 막대 그래프 등)는 읽은 책만 센다.
+  const shelf = data.books.filter((b) => b.status === 'done' || b.status === 'reading');
+  const genres = [...new Set(shelf.map((b) => b.genre).filter((g): g is string => !!g))].sort();
+  const selectors = data.members.filter((m) => shelf.some((b) => b.selected_by === m.id));
   const genre = q.genre && genres.includes(q.genre) ? q.genre : '';
   const by = q.by && selectors.some((m) => m.id === q.by) ? q.by : '';
 
   const gap = new Map(disagreementByBook(s.ratings).map((d) => [d.bookId, d.stddev]));
-  const rows = done
+  const rows = shelf
     .filter((b) => (!genre || b.genre === genre) && (!by || b.selected_by === by))
     .map((b) => ({ b, date: meetingOfBook(b.id)?.date ?? '', ...bookAverage(s.ratings, b.id), gap: gap.get(b.id) ?? null }));
   rows.sort((x, y) => {
@@ -91,7 +92,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
       </form>
 
       {rows.length === 0 ? (
-        <Card className="text-center text-muted">{done.length === 0 ? '아직 읽은 책이 없어요' : '조건에 맞는 책이 없어요'}</Card>
+        <Card className="text-center text-muted">{shelf.length === 0 ? '아직 읽은 책이 없어요' : '조건에 맞는 책이 없어요'}</Card>
       ) : (
         <ul className="grid grid-cols-3 gap-3">
           {rows.map(({ b, avg, n }) => (
@@ -99,10 +100,14 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
               <Link href={`/books/${b.id}`} className="block">
                 <Cover title={b.title} authors={b.authors} genre={b.genre} coverPath={b.cover_path} />
                 <p className="mt-2 line-clamp-2 text-sm font-medium leading-snug">{b.title}</p>
-                <p className="text-xs text-muted tabular-nums">
-                  <span aria-hidden className="text-star">★</span> {fmtScore(avg)}
-                  {n > 0 && ` (${n})`}
-                </p>
+                {b.status === 'reading' ? (
+                  <p className="text-xs font-medium text-accent">읽는 중</p>
+                ) : (
+                  <p className="text-xs text-muted tabular-nums">
+                    <span aria-hidden className="text-star">★</span> {fmtScore(avg)}
+                    {n > 0 && ` (${n})`}
+                  </p>
+                )}
               </Link>
             </li>
           ))}
