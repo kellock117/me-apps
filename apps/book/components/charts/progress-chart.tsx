@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { CartesianGrid, Legend, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { seriesRows, type ChartMode, type ProgressPoint } from '@/lib/reading-progress';
 import { TableView } from './table-view';
 
@@ -55,6 +55,7 @@ export function ProgressChart({ series, weeks, totalPages, caption }: { series: 
               labelFormatter={(v) => `${v}주차`}
               formatter={(v, name) => [`${v}${unit}`, single ? '읽은 양' : String(name)]}
             />
+            {!single && <Legend iconType="circle" wrapperStyle={{ fontSize: 12, color: 'var(--muted)' }} />}
             {series.map((s) => (
               <Line key={s.id} name={s.name} dataKey={s.id} type="monotone" stroke={s.color} strokeWidth={2} connectNulls dot={{ r: 5, fill: s.color, stroke: 'var(--surface)', strokeWidth: 2 }} activeDot={{ r: 7 }} isAnimationActive={false} />
             ))}
