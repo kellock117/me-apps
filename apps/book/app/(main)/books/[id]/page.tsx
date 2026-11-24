@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { Avatar } from '@/components/avatar';
 import { BookScoreBars } from '@/components/charts/book-score-bars';
 import { Cover } from '@/components/cover';
+import { ReadingProgressSection } from '@/components/reading-progress-section';
 import { Card, Section } from '@me/ui/section';
 import { getCurrentMember } from '@/lib/auth/member';
 import { bookMemberScores } from '@/lib/chart-data';
@@ -24,7 +25,7 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   if (!UUID.test(id)) notFound();
   const me = await getCurrentMember(); // 게스트(읽기 전용)는 null: 평점 버튼을 숨긴다
-  const { data, s, memberById, meetingOfBook } = await getView();
+  const { data, s, today, memberById, meetingOfBook } = await getView();
   const book = data.books.find((b) => b.id === id);
   if (!book) notFound();
 
@@ -81,6 +82,16 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
           {book.status === 'wishlist' && <p className="text-muted">관심 있는 멤버 {interested}명</p>}
         </Card>
       </Section>
+
+      {me && (
+        <ReadingProgressSection
+          book={book}
+          meeting={meeting}
+          meetingDates={data.meetings.map((m) => m.date)}
+          mine={data.reading_progress.filter((r) => r.book_id === book.id && r.member_id === me.id)}
+          today={today}
+        />
+      )}
 
       {book.description && (
         <Section title="책 소개">

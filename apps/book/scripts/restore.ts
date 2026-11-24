@@ -11,6 +11,9 @@ import { createClient } from '@supabase/supabase-js';
 import { countAll, parseBackup, restoreAll } from '@me/core/backup';
 import { ALL_BACKUP_TABLES, BOOK_TABLES, LEGACY_COLUMN_RENAMES, LEGACY_TABLE_RENAMES, splitLegacyQuotes } from '@me/core/backup-tables';
 
+/** 나중에 만든 표라 옛 백업에는 없어도 복원이 막히지 않아야 하는 독서 표 */
+const OPTIONAL_BOOK_TABLES: ReadonlySet<string> = new Set(['book_quotes', 'book_reading_progress']);
+
 async function main() {
   const args = process.argv.slice(2);
   const force = args.includes('--force');
@@ -24,7 +27,7 @@ async function main() {
 
   const parsed = parseBackup(
     await readFile(file, 'utf8'),
-    BOOK_TABLES.map((t) => t.name).filter((n) => n !== 'book_quotes'), // 독서 모임 테이블은 반드시 있어야 한다(book_quotes는 옛 백업에 없다). 운동 테이블도 옛 백업에 없어도 된다
+    BOOK_TABLES.map((t) => t.name).filter((n) => !OPTIONAL_BOOK_TABLES.has(n)), // 독서 모임 테이블은 반드시 있어야 한다(나중에 생긴 표는 옛 백업에 없다). 운동 테이블도 옛 백업에 없어도 된다
     LEGACY_TABLE_RENAMES, // book_ 접두사가 붙기 전의 백업(members, books …)도 새 이름으로 바꿔 넣는다
     LEGACY_COLUMN_RENAMES, // 한 줄 평(one_liner)이 리뷰(review)로 바뀌기 전의 백업도 새 열로 옮겨 넣는다
   );

@@ -70,7 +70,7 @@
 - 레포가 공개라서 실명·비밀번호·키·개인 기록은 README와 문서에 쓰지 않는다. 멤버는 "멤버 A"처럼 가린다.
 
 ## 명령
-- 로컬 DB: Docker를 켜고 `npx supabase start && npx supabase db reset`. 마이그레이션을 바꾸면 `pnpm --filter @me/core db:types`.
+- 로컬 DB: Docker를 켜고 `npx supabase start && npx supabase db reset`. 마이그레이션을 바꾸면 `pnpm --filter @me/core db:types` 뒤에 `npx oxfmt packages/core/src/database.ts`(생성기가 서식 없이 뽑아 줄이 통째로 바뀌어 보인다).
 - 화면 확인용 시험 데이터(책·평점·리뷰·문장)는 `db reset` 뒤 `pnpm --filter book seed:dev`(로컬 전용, 몇 번 돌려도 같다).
 - `next dev`에서는 로그인이 생략된다(`DEV_LOGIN_SKIP=0`이면 끔). 자세한 것은 `docs/features/guest-mode.md`.
 - 새 앱 추가 절차는 `docs/ADDING-AN-APP.md`.

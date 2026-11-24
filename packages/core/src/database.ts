@@ -393,6 +393,60 @@ export type Database = {
           },
         ];
       };
+      book_reading_progress: {
+        Row: {
+          book_id: string;
+          member_id: string;
+          pages: number;
+          updated_at: string;
+          week: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          book_id: string;
+          member_id: string;
+          pages: number;
+          updated_at?: string;
+          week: number;
+        };
+        Update: {
+          book_id?: string;
+          member_id?: string;
+          pages?: number;
+          updated_at?: string;
+          week?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "book_reading_progress_book_id_fkey";
+            columns: ["book_id"];
+            isOneToOne: false;
+            referencedRelation: "book_books";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "book_reading_progress_book_id_fkey";
+            columns: ["book_id"];
+            isOneToOne: false;
+            referencedRelation: "book_stats";
+            referencedColumns: ["book_id"];
+          },
+          {
+            foreignKeyName: "book_reading_progress_member_id_fkey";
+            columns: ["member_id"];
+            isOneToOne: false;
+            referencedRelation: "book_member_stats";
+            referencedColumns: ["member_id"];
+          },
+          {
+            foreignKeyName: "book_reading_progress_member_id_fkey";
+            columns: ["member_id"];
+            isOneToOne: false;
+            referencedRelation: "book_members";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       workout_drafts: {
         Row: {
           id: string;

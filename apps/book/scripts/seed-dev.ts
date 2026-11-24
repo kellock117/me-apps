@@ -6,16 +6,19 @@
  * - 멤버는 supabase/seed.sql이 넣은 활동 멤버를 그대로 쓴다(없으면 멈춘다).
  * - 넣는 것: 읽은 책 3권(전원 평점+리뷰+문장 여러 개 / 일부만 평점 / 평점 없음), 읽는 중 1권, 읽고 싶은 1권.
  *   그래서 미평점 책 모달, 오늘의 문장(다른 문장 보기), 리뷰·문장 표시를 바로 눌러 볼 수 있다.
+ * - 진도 화면용 모임 2개: 책 다의 모임(17일 전, 앞 모임)과 읽는 중 책의 모임(12일 뒤). 그래서 1·2주차는 열려 있고 3·4주차는 닫혀 있다.
+ *   모임은 회차 번호(90, 91)로 알아보고 날짜는 돌릴 때마다 오늘 기준으로 다시 맞춘다.
  * - id를 고정해 upsert하므로 몇 번을 돌려도 같은 결과(멱등)다. 이 id의 행만 만들고 다른 데이터는 건드리지 않는다.
  * - 로컬 주소(localhost·127.0.0.1)가 아니면 멈춘다. 운영 DB에 시험 데이터를 넣지 않기 위해서다.
  */
 import { createClient } from '@supabase/supabase-js';
+import { addDays, todayInSeoul } from '@me/core/date';
 
 const BOOKS = [
   { id: '11111111-1111-4111-8111-111111111111', title: '시험용 책 가', authors: ['저자 가'], genre: '소설', status: 'done' },
   { id: '22222222-2222-4222-8222-222222222222', title: '시험용 책 나', authors: ['저자 나'], genre: '에세이', status: 'done' },
   { id: '33333333-3333-4333-8333-333333333333', title: '시험용 책 다', authors: ['저자 다'], genre: '철학/인문', status: 'done' },
-  { id: '44444444-4444-4444-8444-444444444444', title: '시험용 읽는 중 책', authors: ['저자 라'], genre: '소설', status: 'reading' },
+  { id: '44444444-4444-4444-8444-444444444444', title: '시험용 읽는 중 책', authors: ['저자 라'], genre: '소설', status: 'reading', pages: 300 },
   { id: '55555555-5555-4555-8555-555555555555', title: '시험용 읽고 싶은 책', authors: ['저자 마'], genre: '과학', status: 'wishlist' },
 ] as const;
 
@@ -57,7 +60,19 @@ async function main() {
   ]);
   must(await db.from('book_quotes').upsert(quotes, { onConflict: 'book_id,member_id,ord' }), '문장');
 
-  console.log(`시험 데이터를 넣었어요: 책 ${BOOKS.length}권, 평점 ${ratings.length}개, 문장 ${quotes.length}개 (멤버 ${members.length}명)`);
+  const today = todayInSeoul(new Date());
+  must(
+    await db.from('book_meetings').upsert(
+      [
+        { number: 90, date: addDays(today, -17), book_id: BOOKS[2].id },
+        { number: 91, date: addDays(today, 12), book_id: BOOKS[3].id },
+      ],
+      { onConflict: 'number' },
+    ),
+    '모임',
+  );
+
+  console.log(`시험 데이터를 넣었어요: 책 ${BOOKS.length}권, 모임 2개, 평점 ${ratings.length}개, 문장 ${quotes.length}개 (멤버 ${members.length}명)`);
 }
 
 main().catch((e) => {
