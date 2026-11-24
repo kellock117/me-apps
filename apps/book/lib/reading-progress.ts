@@ -63,3 +63,69 @@ export function checkProgress(pages: number, opts: { totalPages: number | null; 
     decreased: opts.previous !== null && pages < opts.previous,
   };
 }
+
+// ───────────── 그래프·속도 ─────────────
+
+export type ProgressPoint = { week: number; pages: number; /** 총 쪽수가 없으면 null */ percent: number | null };
+
+/** 일정 안(기간 밖으로 숨겨진 주차 제외)에서 값이 있는 주차만, 주차 순으로. 입력 없는 주는 점이 없다. */
+export function progressPoints(schedule: WeekInfo[], rows: { week: number; pages: number }[], totalPages: number | null): ProgressPoint[] {
+  const inRange = new Set(schedule.map((w) => w.week));
+  return rows
+    .filter((r) => inRange.has(r.week))
+    .sort((a, b) => a.week - b.week)
+    .map((r) => ({ week: r.week, pages: r.pages, percent: totalPages ? Math.round((r.pages / totalPages) * 1000) / 10 : null }));
+}
+
+export type ChartMode = 'percent' | 'pages';
+export type ChartRow = { week: number } & Record<string, number>;
+
+/**
+ * 그래프에 넣을 줄: 주차마다 한 줄, 시리즈 id마다 값. 값이 없는 시리즈는 키를 넣지 않는다(점이 없고 입력된 점끼리 이어진다).
+ * 대시보드의 멤버별 선 그래프도 같은 함수를 쓴다.
+ */
+export function seriesRows(weeks: number[], series: { id: string; points: ProgressPoint[] }[], mode: ChartMode): ChartRow[] {
+  return weeks.map((week) => {
+    const row: ChartRow = { week };
+    for (const s of series) {
+      const p = s.points.find((x) => x.week === week);
+      const v = p ? (mode === 'percent' ? p.percent : p.pages) : null;
+      if (v !== null) row[s.id] = v;
+    }
+    return row;
+  });
+}
+
+export type ReadingSpeed = {
+  /** 전체 평균: 가장 최근 입력 ÷ (그 기준일 − 전 모임일). 입력이 없으면 null */
+  average: number | null;
+  /** 최근 주: 가장 최근 두 입력 사이 증가분 ÷ 기준일 간격(줄었으면 0). 입력이 하나면 전체 평균과 같다. 입력이 없으면 null */
+  recent: number | null;
+  /** 모임일까지 필요한 속도: (총 쪽수 − 가장 최근 쪽수) ÷ (모임일 − 오늘). 총 쪽수가 없거나 모임일이 오늘 이전이면 null */
+  needed: number | null;
+};
+
+/** 하루에 몇 쪽 읽는 중인가. 모두 "쪽/일". 일정 밖 주차의 기록은 쓰지 않는다. */
+export function readingSpeed(o: {
+  prevMeetingDate: string;
+  meetingDate: string;
+  schedule: WeekInfo[];
+  rows: { week: number; pages: number }[];
+  totalPages: number | null;
+  today: string;
+}): ReadingSpeed {
+  const due = new Map(o.schedule.map((w) => [w.week, w.dueDate]));
+  const entries = o.rows
+    .filter((r) => due.has(r.week))
+    .sort((a, b) => a.week - b.week)
+    .map((r) => ({ pages: r.pages, dueDate: due.get(r.week)! }));
+  const latest = entries[entries.length - 1];
+  const before = entries[entries.length - 2];
+
+  const average = latest ? latest.pages / daysBetween(o.prevMeetingDate, latest.dueDate) : null;
+  const recent = latest ? (before ? Math.max(0, latest.pages - before.pages) / daysBetween(before.dueDate, latest.dueDate) : average) : null;
+
+  const daysLeft = daysBetween(o.today, o.meetingDate);
+  const needed = o.totalPages === null || daysLeft <= 0 ? null : Math.max(0, o.totalPages - (latest?.pages ?? 0)) / daysLeft;
+  return { average, recent, needed };
+}

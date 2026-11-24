@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkProgress, currentWeek, isWeekOpen, previousMeetingDate, previousPages, weekSchedule } from './reading-progress';
+import { checkProgress, currentWeek, isWeekOpen, previousMeetingDate, previousPages, progressPoints, readingSpeed, seriesRows, weekSchedule } from './reading-progress';
 
 describe('weekSchedule: 전 모임일부터 7일씩 센 주차와 기준일', () => {
   it('모임 요일마다 한 주차, 마지막 주차의 기준일은 모임 전날', () => {
@@ -117,5 +117,91 @@ describe('checkProgress: 입력값 검증', () => {
   });
   it('총 쪽수를 모르면 상한 검사를 건너뛰고 완독 표시도 없다', () => {
     expect(checkProgress(5000, { totalPages: null, previous: null })).toEqual({ ok: true, done: false, decreased: false });
+  });
+});
+
+describe('progressPoints: 일정 안의 입력만 주차 순으로, 퍼센트 포함', () => {
+  const schedule = weekSchedule('2026-11-07', '2026-12-05'); // 1~4주차
+  it('값이 있는 주차만 주차 순으로 나온다(입력 없는 주는 점 없음)', () => {
+    const pts = progressPoints(schedule, [{ week: 3, pages: 150 }, { week: 1, pages: 30 }], 300);
+    expect(pts).toEqual([
+      { week: 1, pages: 30, percent: 10 },
+      { week: 3, pages: 150, percent: 50 },
+    ]);
+  });
+  it('모임을 당겨 기간 밖이 된 주차의 기록은 숨긴다(지우지는 않는다)', () => {
+    const short = weekSchedule('2026-11-07', '2026-11-28'); // 1~3주차
+    expect(progressPoints(short, [{ week: 2, pages: 60 }, { week: 4, pages: 200 }], 300).map((p) => p.week)).toEqual([2]);
+  });
+  it('총 쪽수가 없으면 퍼센트는 null', () => {
+    expect(progressPoints(schedule, [{ week: 1, pages: 30 }], null)).toEqual([{ week: 1, pages: 30, percent: null }]);
+  });
+  it('퍼센트는 소수 첫째 자리까지', () => {
+    expect(progressPoints(schedule, [{ week: 1, pages: 1 }], 3)[0]!.percent).toBe(33.3);
+  });
+});
+
+describe('readingSpeed: 하루 몇 쪽', () => {
+  const prev = '2026-11-07';
+  const meeting = '2026-12-05';
+  const schedule = weekSchedule(prev, meeting); // 기준일 11/14, 11/21, 11/28, 12/04
+  const base = { prevMeetingDate: prev, meetingDate: meeting, schedule, totalPages: 300 };
+
+  it('입력이 없으면 평균·최근 주는 null, 필요한 속도는 총 쪽수 ÷ 남은 일수', () => {
+    const s = readingSpeed({ ...base, rows: [], today: '2026-11-15' });
+    expect(s.average).toBeNull();
+    expect(s.recent).toBeNull();
+    expect(s.needed).toBeCloseTo(300 / 20); // 11/15 → 12/05
+  });
+  it('전체 평균: 가장 최근 입력 ÷ (그 기준일 − 전 모임일)', () => {
+    const s = readingSpeed({ ...base, rows: [{ week: 2, pages: 140 }], today: '2026-11-22' });
+    expect(s.average).toBe(10); // 140쪽 / 14일
+  });
+  it('입력이 하나면 최근 주는 전체 평균과 같다', () => {
+    const s = readingSpeed({ ...base, rows: [{ week: 1, pages: 70 }], today: '2026-11-15' });
+    expect(s.recent).toBe(s.average);
+  });
+  it('최근 주: 가장 최근 두 입력 사이 증가분 ÷ 기준일 간격(비어 있는 주를 건너뛰어도 일수로 센다)', () => {
+    const s = readingSpeed({ ...base, rows: [{ week: 1, pages: 70 }, { week: 3, pages: 210 }], today: '2026-11-29' });
+    expect(s.recent).toBe(10); // 140쪽 / 14일
+    expect(s.average).toBeCloseTo(210 / 21);
+  });
+  it('앞보다 줄어든 입력이면 최근 주는 0으로 둔다', () => {
+    const s = readingSpeed({ ...base, rows: [{ week: 1, pages: 100 }, { week: 2, pages: 80 }], today: '2026-11-22' });
+    expect(s.recent).toBe(0);
+  });
+  it('필요한 속도: (총 쪽수 − 가장 최근 쪽수) ÷ (모임일 − 오늘)', () => {
+    const s = readingSpeed({ ...base, rows: [{ week: 2, pages: 140 }], today: '2026-11-25' });
+    expect(s.needed).toBe(16); // 160쪽 / 10일
+  });
+  it('이미 다 읽었으면 필요한 속도는 0', () => {
+    const s = readingSpeed({ ...base, rows: [{ week: 2, pages: 300 }], today: '2026-11-25' });
+    expect(s.needed).toBe(0);
+  });
+  it('총 쪽수가 없거나 모임일이 오늘이거나 지났으면 필요한 속도는 숨긴다(null)', () => {
+    expect(readingSpeed({ ...base, totalPages: null, rows: [], today: '2026-11-25' }).needed).toBeNull();
+    expect(readingSpeed({ ...base, rows: [], today: '2026-12-05' }).needed).toBeNull();
+    expect(readingSpeed({ ...base, rows: [], today: '2026-12-20' }).needed).toBeNull();
+  });
+  it('일정 밖(숨겨진) 주차의 기록은 속도에 쓰지 않는다', () => {
+    const short = weekSchedule(prev, '2026-11-28');
+    const s = readingSpeed({ ...base, meetingDate: '2026-11-28', schedule: short, rows: [{ week: 5, pages: 250 }], today: '2026-11-20' });
+    expect(s.average).toBeNull();
+  });
+});
+
+describe('seriesRows: 그래프에 넣을 주차별 줄', () => {
+  const s1 = [{ week: 1, pages: 30, percent: 10 }, { week: 3, pages: 150, percent: 50 }];
+  const s2 = [{ week: 2, pages: 60, percent: 20 }];
+  it('주차마다 한 줄, 시리즈 값이 없으면 키가 없다(점 없음)', () => {
+    expect(seriesRows([1, 2, 3], [{ id: 'a', points: s1 }, { id: 'b', points: s2 }], 'pages')).toEqual([
+      { week: 1, a: 30 },
+      { week: 2, b: 60 },
+      { week: 3, a: 150 },
+    ]);
+  });
+  it('퍼센트 모드는 percent를 쓰고, 퍼센트가 null인 점은 뺀다', () => {
+    expect(seriesRows([1, 3], [{ id: 'a', points: s1 }], 'percent')).toEqual([{ week: 1, a: 10 }, { week: 3, a: 50 }]);
+    expect(seriesRows([1], [{ id: 'a', points: [{ week: 1, pages: 30, percent: null }] }], 'percent')).toEqual([{ week: 1 }]);
   });
 });

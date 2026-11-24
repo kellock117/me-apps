@@ -2,7 +2,11 @@ import { NoMeetingDialog } from '@/components/no-meeting-dialog';
 import { ProgressRow } from '@/components/progress-row';
 import { Card, Section } from '@me/ui/section';
 import { fmtDate } from '@/lib/format';
-import { currentWeek, isWeekOpen, previousMeetingDate, weekSchedule } from '@/lib/reading-progress';
+import { ProgressChart } from '@/components/charts/progress-chart';
+import { currentWeek, isWeekOpen, previousMeetingDate, progressPoints, readingSpeed, weekSchedule } from '@/lib/reading-progress';
+
+/** 쪽/일 표시: 소수 첫째 자리, 정수면 소수점 없이 */
+const fmtPerDay = (n: number | null) => (n === null ? '—' : `${Number.isInteger(n) ? n : n.toFixed(1)}쪽`);
 
 type Props = {
   book: { id: string; status: string; pages: number | null };
@@ -36,9 +40,21 @@ export function ReadingProgressSection({ book, meeting, meetingDates, mine, toda
   if (schedule.length === 0) return null;
 
   const current = currentWeek(schedule, today);
+  const points = progressPoints(schedule, mine, book.pages);
+  const speed = readingSpeed({ prevMeetingDate: prev, meetingDate: meeting.date, schedule, rows: mine, totalPages: book.pages, today });
   const savedOf = (week: number) => mine.find((r) => r.week === week)?.pages ?? null;
   return (
     <Section title="내 진도">
+      <Card className="mb-3 grid grid-cols-3 gap-2 text-center">
+        <Stat label="하루 평균" value={fmtPerDay(speed.average)} />
+        <Stat label="최근 주(하루)" value={fmtPerDay(speed.recent)} />
+        <Stat label="모임까지 하루 필요" value={fmtPerDay(speed.needed)} />
+      </Card>
+      {points.length > 0 && (
+        <Card className="mb-3">
+          <ProgressChart series={[{ id: 'me', name: '나', color: 'var(--accent)', points }]} weeks={schedule.map((w) => w.week)} totalPages={book.pages} caption="내 읽기 진도" />
+        </Card>
+      )}
       <Card className="py-2">
         <ul className="divide-y divide-line">
           {schedule.map((w) => (
@@ -57,5 +73,14 @@ export function ReadingProgressSection({ book, meeting, meetingDates, mine, toda
         </ul>
       </Card>
     </Section>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-lg font-bold tabular-nums">{value}</p>
+      <p className="text-xs text-muted">{label}</p>
+    </div>
   );
 }
