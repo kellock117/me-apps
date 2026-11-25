@@ -307,6 +307,40 @@ export type Database = {
           },
         ];
       };
+      book_push_sent: {
+        Row: {
+          key: string;
+          member_id: string;
+          sent_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          key: string;
+          member_id: string;
+          sent_at?: string;
+        };
+        Update: {
+          key?: string;
+          member_id?: string;
+          sent_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "book_push_sent_member_id_fkey";
+            columns: ["member_id"];
+            isOneToOne: false;
+            referencedRelation: "book_member_stats";
+            referencedColumns: ["member_id"];
+          },
+          {
+            foreignKeyName: "book_push_sent_member_id_fkey";
+            columns: ["member_id"];
+            isOneToOne: false;
+            referencedRelation: "book_members";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       book_push_subscriptions: {
         Row: {
           auth: string;

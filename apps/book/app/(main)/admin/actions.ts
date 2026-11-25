@@ -6,11 +6,14 @@ import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { ADMIN_COOKIE, ADMIN_MAX_AGE_SEC, createAdminToken, isAdmin } from '@/lib/auth/admin';
 import { COOKIE_BASE } from '@me/core/auth/cookie';
+import { todayInSeoul } from '@me/core/date';
 import { checkRateLimit } from '@me/core/auth/rate-limit';
 import { safeEqual } from '@me/core/auth/session';
 import { createAdminClient } from '@me/core/server/supabase';
 import { getCurrentMember } from '@/lib/auth/member';
-import { sendPushToMember } from '@/lib/push/send';
+import { loadPlanData } from '@/lib/push/data';
+import { deliverPushes } from '@/lib/push/deliver';
+import { planPushes, TEST_CASES, type PlannedPush } from '@/lib/push/plan';
 import { bookEditSchema, idSchema, memberSchema } from '@/lib/validation/admin';
 
 export type FormState = { errors?: Record<string, string[]>; ok?: boolean; values?: Record<string, string> };
@@ -110,16 +113,35 @@ export async function deleteRating(formData: FormData) {
 }
 
 /**
- * 테스트 푸시: 지금 로그인한 관리자 본인의 기기에만 보낸다. 제목 앞에 [테스트]를 붙이고, 누르면 홈으로 간다.
- * 보낸 기록은 남기지 않는다(진짜 알림이 테스트 때문에 빠지면 안 된다). 케이스별 문구는 #57 이후 티켓에서 더한다.
+ * 테스트 푸시: 지금 로그인한 관리자 본인의 기기에만 보낸다. 제목 앞에 [테스트]를 붙인다.
+ * 케이스(`ping` 연결 확인, 주차 알림 여러 모양)는 실제 DB 데이터로 만들고 할 일 모양만 강제한다(planPushes).
+ * 보낸 기록은 남기지 않는다(진짜 알림이 테스트 때문에 빠지면 안 된다).
  */
-export async function sendTestPush(): Promise<FormState & { message?: string }> {
+export async function sendTestPush(_prev: FormState & { message?: string }, formData: FormData): Promise<FormState & { message?: string }> {
   const me = await getCurrentMember();
   if (!me) return { errors: { form: ['로그인해 주세요'] } };
   await requireAdmin();
-  const r = await sendPushToMember(me.id, { title: '[테스트] 📚 독서 모임', body: '테스트 알림이에요. 누르면 홈으로 가요.', url: '/' });
-  if (r.sent === 0) {
-    return { errors: { form: [r.failed > 0 ? '보내지 못했어요. 서버 로그를 확인해 주세요' : '알림을 켠 기기가 없어요. 🔔에서 이 기기의 알림을 먼저 켜 주세요'] } };
+  const picked = z.enum(['ping', ...TEST_CASES]).safeParse(str(formData.get('case')));
+  if (!picked.success) return { errors: { form: ['보낼 케이스를 골라 주세요'] } };
+
+  let pushes: PlannedPush[];
+  if (picked.data === 'ping') {
+    pushes = [{ memberId: me.id, key: null, title: '[테스트] 📚 독서 모임', body: '테스트 알림이에요. 누르면 홈으로 가요.', url: '/' }];
+  } else {
+    try {
+      pushes = planPushes({ kind: { type: 'test', case: picked.data, memberId: me.id }, today: todayInSeoul(new Date()), ...(await loadPlanData()) });
+    } catch (e) {
+      console.error('테스트 푸시 데이터 읽기 실패', e);
+      return { errors: { form: ['데이터를 읽지 못했어요. 서버 로그를 확인해 주세요'] } };
+    }
+    if (pushes.length === 0) return { errors: { form: ['이 케이스를 만들 데이터가 없어요. 다음 모임, 읽는 책, 읽은 책이 필요해요(로컬은 seed:dev)'] } };
   }
-  return { ok: true, message: `${r.sent}개 기기로 보냈어요` };
+
+  const results = await deliverPushes(pushes);
+  const sent = results.reduce((n, r) => n + r.sent, 0);
+  const failed = results.reduce((n, r) => n + r.failed, 0);
+  if (sent === 0) {
+    return { errors: { form: [failed > 0 ? '보내지 못했어요. 서버 로그를 확인해 주세요' : '알림을 켠 기기가 없어요. 🔔에서 이 기기의 알림을 먼저 켜 주세요'] } };
+  }
+  return { ok: true, message: `${sent}개 기기로 보냈어요` };
 }

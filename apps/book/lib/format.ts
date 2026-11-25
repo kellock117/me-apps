@@ -24,3 +24,12 @@ export function coverUrl(path: string | null | undefined): string | null {
 
 /** 하루 읽는 쪽수 표시: 소수 첫째 자리, 정수면 소수점 없이. 값이 없으면 "—". */
 export const fmtPerDay = (n: number | null) => (n === null ? '—' : `${Number.isInteger(n) ? n : n.toFixed(1)}쪽`);
+
+const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+
+/** 'YYYY-MM-DD' → '12월 13일(일)' (푸시 제목처럼 연도 없이 짧게). 요일은 날짜 문자열만으로 구해 시간대 영향이 없다. */
+export function fmtMonthDayWeekday(ymd: string): string {
+  const [y, m, d] = ymd.split('-').map(Number);
+  const weekday = WEEKDAYS[new Date(Date.UTC(y!, m! - 1, d!)).getUTCDay()];
+  return `${m}월 ${d}일(${weekday})`;
+}

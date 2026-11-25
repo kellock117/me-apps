@@ -10,17 +10,21 @@ const key = (memberId: string) => `book:unrated-modal-day:${memberId}`;
 /**
  * 홈의 "할 일" 모달(옛 미평점 책 모달을 넓힌 것). 로그인한 멤버에게만, 할 일이 있을 때만 홈이 그린다.
  * 진도와 평점을 나눠 보여 준다. 오늘(서울 날짜) 아직 안 닫았으면 홈에 들어올 때 한 번 뜨고, 닫으면(바깥·Esc·줄 이동 포함) 이 기기에서 오늘은 다시 안 뜬다.
+ * force(푸시 알림의 `/?todo=1`)이면 오늘 이미 닫았어도 띄운다.
  * 날짜는 서버가 서울 기준으로 내려 준다(브라우저 시간대에 흔들리지 않게).
  */
-export function TodoModal({ notices, today, memberId }: { notices: Notice[]; today: string; memberId: string }) {
+export function TodoModal({ notices, today, memberId, force = false }: { notices: Notice[]; today: string; memberId: string; force?: boolean }) {
   const dialog = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
     try {
-      if (localStorage.getItem(key(memberId)) === today) return;
+      // force(푸시 알림에서 들어옴)이면 하루 한 번 규칙을 넘긴다
+      if (!force && localStorage.getItem(key(memberId)) === today) return;
     } catch {} // 저장소를 못 써도(시크릿 모드 등) 모달은 보여 준다
-    dialog.current?.showModal();
-  }, [today, memberId]);
+    if (dialog.current && !dialog.current.open) dialog.current.showModal();
+    // 주소에 ?todo=1이 남으면 새로고침할 때마다 다시 뜬다: 한 번 띄운 뒤 지운다
+    if (force) window.history.replaceState(null, '', window.location.pathname);
+  }, [today, memberId, force]);
 
   const remember = () => {
     try {
