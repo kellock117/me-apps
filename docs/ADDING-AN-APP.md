@@ -33,7 +33,7 @@
 1. Vercel에서 프로젝트를 새로 만들고 Root Directory를 `apps/<이름>`으로 한다. 환경 변수를 넣는다.
 2. 도메인 `<이름>.<도메인>`을 연결한다.
 3. GitHub 시크릿 `VERCEL_PROJECT_ID_<이름 대문자>`를 추가한다 (`npx vercel link`로 projectId 확인).
-4. `.github/workflows/deploy.yml`의 `vercel` 잡 matrix에 `- app: <이름>` / `project_secret: VERCEL_PROJECT_ID_<이름 대문자>`를 더한다. verify의 자리표시 env에 새 비밀번호 변수도 더하고, `scripts/smoke.mjs`의 `APPS`에 새 앱(포트·확인할 주소)을 더한다.
+4. `.github/workflows/deploy.yml`의 `vercel` 잡 matrix에 `- app: <이름>` / `project_secret: VERCEL_PROJECT_ID_<이름 대문자>`를 더한다. verify의 자리표시 env에 새 비밀번호 변수도 더하고, `scripts/smoke.mjs`의 `APPS`에 새 앱(포트·확인할 주소)을 더한다(빠뜨리면 smoke가 "APPS에 없는 앱"으로 실패한다).
 
 ## 6. 문서
 - 이 앱만의 규칙은 `CLAUDE.md`, 함정·가정은 `docs/NOTES.md`에 바로 적는다.
