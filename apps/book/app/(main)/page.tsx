@@ -6,20 +6,20 @@ import { Heatmap } from '@/components/charts/heatmap';
 import { TrendLine } from '@/components/charts/trend-line';
 import { Cover } from '@/components/cover';
 import { MemberProgressSection } from '@/components/member-progress-section';
-import { UnratedBooksModal } from '@/components/unrated-books-modal';
+import { TodoModal } from '@/components/todo-modal';
 import { Card, Section } from '@me/ui/section';
 import { getCurrentMember } from '@/lib/auth/member';
 import { generosityRows, genreShare, heatmapRows, meetingTrend } from '@/lib/chart-data';
 import { fmtDate, fmtDday, fmtScore } from '@/lib/format';
-import { bookAverage, meetingCount, monthsTogether, nextMeetingDday, nextSelector, overallAverage, readBookCount, totalPages, unratedBooks } from '@/lib/stats';
-import { getView } from '@/lib/view';
+import { bookAverage, meetingCount, monthsTogether, nextMeetingDday, nextSelector, overallAverage, readBookCount, totalPages } from '@/lib/stats';
+import { getMyNotices, getView } from '@/lib/view';
 
 
 export default async function HomePage() {
   const me = await getCurrentMember(); // 게스트(읽기 전용)는 null: 개인용 안내를 건너뛴다
   const { data, s, today, memberById, colors, meetingOfBook } = await getView();
 
-  const unrated = me ? unratedBooks(s.books, s.meetings, s.ratings, me.id) : [];
+  const notices = me ? await getMyNotices(me.id) : []; // 게스트는 계산하지 않는다
   const reading = data.books.find((b) => b.status === 'reading');
   const selector = nextSelector(s.members, s.books, s.meetings);
   const iAmNext = !!me && selector?.id === me.id;
@@ -42,7 +42,7 @@ export default async function HomePage() {
   return (
     <div className="space-y-8">
       {!me && <h1 className="font-serif text-2xl font-bold">독서 모임 기록</h1>}
-      {me && unrated.length > 0 && <UnratedBooksModal books={unrated.map((b) => ({ id: b.id, title: b.title }))} today={today} memberId={me.id} />}
+      {me && notices.length > 0 && <TodoModal notices={notices} today={today} memberId={me.id} />}
 
       {iAmNext && !reading && (
         <Link href="/select" className="block rounded-2xl border border-accent bg-surface p-4">

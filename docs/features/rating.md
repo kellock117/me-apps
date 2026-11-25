@@ -10,6 +10,7 @@
 - 저장하면 그 책 상세로 돌아가고 토스트("rated")가 뜹니다.
 - 하단 **문장** 탭(✍️, 책장과 위시리스트 사이, `/quotes`): 오늘의 문장을 페이지로 보여 주고 "다른 문장"으로 넘깁니다. 문장이 없으면 "아직 남긴 문장이 없어요"(#47).
 - 홈: **미평점 책 모달**(로그인한 멤버, 하루 한 번).
+  > ⚠️ 폐기 (2026-11-25): 미평점 책 모달 → "할 일" 모달(평점·진도)과 🔔 알림으로 넓힘(#50). [notices.md](notices.md)
   > ⚠️ 폐기 (2026-11-25): 홈의 "오늘의 문장" 버튼과 모달 → 문장 탭으로 대체됨(#47)
 - 홈 인사말은 로그인한 사람에게는 없고, 게스트는 "독서 모임 기록" 제목이 보입니다. 위쪽 "평점 안 남긴 책" 카드와 "최근 한 줄 평"은 없어졌습니다.
 
@@ -18,6 +19,7 @@
 - **저장**(`app/(main)/rate/actions.ts`): 첫 줄에서 `getCurrentMember()`로 로그인 확인 → zod 검증(`lib/validation/rating.ts`: 리뷰 CRLF→LF·앞뒤 공백 자르기·빈 리뷰는 빈 문자열(null 없음), 문장 빈 칸 건너뛰기, 한 번에 50개 상한) → 평점 upsert → 문장을 `ord` 기준 upsert하고 남는 `ord`는 삭제. 평점과 문장은 한 트랜잭션이 아닙니다.
 - **오늘의 문장**(`lib/daily-quote.ts`, `app/(main)/quotes/actions.ts`, `components/quote-view.tsx`): 서울 날짜를 해시해 정렬된 문장 id 중 하나를 고르므로 하루 동안 모두에게 같습니다. 첫 문장은 페이지가 서버에서 그리고, "다른 문장"은 안 본 것 중 무작위, 다 보면 다시 시작(직전 문장은 피함). 문장은 서버 액션으로 하나씩 가져옵니다.
 - **미평점 책 모달**(`components/unrated-books-modal.tsx`, `unratedBooks` in `lib/stats.ts`): 내가 안 남긴 읽은 책을 모임 날짜 늦은 순으로. 닫으면 `localStorage`의 `book:unrated-modal-day:<멤버id>`에 서울 날짜를 저장해 그날은 다시 안 뜹니다.
+  > ⚠️ 폐기 (2026-11-25): `components/todo-modal.tsx`(할 일 모달)로 바뀜(#50). 미평점 조건(`unratedBooks`)과 하루 한 번 규칙·저장 키는 그대로입니다. [notices.md](notices.md)
 - **공용 UI**(두 앱 모두): 클릭 요소 포인터·비활성 `not-allowed` 커서는 `packages/ui/src/theme.css`, 토스트는 타이머 없이 ✕로만 닫고 쌓입니다(`packages/ui/src/toast.tsx`, workout은 `use-overlays.tsx`).
 - **백업**: `book_quotes`를 `backup-tables.ts`에 등록했고 옛 구조 백업은 복원 때 변환합니다(`docs/features/backup.md`).
 

@@ -1,10 +1,12 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { GuestLogin } from '@me/ui/guest-login';
+import { NoticeBell } from '@/components/notice-bell';
 import { TabBar } from '@/components/tab-bar';
 import { isLoggedIn } from '@/lib/auth/access';
 import { getCurrentMember } from '@/lib/auth/member';
 import { initialOf } from '@/lib/guest-mask';
+import { getMyNotices } from '@/lib/view';
 
 export default async function MainLayout({ children }: { children: React.ReactNode }) {
   // 로그인 안 한 사람(게스트): proxy.ts가 허용한 읽기 화면만 여기까지 온다. 읽기 전용 화면을 그린다.
@@ -26,21 +28,25 @@ export default async function MainLayout({ children }: { children: React.ReactNo
 
   const me = await getCurrentMember();
   if (!me) redirect('/who'); // 쿠키의 멤버가 없어졌거나 활동 중이 아닐 때
+  const notices = await getMyNotices(me.id);
 
   return (
     <>
-      <header className="mx-auto flex max-w-md items-center justify-between px-4 pt-4">
+      <header className="relative mx-auto flex max-w-md items-center justify-between px-4 pt-4">
         <Link href="/" className="font-serif text-xl font-bold">
           독서 모임
         </Link>
-        <Link
+        <div className="flex items-center gap-1">
+          <NoticeBell notices={notices} />
+          <Link
           href="/who"
           aria-label={`${me.name}님으로 보는 중. 누르면 이름을 바꿀 수 있어요`}
           className="flex size-11 items-center justify-center rounded-full text-base font-bold text-white"
           style={{ backgroundColor: me.color }}
         >
           {initialOf(me.name)}
-        </Link>
+          </Link>
+        </div>
       </header>
       <main className="mx-auto w-full max-w-md px-4 pb-28 pt-4">{children}</main>
       <TabBar />
