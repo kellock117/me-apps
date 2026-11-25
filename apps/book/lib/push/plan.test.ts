@@ -34,7 +34,7 @@ const base = (over: Partial<PlanInput> = {}): PlanInput => ({
     { bookId: 'old', memberId: C, score: 3 },
     { bookId: 'done', memberId: C, score: 3 },
   ],
-  progress: [{ bookId: 'now', memberId: A, week: 2 }],
+  progress: [{ bookId: 'now', memberId: A, week: 2, pages: 150 }],
   dismissed: {},
   sent: [],
   ...over,
@@ -159,7 +159,7 @@ describe('planPushes · 보낸 기록', () => {
 });
 
 describe('planPushes · 관리자 테스트 케이스', () => {
-  const test = (c: 'weekly-none' | 'weekly-progress' | 'weekly-rate' | 'weekly-rate-many' | 'weekly-both' | 'weekly-d1', over: Partial<PlanInput> = {}) =>
+  const test = (c: 'weekly-none' | 'weekly-progress' | 'weekly-rate' | 'weekly-rate-many' | 'weekly-both' | 'weekly-d1' | 'meetingday-unfinished' | 'meetingday-done', over: Partial<PlanInput> = {}) =>
     planPushes(base({ kind: { type: 'test', case: c, memberId: A }, today: '2026-11-26', ...over }));
 
   it('관리자 본인에게만, 기록 키 없이, 제목에 [테스트]', () => {
@@ -190,5 +190,66 @@ describe('planPushes · 관리자 테스트 케이스', () => {
     expect(test('weekly-progress', { books: noReading })).toEqual([]);
     expect(test('weekly-rate-many', { books: base().books.filter((b) => b.id !== 'old') })).toEqual([]);
     expect(test('weekly-none', { meetings: base().meetings.filter((m) => m.id !== 'm2') })).toEqual([]);
+  });
+});
+
+describe('planPushes · 모임 당일', () => {
+  // 모임 12/13(일), 읽는 책 300쪽. A는 끝까지 읽음(300쪽), B는 150쪽까지.
+  const day = (over: Partial<PlanInput> = {}) =>
+    base({
+      today: '2026-12-13',
+      progress: [
+        { bookId: 'now', memberId: A, week: 3, pages: 150 },
+        { bookId: 'now', memberId: A, week: 4, pages: 300 },
+        { bookId: 'now', memberId: B, week: 4, pages: 150 },
+      ],
+      ...over,
+    });
+
+  it('모임 날에만 활동 멤버에게 보낸다', () => {
+    expect(planPushes(day()).map((p) => p.memberId).sort()).toEqual([A, B]);
+    expect(planPushes(base({ today: '2026-12-12' })).some((p) => p.key?.startsWith('meetingday:'))).toBe(false);
+    expect(planPushes(day({ today: '2026-12-14' }))).toEqual([]);
+  });
+
+  it('제목은 날짜만, 시각은 없다. 기록 키는 meetingday:<모임>:<날짜>', () => {
+    const [p] = planPushes(day());
+    expect(p!.title).toBe('📚 오늘 모임이에요 · 12월 13일(일)');
+    expect(p!.key).toBe('meetingday:m2:2026-12-13');
+  });
+
+  it('완독 전: 진도 요청 문구, 책 상세로', () => {
+    expect(forMember(planPushes(day()), B)).toMatchObject({ body: '『읽는 책』 오늘 만나요. 마지막으로 얼마나 읽었는지 적어 주세요', url: '/books/now' });
+  });
+
+  it('기록이 없어도 완독 전이다', () => {
+    expect(forMember(planPushes(day({ progress: [] })), A)!.url).toBe('/books/now');
+  });
+
+  it('완독(마지막 기록 = 총 쪽수): "오늘 만나요", 모임 상세로', () => {
+    expect(forMember(planPushes(day()), A)).toMatchObject({ body: '오늘 만나요', url: '/meetings' });
+  });
+
+  it('마지막 기록이 총 쪽수보다 적으면(앞 주차에만 300쪽이 아니어도) 완독 전', () => {
+    const p = day({ progress: [{ bookId: 'now', memberId: A, week: 4, pages: 299 }] });
+    expect(forMember(planPushes(p), A)!.url).toBe('/books/now');
+  });
+
+  it('이미 보낸 기록이 있는 멤버는 뺀다', () => {
+    const pushes = planPushes(day({ sent: [{ memberId: A, key: 'meetingday:m2:2026-12-13' }] }));
+    expect(pushes.map((p) => p.memberId)).toEqual([B]);
+  });
+
+  it('주차 알림 날과 겹쳐도 둘 다 계획한다(키가 다르다)', () => {
+    // 모임 날이 어떤 주차 마감일이 되는 일은 없지만, 두 종류의 키는 서로를 막지 않는다.
+    const keys = planPushes(day({ sent: [{ memberId: A, key: 'weekly:m2:2026-12-13' }] })).map((p) => p.key);
+    expect(keys).toContain('meetingday:m2:2026-12-13');
+  });
+
+  it('관리자 테스트: 완독 전·완독, 기록 키 없이', () => {
+    const t = (c: 'meetingday-unfinished' | 'meetingday-done') => planPushes(day({ kind: { type: 'test', case: c, memberId: B }, today: '2026-11-26' }));
+    expect(t('meetingday-unfinished')[0]).toMatchObject({ memberId: B, key: null, title: '[테스트] 📚 오늘 모임이에요 · 11월 26일(목)', url: '/books/now' });
+    expect(t('meetingday-done')[0]).toMatchObject({ key: null, body: '오늘 만나요', url: '/meetings' });
+    expect(planPushes(day({ kind: { type: 'test', case: 'meetingday-done', memberId: B }, meetings: [] }))).toEqual([]);
   });
 });

@@ -14,7 +14,7 @@ export async function loadPlanData(): Promise<Omit<PlanInput, 'kind' | 'today'>>
     db.from('book_books').select('id,title,pages,status,selected_by'),
     db.from('book_meetings').select('id,number,date,book_id'),
     db.from('book_ratings').select('book_id,member_id,score'),
-    db.from('book_reading_progress').select('book_id,member_id,week'),
+    db.from('book_reading_progress').select('book_id,member_id,week,pages'),
     db.from('book_notice_dismissals').select('member_id,key'),
     db.from('book_push_sent').select('member_id,key'),
   ]);
@@ -30,7 +30,7 @@ export async function loadPlanData(): Promise<Omit<PlanInput, 'kind' | 'today'>>
     books: books.data!.map((b) => ({ id: b.id, title: b.title, pages: b.pages, status: b.status as 'wishlist' | 'reading' | 'done', selectedBy: b.selected_by })),
     meetings: meetings.data!.map((m) => ({ id: m.id, number: m.number, date: m.date, bookId: m.book_id })),
     ratings: ratings.data!.map((r) => ({ bookId: r.book_id, memberId: r.member_id, score: Number(r.score) })),
-    progress: progress.data!.map((p) => ({ bookId: p.book_id, memberId: p.member_id, week: p.week })),
+    progress: progress.data!.map((p) => ({ bookId: p.book_id, memberId: p.member_id, week: p.week, pages: p.pages })),
     dismissed: dismissedByMember,
     sent: sent.data!.map((s) => ({ memberId: s.member_id, key: s.key })),
   };
