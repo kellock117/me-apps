@@ -45,10 +45,7 @@ export default async function MeetingsPage() {
                       <span className="font-serif text-lg font-bold">{m.number}회</span>
                       {upcoming && <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-bold text-accent-ink">다가오는 모임 · {fmtDday(daysBetween(today, m.date))}</span>}
                     </p>
-                    <p className="text-sm text-muted">
-                      {fmtDate(m.date)}
-                      {m.place ? ` · ${m.place}` : ''}
-                    </p>
+                    <p className="text-sm text-muted">{fmtDate(m.date)}</p>
                     {book && (
                       <Link href={`/books/${book.id}`} className="block truncate font-medium underline-offset-2 hover:underline">
                         {book.title}

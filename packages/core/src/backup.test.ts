@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { splitLegacyQuotes } from './backup-tables';
+import { dropLegacyMeetingPlace, splitLegacyQuotes } from './backup-tables';
 import { backupFileName, fetchAllRows, expiredBackups, latestBackup, parseBackup } from './backup';
 
 describe('backupFileName', () => {
@@ -152,5 +152,23 @@ describe('splitLegacyQuotes (옛 백업의 평점당 문장 1개 → book_quotes
   it('quote 열이 아예 없는 백업은 그대로 둔다', () => {
     const t = wrap({ book_ratings: [rating({})] });
     expect(splitLegacyQuotes(t)).toEqual(t);
+  });
+});
+
+describe('dropLegacyMeetingPlace (옛 백업의 모임 장소 열 버리기)', () => {
+  const wrap = (tables: Record<string, Record<string, unknown>[]>) => ({ version: 1 as const, createdAt: 'x', tables });
+  it('book_meetings 행의 place 열을 지우고 나머지는 그대로 둔다', () => {
+    const out = dropLegacyMeetingPlace(wrap({ book_meetings: [{ id: 'm1', number: 1, place: '디스코드', questions: 'q' }, { id: 'm2', number: 2, place: null }] }));
+    expect(out.tables.book_meetings).toEqual([{ id: 'm1', number: 1, questions: 'q' }, { id: 'm2', number: 2 }]);
+  });
+  it('다른 테이블의 place 열은 건드리지 않는다', () => {
+    const t = wrap({ book_meetings: [{ id: 'm1' }], other: [{ place: 'x' }] });
+    expect(dropLegacyMeetingPlace(t).tables.other).toEqual([{ place: 'x' }]);
+  });
+  it('place 열이 없는 새 백업·book_meetings가 없는 백업은 그대로 둔다', () => {
+    const a = wrap({ book_meetings: [{ id: 'm1' }] });
+    expect(dropLegacyMeetingPlace(a)).toBe(a);
+    const b = wrap({});
+    expect(dropLegacyMeetingPlace(b)).toBe(b);
   });
 });

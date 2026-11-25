@@ -55,7 +55,6 @@ export function normalizeApiPages(raw: {
       id: notionId(p.id),
       title: title(p.properties['회차']),
       date: date(p.properties['날짜']),
-      place: text(p.properties['장소']),
       questions: text(p.properties['발제 질문']),
       bookIds: rel(p.properties['책']),
       attendeeIds: rel(p.properties['참석자']),

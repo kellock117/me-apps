@@ -70,7 +70,6 @@ describe('normalizeApiPages (노션 API 모양, 손으로 만든 입력)', () =>
           properties: {
             회차: { title: t('제1회 · 인간 실격') },
             날짜: { date: { start: '2026-07-09' } },
-            장소: { rich_text: [] },
             '발제 질문': { rich_text: [] },
             책: { relation: [{ id: 'bbbbbbbb-7feb-80aa-8a1d-c67ae5804206' }] },
             참석자: { relation: [{ id: 'aaaaaaaa-7feb-815d-b62b-ec8a234cab7f' }] },
@@ -93,6 +92,7 @@ describe('normalizeApiPages (노션 API 모양, 손으로 만든 입력)', () =>
     expect(() => snapshotSchema.parse(snap)).not.toThrow();
     expect(snap.books[0]).toMatchObject({ id: 'bbbbbbbb7feb80aa8a1dc67ae5804206', title: '인간 실격', status: '완료', genre: '소설', selectedBy: ['aaaaaaaa7feb815db62bec8a234cab7f'] });
     expect(snap.meetings[0]).toMatchObject({ date: '2026-07-09', bookIds: ['bbbbbbbb7feb80aa8a1dc67ae5804206'] });
+    expect(snap.meetings[0]).not.toHaveProperty('place');
     expect(snap.ratings[0]).toMatchObject({ score: 2, memberId: 'aaaaaaaa7feb815db62bec8a234cab7f' });
   });
 });

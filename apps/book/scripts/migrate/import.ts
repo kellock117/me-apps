@@ -152,7 +152,6 @@ export async function importSnapshot(db: Db, snap: Snapshot, log: (s: string) =>
             number,
             date: mt.date,
             book_id: book(mt.bookIds[0], `${mt.title} 책`),
-            place: blankToNull(mt.place),
             questions: blankToNull(mt.questions),
           },
           { onConflict: 'number' },

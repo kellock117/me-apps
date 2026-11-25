@@ -62,9 +62,12 @@ describe('recommendSchema / selectExistingSchema', () => {
 });
 
 describe('meetingSchema', () => {
-  const base = { id: ID, date: '2026-12-08', place: '', questions: '', attendees: [ID], intent: 'save' };
-  it('빈 장소·질문은 null', () => {
-    expect(meetingSchema.parse(base)).toMatchObject({ place: null, questions: null });
+  const base = { id: ID, date: '2026-12-08', questions: '', attendees: [ID], intent: 'save' };
+  it('빈 질문은 null', () => {
+    expect(meetingSchema.parse(base)).toMatchObject({ questions: null });
+  });
+  it('장소 칸은 없다(옛 폼이 place를 보내도 결과에 남지 않는다)', () => {
+    expect(meetingSchema.parse({ ...base, place: '디스코드' })).not.toHaveProperty('place');
   });
   it('날짜·의도·참석자 id 검증', () => {
     expect(meetingSchema.safeParse({ ...base, date: '' }).success).toBe(false);

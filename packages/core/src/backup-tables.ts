@@ -61,6 +61,21 @@ export function splitLegacyQuotes(backup: Backup): Backup {
   return { ...backup, tables };
 }
 
+/**
+ * 모임 장소(book_meetings.place, 2026-11-25 삭제) 칸이 있던 옛 백업을 새 구조로 바꾼다.
+ * book_meetings 행에서 place 열만 지운다(DB에 이 열이 없어서 그대로 넣으면 복원이 실패한다). place 값은 복원되지 않고 버려진다.
+ * place가 없는 새 백업은 같은 객체를 그대로 돌려준다.
+ */
+export function dropLegacyMeetingPlace(backup: Backup): Backup {
+  const meetings = backup.tables.book_meetings;
+  if (!meetings || !meetings.some((m) => 'place' in m)) return backup;
+  const cleaned = meetings.map((m) => {
+    const { place: _place, ...rest } = m;
+    return rest;
+  });
+  return { ...backup, tables: { ...backup.tables, book_meetings: cleaned } };
+}
+
 /** 운동 기록(apps/workout) */
 export const WORKOUT_TABLES: readonly TableSpec[] = [
   { name: 'workout_sessions', conflictKey: 'id' },

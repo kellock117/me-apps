@@ -14,6 +14,7 @@
 - 독서 진도(`book_reading_progress`, 책·멤버·주차 키)도 등록돼 있어 매일 백업되고 복원됩니다. 이 표가 생기기 전 백업에는 없지만 복원이 막히지 않습니다.
 - 할 일 알림의 숨김(읽음) 기록(`book_notice_dismissals`, 멤버·키, #51)도 등록돼 있습니다. 2026-11-25 이전 백업에는 없지만 복원이 막히지 않습니다(`restore.ts`의 `OPTIONAL_BOOK_TABLES`).
 - 열 이름·구조가 바뀐 옛 백업은 `LEGACY_COLUMN_RENAMES`(`one_liner`→`review`)와 `splitLegacyQuotes`(옛 `book_ratings.quote` → `book_quotes` 첫 문장)가 복원할 때 새 구조로 바꿉니다. `book_quotes`는 옛 백업에 없어도 복원이 막히지 않습니다.
+- 모임 장소(`book_meetings.place`)는 2026-11-25에 열을 지웠습니다. 옛 백업에 `place`가 있으면 `dropLegacyMeetingPlace`가 복원할 때 그 열을 버립니다(값은 복원되지 않음). 옛 장소 값은 12주(백업 보관 기간) 동안 백업 파일에만 남습니다.
 - 보관 기간은 `BACKUP_KEEP_WEEKS`로 바꿉니다(12주면 최대 약 84개 파일).
 
 ## 특이사항

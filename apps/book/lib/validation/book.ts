@@ -54,7 +54,6 @@ export const selectNewSchema = bookFieldsSchema.extend(selectCommon);
 export const meetingSchema = z.object({
   id: z.uuid('모임을 찾을 수 없어요'),
   date: z.iso.date('날짜를 골라 주세요'),
-  place: optional(100),
   questions: optional(3000),
   attendees: z.array(z.uuid()),
   intent: z.enum(['save', 'finish']),

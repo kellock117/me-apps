@@ -9,7 +9,7 @@ import { meetingSchema } from '@/lib/validation/book';
 
 export type MeetingState = {
   errors?: Record<string, string[]>;
-  values?: { date: string; place: string; questions: string; attendees: string[] };
+  values?: { date: string; questions: string; attendees: string[] };
 };
 
 const str = (v: FormDataEntryValue | null) => (typeof v === 'string' ? v : '');
@@ -18,12 +18,11 @@ export async function saveMeeting(_prev: MeetingState, formData: FormData): Prom
   const raw = {
     id: str(formData.get('id')),
     date: str(formData.get('date')),
-    place: str(formData.get('place')),
     questions: str(formData.get('questions')),
     attendees: formData.getAll('attendees').filter((v): v is string => typeof v === 'string'),
     intent: str(formData.get('intent')),
   };
-  const values = { date: raw.date, place: raw.place, questions: raw.questions, attendees: raw.attendees };
+  const values = { date: raw.date, questions: raw.questions, attendees: raw.attendees };
 
   const me = await getCurrentMember();
   if (!me) redirect('/who');
@@ -41,7 +40,7 @@ export async function saveMeeting(_prev: MeetingState, formData: FormData): Prom
   const activeIds = new Set((active ?? []).map((m) => m.id));
   const attendees = [...new Set(input.attendees)].filter((id) => activeIds.has(id));
 
-  const { error } = await db.from('book_meetings').update({ date: input.date, place: input.place, questions: input.questions }).eq('id', input.id);
+  const { error } = await db.from('book_meetings').update({ date: input.date, questions: input.questions }).eq('id', input.id);
   if (error) return { errors: { form: ['저장하지 못했어요. 잠시 뒤에 다시 해 주세요'] }, values };
 
   // 참석자: 비교해서 빠진 사람은 지우고 새로 온 사람은 넣는다
