@@ -1,31 +1,9 @@
 'use client';
 
 import { useEffect, useState, useTransition } from 'react';
-import { removePushSubscription, savePushSubscription } from '@/app/(main)/push-actions';
-
-/** 이 기기의 알림 상태. loading은 첫 그림(서버)에서 브라우저를 아직 못 본 때다. */
-type Status = 'loading' | 'unsupported' | 'needs-install' | 'denied' | 'off' | 'on';
-
-const isIos = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || (navigator as Navigator & { standalone?: boolean }).standalone === true;
-
-/** VAPID 공개 키(base64url)를 구독 요청이 받는 바이트로 바꾼다. */
-function keyToBytes(base64Url: string): Uint8Array<ArrayBuffer> {
-  const base64 = (base64Url + '='.repeat((4 - (base64Url.length % 4)) % 4)).replace(/-/g, '+').replace(/_/g, '/');
-  const raw = atob(base64);
-  const out = new Uint8Array(new ArrayBuffer(raw.length));
-  for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
-  return out;
-}
-
-/** 이 기기가 어떤 상태인지 브라우저에 물어 본다. iOS는 홈 화면 앱이 아니면 푸시 API 자체가 없어서 "지원 안 함"보다 먼저 가른다. */
-async function readStatus(savedEndpoints: string[]): Promise<Status> {
-  if (isIos() && !isStandalone()) return 'needs-install';
-  if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return 'unsupported';
-  if (Notification.permission === 'denied') return 'denied';
-  const sub = await (await navigator.serviceWorker.ready).pushManager.getSubscription();
-  return sub && savedEndpoints.includes(sub.endpoint) ? 'on' : 'off';
-}
+import { removePushSubscription } from '@/app/(main)/push-actions';
+import { enablePush, readPushStatus, type PushStatus } from '@/lib/push/client';
+import { OPEN_INSTALL_GUIDE } from '@/lib/push/guide';
 
 /**
  * 🔔 드롭다운 맨 아래 한 줄: 이 기기의 알림을 켜고 끈다(docs/features/push.md).
@@ -34,13 +12,13 @@ async function readStatus(savedEndpoints: string[]): Promise<Status> {
  * 같은 기기에서 다른 멤버도 켜 두었을 수 있어서, 브라우저 구독을 풀면 그 멤버 알림이 죽는다.
  */
 export function PushToggle({ publicKey, savedEndpoints }: { publicKey: string; savedEndpoints: string[] }) {
-  const [status, setStatus] = useState<Status>('loading');
+  const [status, setStatus] = useState<PushStatus>('loading');
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
   useEffect(() => {
     let alive = true;
-    readStatus(savedEndpoints).then(
+    readPushStatus(savedEndpoints).then(
       (s) => alive && setStatus(s),
       () => alive && setStatus('unsupported'),
     );
@@ -52,17 +30,9 @@ export function PushToggle({ publicKey, savedEndpoints }: { publicKey: string; s
   const enable = () =>
     start(async () => {
       setError(null);
-      try {
-        const permission = await Notification.requestPermission();
-        if (permission !== 'granted') return setStatus(permission === 'denied' ? 'denied' : 'off');
-        const reg = await navigator.serviceWorker.ready;
-        const sub = (await reg.pushManager.getSubscription()) ?? (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyToBytes(publicKey) }));
-        const res = await savePushSubscription(sub.toJSON());
-        if (res.ok) setStatus('on');
-        else setError(res.error);
-      } catch {
-        setError('알림을 켜지 못했어요. 잠시 뒤에 다시 해 주세요');
-      }
+      const res = await enablePush(publicKey);
+      if ('error' in res) setError(res.error);
+      else setStatus(res.status);
     });
 
   const disable = () =>
@@ -85,8 +55,15 @@ export function PushToggle({ publicKey, savedEndpoints }: { publicKey: string; s
   return (
     <div className="border-t border-line">
       {status === 'unsupported' && <p className={note}>이 브라우저는 알림을 받을 수 없어요</p>}
-      {status === 'needs-install' && <p className={note}>공유 → 홈 화면에 추가 후 켤 수 있어요</p>}
-      {status === 'denied' && <p className={note}>설정에서 알림을 허용해 주세요</p>}
+      {status === 'needs-install' && (
+        <div className="flex items-center justify-between gap-2 px-3">
+          <p className="py-3 text-sm text-muted">홈 화면에 추가하면 알림을 켤 수 있어요</p>
+          <button type="button" onClick={() => window.dispatchEvent(new Event(OPEN_INSTALL_GUIDE))} className="min-h-11 shrink-0 rounded-xl px-3 text-sm font-medium text-accent">
+            방법 보기
+          </button>
+        </div>
+      )}
+      {status === 'denied' && <p className={note}>알림이 꺼져 있어요. iPhone 설정 → 알림 → 이 앱에서 켜 주세요</p>}
       {status === 'off' && (
         <button type="button" disabled={pending} onClick={enable} className="min-h-11 w-full rounded-xl px-3 text-left text-sm font-medium text-accent disabled:opacity-60">
           이 기기에서 알림 켜기

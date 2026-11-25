@@ -1,6 +1,7 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
+import { DEV_ALWAYS_KEY } from '@/lib/push/guide';
 import { adminLogin, adminLogout, saveBook, saveMember, sendTestPush, type FormState } from './actions';
 
 const input = 'min-h-11 w-full rounded-xl border border-line bg-paper px-3 text-base';
@@ -205,5 +206,33 @@ export function TestPushButton() {
         </p>
       )}
     </form>
+  );
+}
+
+/** 개발 서버 전용: 첫 접속 안내를 "닫았다" 기록과 상관없이 항상 띄울지(기본 켜짐). 이 기기 localStorage에 저장. */
+export function DevGuideToggle() {
+  const [on, setOn] = useState(() => {
+    try {
+      return localStorage.getItem(DEV_ALWAYS_KEY) !== 'off';
+    } catch {
+      return true;
+    }
+  });
+  return (
+    <label className="flex min-h-11 items-center gap-2 text-sm">
+      <input
+        type="checkbox"
+        checked={on}
+        onChange={(e) => {
+          setOn(e.target.checked);
+          try {
+            localStorage.setItem(DEV_ALWAYS_KEY, e.target.checked ? 'on' : 'off');
+          } catch {
+            // 저장이 막혀도 개발 편의일 뿐이다
+          }
+        }}
+      />
+      개발: 첫 접속 안내를 항상 띄우기 (끄면 닫은 기록을 따름)
+    </label>
   );
 }

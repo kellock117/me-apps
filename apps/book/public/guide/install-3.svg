@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 400" role="img" font-family="-apple-system,Helvetica,sans-serif">
+<rect x="1" y="1" width="278" height="398" rx="28" fill="#f2f2f7" stroke="#c7c7cc" stroke-width="2"/>
+<text x="24" y="52" font-size="14" fill="#007aff">취소</text><text x="140" y="52" text-anchor="middle" font-size="14" font-weight="700" fill="#000">홈 화면에 추가</text>
+<text x="256" y="52" text-anchor="end" font-size="15" font-weight="700" fill="#007aff">추가</text>
+<circle cx="236" cy="48" r="26" fill="none" stroke="#ff3b30" stroke-width="3"/>
+<rect x="16" y="86" width="248" height="72" rx="12" fill="#fff"/><rect x="28" y="100" width="44" height="44" rx="10" fill="#c7c7cc"/><text x="88" y="126" font-size="14" fill="#000">독서 모임</text>
+<text x="140" y="214" text-anchor="middle" font-size="14" font-weight="700" fill="#ff3b30">오른쪽 위 "추가"</text>
+</svg>

@@ -35,10 +35,9 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 
-/* 키보드로 이동할 때 현재 위치가 보이게 */
+/* 포커스 링은 쓰지 않는다(터치로 모달을 열 때 첫 포커스에 링이 떠서 거슬림). 입력 칸은 각자 테두리로 구분한다. */
 :focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: 2px;
+  outline: none;
 }
 
 /*

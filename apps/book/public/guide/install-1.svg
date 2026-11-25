@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 400" role="img" font-family="-apple-system,Helvetica,sans-serif">
+<rect x="1" y="1" width="278" height="398" rx="28" fill="#f2f2f7" stroke="#c7c7cc" stroke-width="2"/>
+<rect x="16" y="24" width="248" height="40" rx="12" fill="#fff"/><text x="140" y="49" text-anchor="middle" font-size="13" fill="#8e8e93">book.example.com</text>
+<rect x="16" y="80" width="248" height="200" rx="12" fill="#fff"/><rect x="32" y="98" width="120" height="12" rx="6" fill="#e5e5ea"/><rect x="32" y="122" width="200" height="10" rx="5" fill="#e5e5ea"/><rect x="32" y="142" width="170" height="10" rx="5" fill="#e5e5ea"/>
+<rect x="0" y="330" width="280" height="70" rx="0" fill="#fff"/><path d="M0 330H280" stroke="#d1d1d6"/>
+<g fill="none" stroke="#007aff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M140 366V346M132 354l8-9 8 9"/><path d="M129 352h-5v26h32v-26h-5"/></g>
+<circle cx="140" cy="360" r="26" fill="none" stroke="#ff3b30" stroke-width="3"/>
+<text x="140" y="322" text-anchor="middle" font-size="14" font-weight="700" fill="#ff3b30">여기를 눌러요</text>
+</svg>
