@@ -15,7 +15,8 @@ import { bookAverage, meetingCount, monthsTogether, nextMeetingDday, nextSelecto
 import { getMyNotices, getView } from '@/lib/view';
 
 
-export default async function HomePage() {
+export default async function HomePage({ searchParams }: { searchParams: Promise<{ todo?: string }> }) {
+  const { todo } = await searchParams; // ?todo=1: 푸시를 눌러 들어왔을 때 할 일 모달을 오늘 이미 닫았어도 띄운다
   const me = await getCurrentMember(); // 게스트(읽기 전용)는 null: 개인용 안내를 건너뛴다
   const { data, s, today, memberById, colors, meetingOfBook } = await getView();
 
@@ -42,7 +43,7 @@ export default async function HomePage() {
   return (
     <div className="space-y-8">
       {!me && <h1 className="font-serif text-2xl font-bold">독서 모임 기록</h1>}
-      {me && notices.length > 0 && <TodoModal notices={notices} today={today} memberId={me.id} />}
+      {me && notices.length > 0 && <TodoModal notices={notices} today={today} memberId={me.id} force={todo === '1'} />}
 
       {iAmNext && !reading && (
         <Link href="/select" className="block rounded-2xl border border-accent bg-surface p-4">

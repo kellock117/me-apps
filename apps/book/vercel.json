@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/daily",
       "schedule": "0 15 * * *"
+    },
+    {
+      "path": "/api/cron/progress-push",
+      "schedule": "0 9 * * *"
     }
   ]
 }

@@ -4,7 +4,7 @@ import { isAdmin } from '@/lib/auth/admin';
 import { getClubData } from '@/lib/data';
 import { GENRES } from '@/lib/validation/admin';
 import { deleteBook, deleteMeeting, deleteRating } from './actions';
-import { AdminLoginForm, BookForm, DeleteButton, LogoutButton, MemberForm } from './forms';
+import { AdminLoginForm, BookForm, DeleteButton, LogoutButton, MemberForm, TestPushButton } from './forms';
 
 export const metadata: Metadata = { title: '관리 · 독서 모임', robots: { index: false } };
 
@@ -49,6 +49,13 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
               지금 상태 내려받기
             </a>
           </div>
+        </Card>
+      </Section>
+
+      <Section title="푸시 알림">
+        <Card className="space-y-2 text-sm">
+          <p className="text-muted">내 기기에만 가요. 🔔 아래에서 이 기기의 알림을 켜 둬야 받아요.</p>
+          <TestPushButton />
         </Card>
       </Section>
 

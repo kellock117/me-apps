@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
-import { adminLogin, adminLogout, saveBook, saveMember, type FormState } from './actions';
+import { adminLogin, adminLogout, saveBook, saveMember, sendTestPush, type FormState } from './actions';
 
 const input = 'min-h-11 w-full rounded-xl border border-line bg-paper px-3 text-base';
 const btn = 'min-h-11 rounded-xl bg-accent px-4 text-sm font-semibold text-accent-ink disabled:opacity-60';
@@ -164,6 +164,44 @@ export function DeleteButton({ action, id, what }: { action: (fd: FormData) => P
       <button type="submit" className="min-h-11 rounded-xl border border-danger px-3 text-sm font-medium text-danger">
         삭제
       </button>
+    </form>
+  );
+}
+
+const TEST_PUSH_OPTIONS = [
+  ['ping', '연결 확인 (홈으로)'],
+  ['weekly-none', '주차 · 할 일 없음 (응원 문장)'],
+  ['weekly-progress', '주차 · 진도만'],
+  ['weekly-rate', '주차 · 별점만 (1권)'],
+  ['weekly-rate-many', '주차 · 별점 2권 이상'],
+  ['weekly-both', '주차 · 진도와 별점 둘 다'],
+  ['weekly-d1', '주차 · D-1 (내일 모임)'],
+] as const;
+
+/** 나에게 테스트 푸시 보내기: 케이스를 고르고 보낸다. 결과(보낸 기기 수 또는 이유)를 버튼 아래에 보여 준다. */
+export function TestPushButton() {
+  const [state, action, pending] = useActionState<FormState & { message?: string }, FormData>(sendTestPush, {});
+  return (
+    <form action={action} className="space-y-2">
+      <label htmlFor="push-case" className="block text-sm font-medium">
+        케이스
+      </label>
+      <select id="push-case" name="case" defaultValue="ping" className={input}>
+        {TEST_PUSH_OPTIONS.map(([value, label]) => (
+          <option key={value} value={value}>
+            {label}
+          </option>
+        ))}
+      </select>
+      <button type="submit" disabled={pending} className={btn}>
+        {pending ? '보내는 중…' : '나에게 테스트 푸시 보내기'}
+      </button>
+      {state.message && <p role="status" className="text-sm text-muted">{state.message}</p>}
+      {state.errors?.form && (
+        <p role="alert" className="text-sm font-medium text-danger">
+          {state.errors.form[0]}
+        </p>
+      )}
     </form>
   );
 }

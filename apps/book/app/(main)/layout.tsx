@@ -7,7 +7,7 @@ import { TabBar } from '@/components/tab-bar';
 import { isLoggedIn } from '@/lib/auth/access';
 import { getCurrentMember } from '@/lib/auth/member';
 import { initialOf } from '@/lib/guest-mask';
-import { getMyNotices } from '@/lib/view';
+import { getMyNotices, getMyPushEndpoints } from '@/lib/view';
 
 export default async function MainLayout({ children }: { children: React.ReactNode }) {
   // 로그인 안 한 사람(게스트): proxy.ts가 허용한 읽기 화면만 여기까지 온다. 읽기 전용 화면을 그린다.
@@ -29,7 +29,9 @@ export default async function MainLayout({ children }: { children: React.ReactNo
 
   const me = await getCurrentMember();
   if (!me) redirect('/who'); // 쿠키의 멤버가 없어졌거나 활동 중이 아닐 때
-  const notices = await getMyNotices(me.id);
+  const [notices, savedEndpoints] = await Promise.all([getMyNotices(me.id), getMyPushEndpoints(me.id)]);
+  // 공개 키는 NEXT_PUBLIC_ 없이 서버가 읽어 props로 넘긴다(CLAUDE.md). 키가 없으면(로컬 등) 알림 켜기 줄을 그리지 않는다.
+  const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
 
   return (
     <>
@@ -38,7 +40,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
           독서 모임
         </Link>
         <div className="flex items-center gap-1">
-          <NoticeBell notices={notices} />
+          <NoticeBell notices={notices} push={vapidPublicKey ? { publicKey: vapidPublicKey, savedEndpoints } : null} />
           <Link
           href="/who"
           aria-label={`${me.name}님으로 보는 중. 누르면 이름을 바꿀 수 있어요`}
