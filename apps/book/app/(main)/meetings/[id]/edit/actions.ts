@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { getCurrentMember } from '@/lib/auth/member';
+import { notifyMeetingChange } from '@/lib/push/notify';
 import { createAdminClient } from '@me/core/server/supabase';
 import { meetingSchema } from '@/lib/validation/book';
 
@@ -32,7 +33,7 @@ export async function saveMeeting(_prev: MeetingState, formData: FormData): Prom
   const input = parsed.data;
 
   const db = createAdminClient();
-  const { data: meeting } = await db.from('book_meetings').select('id,book_id').eq('id', input.id).maybeSingle();
+  const { data: meeting } = await db.from('book_meetings').select('id,book_id,date').eq('id', input.id).maybeSingle();
   if (!meeting) return { errors: { form: ['없는 모임이에요'] }, values };
 
   // 활동 중인 멤버만 참석자로 받는다
@@ -53,6 +54,9 @@ export async function saveMeeting(_prev: MeetingState, formData: FormData): Prom
     const { error: addError } = await db.from('book_meeting_attendees').insert(toAdd.map((member_id) => ({ meeting_id: input.id, member_id })));
     if (addError) return { errors: { form: ['참석자를 저장하지 못했어요. 다시 해 주세요'] }, values };
   }
+
+  // 알림은 저장(참석자 포함)이 모두 끝난 뒤에, 날짜가 실제로 바뀌었을 때만. 실패해도 저장 결과는 그대로다.
+  if (meeting.date !== input.date) await notifyMeetingChange({ type: 'meeting-datechange', meetingId: input.id, oldDate: meeting.date });
 
   if (input.intent === 'finish') {
     if (!meeting.book_id) return { errors: { form: ['이 모임에는 책이 정해져 있지 않아요'] }, values };
