@@ -101,9 +101,9 @@ describe('buildPlan: 지난 기록에서 예정 세트 만들기', () => {
   const id = () => `id${++n}`;
   it('지난 기록이 없으면 기본 횟수로 3세트', () => {
     const items = buildPlan('lower', {}, id);
-    expect(items.map((i) => i.n)).toEqual(['불가리안 스플릿 스쿼트', '템포 스쿼트', '한 다리 루마니안 데드리프트', '한 다리 힙 브릿지', '한 발 카프 레이즈']);
+    expect(items.map((i) => i.n)).toEqual(['불가리안 스플릿 스쿼트', '템포 스쿼트', '한 다리 루마니안 데드리프트', '한 발 카프 레이즈']);
     expect(items[0]!.sets.map((s) => s.reps)).toEqual([8, 8, 8]);
-    expect(items[4]!.sets.map((s) => s.reps)).toEqual([15, 15, 15]);
+    expect(items[3]!.sets.map((s) => s.reps)).toEqual([15, 15, 15]);
   });
   it('지난 기록이 있으면 그 세트 수·횟수를 따른다 (횟수 0은 기본값)', () => {
     const items = buildPlan('lower', { '불가리안 스플릿 스쿼트': [{ n: 1, r: 12 }, { n: 2, r: 12 }, { n: 3, r: 0 }, { n: 4, r: 10 }] }, id);
