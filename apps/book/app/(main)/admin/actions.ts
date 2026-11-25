@@ -9,6 +9,8 @@ import { COOKIE_BASE } from '@me/core/auth/cookie';
 import { checkRateLimit } from '@me/core/auth/rate-limit';
 import { safeEqual } from '@me/core/auth/session';
 import { createAdminClient } from '@me/core/server/supabase';
+import { getCurrentMember } from '@/lib/auth/member';
+import { sendPushToMember } from '@/lib/push/send';
 import { bookEditSchema, idSchema, memberSchema } from '@/lib/validation/admin';
 
 export type FormState = { errors?: Record<string, string[]>; ok?: boolean; values?: Record<string, string> };
@@ -105,4 +107,19 @@ export async function deleteMeeting(formData: FormData) {
 }
 export async function deleteRating(formData: FormData) {
   return remove('book_ratings', formData);
+}
+
+/**
+ * 테스트 푸시: 지금 로그인한 관리자 본인의 기기에만 보낸다. 제목 앞에 [테스트]를 붙이고, 누르면 홈으로 간다.
+ * 보낸 기록은 남기지 않는다(진짜 알림이 테스트 때문에 빠지면 안 된다). 케이스별 문구는 #57 이후 티켓에서 더한다.
+ */
+export async function sendTestPush(): Promise<FormState & { message?: string }> {
+  const me = await getCurrentMember();
+  if (!me) return { errors: { form: ['로그인해 주세요'] } };
+  await requireAdmin();
+  const r = await sendPushToMember(me.id, { title: '[테스트] 📚 독서 모임', body: '테스트 알림이에요. 누르면 홈으로 가요.', url: '/' });
+  if (r.sent === 0) {
+    return { errors: { form: [r.failed > 0 ? '보내지 못했어요. 서버 로그를 확인해 주세요' : '알림을 켠 기기가 없어요. 🔔에서 이 기기의 알림을 먼저 켜 주세요'] } };
+  }
+  return { ok: true, message: `${r.sent}개 기기로 보냈어요` };
 }

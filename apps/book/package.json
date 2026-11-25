@@ -13,7 +13,7 @@
     "copy:cloud": "tsx --env-file=.env.local scripts/copy-to-cloud.ts",
     "backfill:book-info": "tsx --env-file=.env.local scripts/backfill-book-info.ts",
     "seed:dev": "tsx --env-file=.env.local scripts/seed-dev.ts",
-    "restore":"tsx --env-file=.env.local scripts/restore.ts"
+    "restore": "tsx --env-file=.env.local scripts/restore.ts"
   },
   "dependencies": {
     "@me/core": "workspace:*",
@@ -27,6 +27,7 @@
     "react-dom": "^19.3.1",
     "recharts": "^3.10.1",
     "server-only": "^0.0.1",
+    "web-push": "^4.0.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {
@@ -35,6 +36,7 @@
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@types/web-push": "^3.6.4",
     "postcss": "^8.5.32",
     "tailwindcss": "^4.3.5",
     "tsx": "^4.23.15",

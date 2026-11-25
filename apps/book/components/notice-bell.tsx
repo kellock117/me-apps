@@ -4,15 +4,17 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useId, useRef, useState, useTransition } from 'react';
 import { dismissAllNotices, dismissNotice, type DismissResult } from '@/app/(main)/notice-actions';
+import { PushToggle } from '@/components/push-toggle';
 import type { Notice } from '@/lib/notices';
 
 /**
  * 헤더의 🔔 버튼(프로필 왼쪽)과 드롭다운. 로그인한 멤버에게만 레이아웃이 그린다(게스트는 계산도 하지 않는다).
  * 배지 = 알림 개수(0이면 없음). 줄을 누르면 그 화면으로 간다. 눌러도 알림은 없어지지 않는다(할 일을 하거나 "읽음"으로 숨겨야 사라진다).
  * 진도 알림 줄에만 "읽음"이 있고, 패널 위 "모두 읽음"은 진도 알림만 숨긴다(평점 알림은 숨길 수 없다). 서버 액션이 화면을 새로 그린다.
+ * 맨 아래에는 이 기기의 푸시 알림을 켜고 끄는 줄이 있다(push가 null이면 서버에 VAPID 키가 없어 줄도 없다).
  * 바깥을 누르거나 Esc, 화면 이동이면 닫힌다. 패널은 헤더(relative) 아래로 펼쳐진다.
  */
-export function NoticeBell({ notices }: { notices: Notice[] }) {
+export function NoticeBell({ notices, push }: { notices: Notice[]; push: { publicKey: string; savedEndpoints: string[] } | null }) {
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLDivElement>(null);
   const button = useRef<HTMLButtonElement>(null);
@@ -109,6 +111,7 @@ export function NoticeBell({ notices }: { notices: Notice[] }) {
               ))}
             </ul>
           )}
+          {push && <PushToggle publicKey={push.publicKey} savedEndpoints={push.savedEndpoints} />}
         </div>
       )}
     </div>

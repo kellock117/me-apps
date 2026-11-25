@@ -36,3 +36,12 @@ export async function getMyNotices(memberId: string) {
   const progress = data.reading_progress.map((r) => ({ bookId: r.book_id, memberId: r.member_id, week: r.week }));
   return pendingNotices({ books: s.books, meetings: s.meetings, ratings: s.ratings, progress, memberId, today, dismissed });
 }
+
+/**
+ * 이 멤버가 알림을 켠 기기들의 구독 주소(🔔 줄의 켜짐 표시용). 주소는 비밀에 가까워서 화면으로는 이 멤버 것만, 켜짐 비교에만 쓴다.
+ * 읽지 못하면 빈 목록(꺼짐으로 보인다).
+ */
+export async function getMyPushEndpoints(memberId: string): Promise<string[]> {
+  const { data, error } = await createAdminClient().from('book_push_subscriptions').select('endpoint').eq('member_id', memberId);
+  return error ? [] : data.map((r) => r.endpoint);
+}
