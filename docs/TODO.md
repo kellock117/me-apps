@@ -29,7 +29,7 @@
 ## 3등급: 목표 직결 (구직 준비 12월 중순~말)
 - [ ] (직접) 워크아웃 게스트 화면 재확인: 팝업 → `/login` 링크로 바꾼 뒤 화면 <!-- id:workout-guest-check -->
 - [ ] (직접) iPhone 홈 화면 추가(PWA) 동작 확인 <!-- id:pwa-install-check -->
-- [ ] (직접) iPhone 실기기에서 운동 앱 확인: 화면 잠금·백그라운드 후 타이머, 1:30 삑 소리, 시간·횟수 입력(`docs/features/workout.md` 미검증 항목) <!-- id:workout-device-check -->
+- [ ] (직접) iPhone 실기기에서 운동 앱 확인: 화면 잠금·백그라운드 후 타이머, 1:30 삑 소리, 시간·횟수 입력(`docs/workout/features/workout.md` 미검증 항목) <!-- id:workout-device-check -->
 - [ ] (Claude) ADR 소급 작성: 알라딘 종료 → 카카오·국립중앙도서관, 데이터 캐시 제거, RLS 켜고 정책 없음, 모노레포·테이블 접두사. `/grill-with-docs`로 사용자와 확인하며 `docs/adr/`에 쓴다 <!-- id:adr-backfill -->
 - [ ] (함께) 지표 기준선 측정: 백업 복원 소요 시간, Lighthouse, 테스트 수·커버리지, `npm audit`. 값은 `docs/reference/`에 기록한다 <!-- id:metrics-baseline -->
 - [ ] (함께) 핵심 흐름 e2e와 테스트 보강(로그인, 평점, 선정, 기록, 백업). SDD로 진행 <!-- id:full-tests -->

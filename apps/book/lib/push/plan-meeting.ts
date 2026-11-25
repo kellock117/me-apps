@@ -1,5 +1,5 @@
 /**
- * 새 모임·날짜 변경 푸시 계산(#59). plan.ts의 planPushes가 kind에 따라 여기를 부른다(docs/features/push.md).
+ * 새 모임·날짜 변경 푸시 계산(#59). plan.ts의 planPushes가 kind에 따라 여기를 부른다(docs/book/features/push.md).
  * 순수 함수만 둔다. 크론이 아니라 모임 저장 서버 액션이 저장 직후 바로 보내므로 "오늘 보낼 날" 판정은 없다.
  */
 

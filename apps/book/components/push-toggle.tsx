@@ -6,7 +6,7 @@ import { enablePush, readPushStatus, type PushStatus } from '@/lib/push/client';
 import { OPEN_INSTALL_GUIDE } from '@/lib/push/guide';
 
 /**
- * 🔔 드롭다운 맨 아래 한 줄: 이 기기의 알림을 켜고 끈다(docs/features/push.md).
+ * 🔔 드롭다운 맨 아래 한 줄: 이 기기의 알림을 켜고 끈다(docs/book/features/push.md).
  * 켜짐 = 이 기기의 브라우저 구독이 있고, 그 주소가 지금 멤버 이름으로 저장되어 있을 때(savedEndpoints는 서버가 지금 멤버 기준으로 넘긴다).
  * 권한 요청은 [켜기]를 눌렀을 때만 한다(iOS는 사용자 동작 안에서만 허용). 끄기는 서버 저장만 지우고 브라우저 구독은 둔다 —
  * 같은 기기에서 다른 멤버도 켜 두었을 수 있어서, 브라우저 구독을 풀면 그 멤버 알림이 죽는다.
