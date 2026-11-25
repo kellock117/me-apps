@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkProgress, currentWeek, hasNoProgress, isWeekOpen, previousMeetingDate, previousPages, progressPoints, readingSpeed, seriesRows, weekSchedule } from './reading-progress';
+import { checkProgress, currentWeek, hasNoProgress, isWeekOpen, previousMeetingDate, previousPages, progressPoints, projectionPoints, readingSpeed, seriesRows, weekSchedule } from './reading-progress';
 
 describe('weekSchedule: 전 모임일부터 7일씩 센 주차와 기준일', () => {
   it('모임 요일마다 한 주차, 마지막 주차의 기준일은 모임 전날', () => {
@@ -223,5 +223,42 @@ describe('hasNoProgress: "모두의 진도"에 아직 아무 기록이 없는가
 
   it('활동 멤버 한 명이라도 일정 안 기록이 있으면 거짓', () => {
     expect(hasNoProgress(schedule, [{ member_id: 'b', week: 2 }], ['a', 'b'])).toBe(false);
+  });
+});
+
+describe('projectionPoints: 하루 평균으로 본 예상선', () => {
+  const schedule = weekSchedule('2026-11-07', '2026-12-05'); // 기준일 11-14, 11-21, 11-28, 12-04(마지막 주는 6일)
+
+  it('마지막 기록 주차에서 시작해 남은 주차마다 (기준일까지 일수 × 하루 평균)을 더한다', () => {
+    expect(projectionPoints(schedule, [{ week: 1, pages: 70 }], 10, null)).toEqual([
+      { week: 1, pages: 70, percent: null },
+      { week: 2, pages: 140, percent: null },
+      { week: 3, pages: 210, percent: null },
+      { week: 4, pages: 270, percent: null },
+    ]);
+  });
+
+  it('쪽수는 반올림한 정수다', () => {
+    expect(projectionPoints(schedule, [{ week: 2, pages: 50 }], 50 / 14, null).map((p) => p.pages)).toEqual([50, 75, 96]);
+  });
+
+  it('총 쪽수를 넘지 않는다', () => {
+    expect(projectionPoints(schedule, [{ week: 1, pages: 70 }], 10, 200).map((p) => p.pages)).toEqual([70, 140, 200, 200]);
+  });
+
+  it('퍼센트는 기록 점과 같은 방식(소수 첫째 자리)으로 환산한다', () => {
+    expect(projectionPoints(schedule, [{ week: 1, pages: 70 }], 10, 300).map((p) => p.percent)).toEqual([23.3, 46.7, 70, 90]);
+  });
+
+  it('여러 기록 중 가장 늦은 주차에서 시작하고, 일정 밖 기록은 쓰지 않는다', () => {
+    const rows = [{ week: 2, pages: 100 }, { week: 1, pages: 40 }, { week: 9, pages: 999 }];
+    expect(projectionPoints(schedule, rows, 5, null).map((p) => [p.week, p.pages])).toEqual([[2, 100], [3, 135], [4, 165]]);
+  });
+
+  it('기록이 없거나, 하루 평균이 없거나, 마지막 주차에 이미 기록이 있으면 빈 결과', () => {
+    expect(projectionPoints(schedule, [], 10, 300)).toEqual([]);
+    expect(projectionPoints(schedule, [{ week: 9, pages: 10 }], 10, 300)).toEqual([]);
+    expect(projectionPoints(schedule, [{ week: 1, pages: 70 }], null, 300)).toEqual([]);
+    expect(projectionPoints(schedule, [{ week: 1, pages: 70 }, { week: 4, pages: 250 }], 10, 300)).toEqual([]);
   });
 });

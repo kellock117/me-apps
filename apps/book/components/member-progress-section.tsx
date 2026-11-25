@@ -1,6 +1,6 @@
 import { Card, Section } from '@me/ui/section';
 import { ProgressChart } from '@/components/charts/progress-chart';
-import { hasNoProgress, previousMeetingDate, progressPoints, readingSpeed, weekSchedule } from '@/lib/reading-progress';
+import { hasNoProgress, previousMeetingDate, progressPoints, projectionPoints, readingSpeed, weekSchedule } from '@/lib/reading-progress';
 
 type Props = {
   /** 읽는 중인 책(없으면 구역을 그리지 않는다) */
@@ -17,7 +17,7 @@ type Props = {
 };
 
 /**
- * 대시보드의 "모두의 진도" 구역: 읽는 책의 멤버별 선 그래프와 속도 표.
+ * 대시보드의 "모두의 진도" 구역: 읽는 책의 멤버별 선 그래프(+ 하루 평균 기준 예상 점선)와 속도 표.
  * 읽는 책·모임·앞 모임(첫 책)이 없으면 통째로 숨긴다. 아무도 아직 기록하지 않았으면 "아직 진도 기록이 없어요"만 보인다.
  * 데이터는 getClubData() 결과만 받으므로 게스트에게는 가려진 이름이 간다.
  */
@@ -40,12 +40,14 @@ export function MemberProgressSection({ book, meeting, meetingDates, members, ro
 
   const series = members.map((m) => {
     const mine = bookRows.filter((r) => r.member_id === m.id);
+    const speed = readingSpeed({ prevMeetingDate: prev, meetingDate: meeting.date, schedule, rows: mine, totalPages: book.pages, today });
     return {
       id: m.id,
       name: m.name,
       color: m.color,
       points: progressPoints(schedule, mine, book.pages),
-      speed: readingSpeed({ prevMeetingDate: prev, meetingDate: meeting.date, schedule, rows: mine, totalPages: book.pages, today }),
+      projection: projectionPoints(schedule, mine, speed.average, book.pages),
+      speed,
     };
   });
 

@@ -74,7 +74,35 @@ export function progressPoints(schedule: WeekInfo[], rows: { week: number; pages
   return rows
     .filter((r) => inRange.has(r.week))
     .sort((a, b) => a.week - b.week)
-    .map((r) => ({ week: r.week, pages: r.pages, percent: totalPages ? Math.round((r.pages / totalPages) * 1000) / 10 : null }));
+    .map((r) => ({ week: r.week, pages: r.pages, percent: toPercent(r.pages, totalPages) }));
+}
+
+/** 쪽수 → 퍼센트(소수 첫째 자리). 총 쪽수가 없으면 null. */
+function toPercent(pages: number, totalPages: number | null): number | null {
+  return totalPages ? Math.round((pages / totalPages) * 1000) / 10 : null;
+}
+
+/**
+ * 예상선: 마지막 기록 주차의 누적 쪽수에서 시작해, 남은 주차마다 (그 기준일까지 일수 × 하루 평균)을 더한 점들.
+ * 첫 점은 마지막 기록 그대로다(실제 선과 이어지게). 쪽수는 반올림하고 총 쪽수에서 자른다. average는 readingSpeed().average를 넘긴다.
+ * 기록이 없거나(일정 밖 기록만 있어도), 하루 평균이 없거나, 마지막 주차에 이미 기록이 있으면 빈 목록.
+ */
+export function projectionPoints(schedule: WeekInfo[], rows: { week: number; pages: number }[], average: number | null, totalPages: number | null): ProgressPoint[] {
+  const recorded = progressPoints(schedule, rows, totalPages);
+  const latest = recorded[recorded.length - 1];
+  const lastWeek = schedule[schedule.length - 1];
+  if (!latest || average === null || !lastWeek || latest.week === lastWeek.week) return [];
+  const from = schedule.find((w) => w.week === latest.week)!;
+  return [
+    latest,
+    ...schedule
+      .filter((w) => w.week > latest.week)
+      .map((w) => {
+        const raw = Math.round(latest.pages + daysBetween(from.dueDate, w.dueDate) * average);
+        const pages = totalPages === null ? raw : Math.min(totalPages, raw);
+        return { week: w.week, pages, percent: toPercent(pages, totalPages) };
+      }),
+  ];
 }
 
 export type ChartMode = 'percent' | 'pages';
