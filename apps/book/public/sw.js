@@ -14,7 +14,7 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title || '📚 독서 모임', {
       body: data.body || '',
-      data: { url: typeof data.url === 'string' && data.url.startsWith('/') ? data.url : '/' },
+      data: { url: typeof data.url === 'string' && data.url.startsWith('/') && !data.url.startsWith('//') && !data.url.startsWith('/\\') ? data.url : '/' },
     }),
   );
 });
