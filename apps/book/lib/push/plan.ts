@@ -4,27 +4,30 @@
  * 크론·관리자 테스트는 데이터를 모아 이 함수를 부르고, 결과를 보내고 기록만 한다.
  * 나중에 네이티브 앱이 필요해져도 이 계산은 그대로 쓰고 발송 모듈(send.ts)만 바꾼다.
  *
- * 지금 계산하는 것: 주차 알림, 모임 당일 알림. (새 모임·날짜 변경은 이후 티켓에서 더한다.)
+ * 지금 계산하는 것: 주차 알림, 모임 당일 알림, 새 모임·날짜 변경 알림(plan-meeting.ts).
  */
 
 import { addDays, daysBetween } from '@me/core/date';
 import { fmtMonthDayWeekday } from '../format';
 import { pendingNotices, type Notice } from '../notices';
 import { currentWeek, previousMeetingDate, weekSchedule } from '../reading-progress';
+import { planMeeting, type MeetingPlanKind } from './plan-meeting';
 import type { StatsBook, StatsMeeting, StatsMember, StatsRating } from '../stats';
 
 /** 보낼 푸시 하나. key가 null이면 보낸 기록에 남기지 않는다(관리자 테스트). */
 export type PlannedPush = { memberId: string; key: string | null; title: string; body: string; url: string };
 
 /** 관리자 테스트 케이스. 실제 DB 데이터에 이 모양의 할 일을 강제로 채운다. */
-export const TEST_CASES = ['weekly-none', 'weekly-progress', 'weekly-rate', 'weekly-both', 'weekly-rate-many', 'weekly-d1', 'meetingday-unfinished', 'meetingday-done'] as const;
+export const TEST_CASES = ['weekly-none', 'weekly-progress', 'weekly-rate', 'weekly-both', 'weekly-rate-many', 'weekly-d1', 'meetingday-unfinished', 'meetingday-done', 'meeting-new', 'meeting-datechange'] as const;
 export type TestCase = (typeof TEST_CASES)[number];
 
 export type PlanKind =
   /** 매일 18시 크론: 오늘 보낼 알림 */
   | { type: 'daily' }
   /** 관리자 테스트: 그 멤버에게만, 기록 없이 */
-  | { type: 'test'; case: TestCase; memberId: string };
+  | { type: 'test'; case: TestCase; memberId: string }
+  /** 새 모임·날짜 변경(#59): 모임 저장 직후 바로 */
+  | Exclude<MeetingPlanKind, { type: 'meeting-test' }>;
 
 export type PlanInput = {
   kind: PlanKind;
@@ -154,6 +157,9 @@ function planTest(input: PlanInput, kind: Extract<PlanKind, { type: 'test' }>): 
     case 'meetingday-unfinished':
     case 'meetingday-done':
       return []; // planMeetingDayTest가 맡는다
+    case 'meeting-new':
+    case 'meeting-datechange':
+      return []; // planPushes가 plan-meeting.ts로 먼저 보낸다
   }
   if (!notices) return [];
 
@@ -211,6 +217,11 @@ function planMeetingDayTest(input: PlanInput, kind: Extract<PlanKind, { type: 't
 
 /** 푸시 대상 계산의 입구. 결과는 보낼 순서대로. */
 export function planPushes(input: PlanInput): PlannedPush[] {
-  if (input.kind.type === 'test') return input.kind.case.startsWith('meetingday-') ? planMeetingDayTest(input, input.kind) : planTest(input, input.kind);
+  const kind = input.kind;
+  if (kind.type === 'meeting-new' || kind.type === 'meeting-datechange') return planMeeting(input, kind);
+  if (kind.type === 'test') {
+    if (kind.case === 'meeting-new' || kind.case === 'meeting-datechange') return planMeeting(input, { type: 'meeting-test', case: kind.case, memberId: kind.memberId });
+    return kind.case.startsWith('meetingday-') ? planMeetingDayTest(input, kind) : planTest(input, kind);
+  }
   return [...planWeekly(input), ...planMeetingDay(input)];
 }
