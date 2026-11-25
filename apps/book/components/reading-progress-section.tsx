@@ -1,12 +1,9 @@
 import { NoMeetingDialog } from '@/components/no-meeting-dialog';
 import { ProgressRow } from '@/components/progress-row';
 import { Card, Section } from '@me/ui/section';
-import { fmtDate } from '@/lib/format';
+import { fmtDate, fmtPerDay } from '@/lib/format';
 import { ProgressChart } from '@/components/charts/progress-chart';
-import { currentWeek, isWeekOpen, previousMeetingDate, progressPoints, readingSpeed, weekSchedule } from '@/lib/reading-progress';
-
-/** 쪽/일 표시: 소수 첫째 자리, 정수면 소수점 없이 */
-const fmtPerDay = (n: number | null) => (n === null ? '—' : `${Number.isInteger(n) ? n : n.toFixed(1)}쪽`);
+import { currentWeek, isWeekOpen, previousMeetingDate, progressPoints, projectionPoints, readingSpeed, weekSchedule } from '@/lib/reading-progress';
 
 type Props = {
   book: { id: string; status: string; pages: number | null };
@@ -42,6 +39,7 @@ export function ReadingProgressSection({ book, meeting, meetingDates, mine, toda
   const current = currentWeek(schedule, today);
   const points = progressPoints(schedule, mine, book.pages);
   const speed = readingSpeed({ prevMeetingDate: prev, meetingDate: meeting.date, schedule, rows: mine, totalPages: book.pages, today });
+  const projection = projectionPoints(schedule, mine, speed.average, book.pages);
   const savedOf = (week: number) => mine.find((r) => r.week === week)?.pages ?? null;
   return (
     <Section title="내 진도">
@@ -52,7 +50,7 @@ export function ReadingProgressSection({ book, meeting, meetingDates, mine, toda
       </Card>
       {points.length > 0 && (
         <Card className="mb-3">
-          <ProgressChart series={[{ id: 'me', name: '나', color: 'var(--accent)', points }]} weeks={schedule.map((w) => w.week)} totalPages={book.pages} caption="내 읽기 진도" />
+          <ProgressChart series={[{ id: 'me', name: '나', color: 'var(--accent)', points, projection }]} weeks={schedule.map((w) => w.week)} totalPages={book.pages} caption="내 읽기 진도" />
         </Card>
       )}
       <Card className="py-2">

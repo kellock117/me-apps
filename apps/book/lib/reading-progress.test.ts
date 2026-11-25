@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkProgress, currentWeek, isWeekOpen, previousMeetingDate, previousPages, progressPoints, readingSpeed, seriesRows, weekSchedule } from './reading-progress';
+import { checkProgress, currentWeek, hasNoProgress, isWeekOpen, previousMeetingDate, previousPages, progressPoints, projectionPoints, readingSpeed, seriesRows, weekSchedule } from './reading-progress';
 
 describe('weekSchedule: 전 모임일부터 7일씩 센 주차와 기준일', () => {
   it('모임 요일마다 한 주차, 마지막 주차의 기준일은 모임 전날', () => {
@@ -95,10 +95,10 @@ describe('previousPages: 앞 주차 중 값이 있는 가장 가까운 것', () 
 describe('checkProgress: 입력값 검증', () => {
   const opts = { totalPages: 300, previous: 100 };
   it('정상 값은 통과', () => {
-    expect(checkProgress(150, opts)).toEqual({ ok: true, done: false, decreased: false });
+    expect(checkProgress(150, opts)).toEqual({ ok: true, done: false });
   });
   it('0은 허용', () => {
-    expect(checkProgress(0, { totalPages: 300, previous: null })).toEqual({ ok: true, done: false, decreased: false });
+    expect(checkProgress(0, { totalPages: 300, previous: null })).toEqual({ ok: true, done: false });
   });
   it('음수·소수·숫자 아님은 거부', () => {
     expect(checkProgress(-1, opts)).toEqual({ ok: false, error: 'invalid' });
@@ -107,16 +107,16 @@ describe('checkProgress: 입력값 검증', () => {
   });
   it('총 쪽수보다 크면 거부, 같으면 완독', () => {
     expect(checkProgress(301, opts)).toEqual({ ok: false, error: 'over-total' });
-    expect(checkProgress(300, opts)).toEqual({ ok: true, done: true, decreased: false });
+    expect(checkProgress(300, opts)).toEqual({ ok: true, done: true });
   });
-  it('앞 주차보다 줄어도 저장은 되지만 줄었다고 알린다', () => {
-    expect(checkProgress(80, opts)).toEqual({ ok: true, done: false, decreased: true });
+  it('앞 주차보다 적으면 거부한다', () => {
+    expect(checkProgress(80, opts)).toEqual({ ok: false, error: 'decreased' });
   });
-  it('앞 주차와 같으면 줄어든 게 아니다', () => {
-    expect(checkProgress(100, opts).ok && checkProgress(100, opts)).toMatchObject({ decreased: false });
+  it('앞 주차와 같으면 통과한다', () => {
+    expect(checkProgress(100, opts)).toEqual({ ok: true, done: false });
   });
   it('총 쪽수를 모르면 상한 검사를 건너뛰고 완독 표시도 없다', () => {
-    expect(checkProgress(5000, { totalPages: null, previous: null })).toEqual({ ok: true, done: false, decreased: false });
+    expect(checkProgress(5000, { totalPages: null, previous: null })).toEqual({ ok: true, done: false });
   });
 });
 
@@ -203,5 +203,62 @@ describe('seriesRows: 그래프에 넣을 주차별 줄', () => {
   it('퍼센트 모드는 percent를 쓰고, 퍼센트가 null인 점은 뺀다', () => {
     expect(seriesRows([1, 3], [{ id: 'a', points: s1 }], 'percent')).toEqual([{ week: 1, a: 10 }, { week: 3, a: 50 }]);
     expect(seriesRows([1], [{ id: 'a', points: [{ week: 1, pages: 30, percent: null }] }], 'percent')).toEqual([{ week: 1 }]);
+  });
+});
+
+describe('hasNoProgress: "모두의 진도"에 아직 아무 기록이 없는가', () => {
+  const schedule = weekSchedule('2026-11-07', '2026-12-05'); // 1~4주차
+
+  it('기록이 하나도 없으면 참', () => {
+    expect(hasNoProgress(schedule, [], ['a', 'b'])).toBe(true);
+  });
+
+  it('일정 밖 주차 기록만 있으면 없는 것으로 센다', () => {
+    expect(hasNoProgress(schedule, [{ member_id: 'a', week: 5 }], ['a', 'b'])).toBe(true);
+  });
+
+  it('활동 멤버가 아닌 사람의 기록은 세지 않는다', () => {
+    expect(hasNoProgress(schedule, [{ member_id: 'x', week: 1 }], ['a', 'b'])).toBe(true);
+  });
+
+  it('활동 멤버 한 명이라도 일정 안 기록이 있으면 거짓', () => {
+    expect(hasNoProgress(schedule, [{ member_id: 'b', week: 2 }], ['a', 'b'])).toBe(false);
+  });
+});
+
+describe('projectionPoints: 하루 평균으로 본 예상선', () => {
+  const schedule = weekSchedule('2026-11-07', '2026-12-05'); // 기준일 11-14, 11-21, 11-28, 12-04(마지막 주는 6일)
+
+  it('마지막 기록 주차에서 시작해 남은 주차마다 (기준일까지 일수 × 하루 평균)을 더한다', () => {
+    expect(projectionPoints(schedule, [{ week: 1, pages: 70 }], 10, null)).toEqual([
+      { week: 1, pages: 70, percent: null },
+      { week: 2, pages: 140, percent: null },
+      { week: 3, pages: 210, percent: null },
+      { week: 4, pages: 270, percent: null },
+    ]);
+  });
+
+  it('쪽수는 반올림한 정수다', () => {
+    expect(projectionPoints(schedule, [{ week: 2, pages: 50 }], 50 / 14, null).map((p) => p.pages)).toEqual([50, 75, 96]);
+  });
+
+  it('총 쪽수를 넘지 않는다', () => {
+    expect(projectionPoints(schedule, [{ week: 1, pages: 70 }], 10, 200).map((p) => p.pages)).toEqual([70, 140, 200, 200]);
+  });
+
+  it('퍼센트는 기록 점과 같은 방식(소수 첫째 자리)으로 환산한다', () => {
+    expect(projectionPoints(schedule, [{ week: 1, pages: 70 }], 10, 300).map((p) => p.percent)).toEqual([23.3, 46.7, 70, 90]);
+  });
+
+  it('여러 기록 중 가장 늦은 주차에서 시작하고, 일정 밖 기록은 쓰지 않는다', () => {
+    const rows = [{ week: 2, pages: 100 }, { week: 1, pages: 40 }, { week: 9, pages: 999 }];
+    expect(projectionPoints(schedule, rows, 5, null).map((p) => [p.week, p.pages])).toEqual([[2, 100], [3, 135], [4, 165]]);
+  });
+
+  it('기록이 없거나, 하루 평균이 없거나, 마지막 주차에 이미 기록이 있으면 빈 결과', () => {
+    expect(projectionPoints(schedule, [], 10, 300)).toEqual([]);
+    expect(projectionPoints(schedule, [{ week: 9, pages: 10 }], 10, 300)).toEqual([]);
+    expect(projectionPoints(schedule, [{ week: 1, pages: 70 }], null, 300)).toEqual([]);
+    expect(projectionPoints(schedule, [{ week: 1, pages: 70 }, { week: 4, pages: 250 }], 10, 300)).toEqual([]);
   });
 });

@@ -276,6 +276,40 @@ export type Database = {
         };
         Relationships: [];
       };
+      book_notice_dismissals: {
+        Row: {
+          dismissed_at: string;
+          key: string;
+          member_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          dismissed_at?: string;
+          key: string;
+          member_id: string;
+        };
+        Update: {
+          dismissed_at?: string;
+          key?: string;
+          member_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "book_notice_dismissals_member_id_fkey";
+            columns: ["member_id"];
+            isOneToOne: false;
+            referencedRelation: "book_member_stats";
+            referencedColumns: ["member_id"];
+          },
+          {
+            foreignKeyName: "book_notice_dismissals_member_id_fkey";
+            columns: ["member_id"];
+            isOneToOne: false;
+            referencedRelation: "book_members";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       book_quotes: {
         Row: {
           book_id: string;

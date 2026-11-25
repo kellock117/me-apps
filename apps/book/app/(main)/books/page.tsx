@@ -1,10 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { BookScoreBars } from '@/components/charts/book-score-bars';
-import { DisagreementBars } from '@/components/charts/disagreement-bars';
 import { Cover } from '@/components/cover';
-import { Card, Section } from '@me/ui/section';
-import { bookMemberScores, disagreementRows } from '@/lib/chart-data';
+import { Card } from '@me/ui/section';
 import { fmtScore } from '@/lib/format';
 import { bookAverage, disagreementByBook } from '@/lib/stats';
 import { getView } from '@/lib/view';
@@ -21,9 +18,9 @@ const SORTS: { value: Sort; label: string }[] = [
 export default async function BooksPage({ searchParams }: { searchParams: Promise<{ sort?: string; genre?: string; by?: string }> }) {
   const q = await searchParams;
   const sort: Sort = SORTS.some((x) => x.value === q.sort) ? (q.sort as Sort) : 'latest';
-  const { data, s, memberById, meetingOfBook } = await getView();
+  const { data, s, meetingOfBook } = await getView();
 
-  // 책장에는 읽은 책(done)과 읽는 중인 책(reading)이 일반 책처럼 섞여 나온다. 통계(아래 막대 그래프 등)는 읽은 책만 센다.
+  // 책장에는 읽은 책(done)과 읽는 중인 책(reading)이 일반 책처럼 섞여 나온다. 평점 줄은 읽은 책에만 보인다.
   const shelf = data.books.filter((b) => b.status === 'done' || b.status === 'reading');
   const genres = [...new Set(shelf.map((b) => b.genre).filter((g): g is string => !!g))].sort();
   const selectors = data.members.filter((m) => shelf.some((b) => b.selected_by === m.id));
@@ -39,16 +36,6 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     if (sort === 'gap') return (y.gap ?? -1) - (x.gap ?? -1);
     return y.date.localeCompare(x.date);
   });
-
-  const active = data.members.filter((m) => m.status === 'active');
-  const bars = s.books
-    .filter((b) => b.status === 'done' && bookAverage(s.ratings, b.id).n > 0)
-    .map((b) => ({
-      bookId: b.id,
-      title: b.title,
-      avg: bookAverage(s.ratings, b.id).avg,
-      scores: bookMemberScores(b.id, s.members, s.ratings).map((x) => ({ ...x, color: memberById.get(x.memberId)?.color ?? '#888' })),
-    }));
 
   const select = 'min-h-11 w-full rounded-xl border border-line bg-surface px-3 text-base';
   return (
@@ -113,18 +100,6 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
           ))}
         </ul>
       )}
-
-      <Section title="책별 멤버 별점">
-        <Card>
-          <BookScoreBars rows={bars} members={active} />
-        </Card>
-      </Section>
-
-      <Section title="의견이 가장 갈린 책">
-        <Card>
-          <DisagreementBars rows={disagreementRows(s.books, s.ratings)} />
-        </Card>
-      </Section>
     </div>
   );
 }

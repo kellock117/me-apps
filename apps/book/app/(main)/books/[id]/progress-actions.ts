@@ -11,8 +11,6 @@ import { progressInputSchema } from '@/lib/validation/progress';
 export type ProgressState = {
   /** 저장에 성공하면 저장한 쪽수 */
   saved?: number;
-  /** 저장은 됐지만 알려 줄 것(앞 주차보다 줄어듦) */
-  warning?: string;
   error?: string;
 };
 
@@ -57,12 +55,16 @@ export async function saveProgress(_prev: ProgressState, formData: FormData): Pr
   if (!target) return { error: '없는 주차예요' };
   if (!isWeekOpen(target.dueDate, todayInSeoul(new Date()))) return { error: '아직 열리지 않은 주차예요' };
 
-  const check = checkProgress(pages, { totalPages: book.pages, previous: previousPages(mineRes.data, week) });
-  if (!check.ok) return { error: check.error === 'over-total' ? `이 책은 ${book.pages}쪽까지예요` : '읽은 쪽수를 0 이상의 숫자로 적어 주세요' };
+  const previous = previousPages(mineRes.data, week);
+  const check = checkProgress(pages, { totalPages: book.pages, previous });
+  if (!check.ok) {
+    const message = { 'over-total': `이 책은 ${book.pages}쪽까지예요`, decreased: `앞 주차(${previous}쪽)보다 적게 적을 수 없어요`, invalid: '읽은 쪽수를 0 이상의 숫자로 적어 주세요' };
+    return { error: message[check.error] };
+  }
 
   const { error } = await db.from('book_reading_progress').upsert({ book_id: bookId, member_id: me.id, week, pages }, { onConflict: 'book_id,member_id,week' });
   if (error) return { error: FAIL };
 
   revalidatePath('/', 'layout'); // 브라우저 라우터 캐시를 비워 바로 새 데이터를 보여 준다
-  return { saved: pages, warning: check.decreased ? '앞 주차보다 줄었어요' : undefined };
+  return { saved: pages };
 }

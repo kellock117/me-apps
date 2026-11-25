@@ -8,7 +8,7 @@ import { MEMBER_COOKIE, SESSION_COOKIE } from '@/lib/auth/cookies';
  * 평점·선정·추천·모임 수정·관리자·"누구" 선택은 여기에 없으므로 게스트는 로그인으로 보내진다.
  * 새 읽기 화면을 만들면 여기에 추가해야 게스트에게 보인다(기본은 잠김).
  */
-const GUEST_PAGES = [/^\/$/, /^\/books(\/[^/]+)?$/, /^\/meetings(\/[^/]+)?$/, /^\/members\/[^/]+$/, /^\/wishlist$/, /^\/rules$/];
+const GUEST_PAGES = [/^\/$/, /^\/books(\/[^/]+)?$/, /^\/meetings(\/[^/]+)?$/, /^\/members\/[^/]+$/, /^\/wishlist$/, /^\/quotes$/, /^\/rules$/];
 
 /**
  * 사이트 전체 잠금. (Next 16에서 middleware.ts는 proxy.ts로 이름이 바뀌었다.)

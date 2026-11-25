@@ -50,18 +50,18 @@ export function previousPages(rows: { week: number; pages: number }[], week: num
 }
 
 export type ProgressCheck =
-  | { ok: true; /** 총 쪽수와 같음 = 완독 */ done: boolean; /** 앞 주차보다 줄어듦(저장은 된다) */ decreased: boolean }
-  | { ok: false; error: 'invalid' | 'over-total' };
+  | { ok: true; /** 총 쪽수와 같음 = 완독 */ done: boolean }
+  | { ok: false; error: 'invalid' | 'over-total' | 'decreased' };
 
-/** 입력값(누적 쪽수) 검증: 0 이상의 정수, 총 쪽수가 있으면 그 이하. totalPages가 null이면 상한을 보지 않는다. */
+/**
+ * 입력값(누적 쪽수) 검증: 0 이상의 정수, 총 쪽수가 있으면 그 이하, 앞 주차(previousPages) 이상. totalPages가 null이면 상한을 보지 않는다.
+ * 앞 주차와 같은 값은 받는다(그 주에 못 읽음).
+ */
 export function checkProgress(pages: number, opts: { totalPages: number | null; previous: number | null }): ProgressCheck {
   if (!Number.isInteger(pages) || pages < 0) return { ok: false, error: 'invalid' };
   if (opts.totalPages !== null && pages > opts.totalPages) return { ok: false, error: 'over-total' };
-  return {
-    ok: true,
-    done: opts.totalPages !== null && pages === opts.totalPages,
-    decreased: opts.previous !== null && pages < opts.previous,
-  };
+  if (opts.previous !== null && pages < opts.previous) return { ok: false, error: 'decreased' };
+  return { ok: true, done: opts.totalPages !== null && pages === opts.totalPages };
 }
 
 // ───────────── 그래프·속도 ─────────────
@@ -74,7 +74,35 @@ export function progressPoints(schedule: WeekInfo[], rows: { week: number; pages
   return rows
     .filter((r) => inRange.has(r.week))
     .sort((a, b) => a.week - b.week)
-    .map((r) => ({ week: r.week, pages: r.pages, percent: totalPages ? Math.round((r.pages / totalPages) * 1000) / 10 : null }));
+    .map((r) => ({ week: r.week, pages: r.pages, percent: toPercent(r.pages, totalPages) }));
+}
+
+/** 쪽수 → 퍼센트(소수 첫째 자리). 총 쪽수가 없으면 null. */
+function toPercent(pages: number, totalPages: number | null): number | null {
+  return totalPages ? Math.round((pages / totalPages) * 1000) / 10 : null;
+}
+
+/**
+ * 예상선: 마지막 기록 주차의 누적 쪽수에서 시작해, 남은 주차마다 (그 기준일까지 일수 × 하루 평균)을 더한 점들.
+ * 첫 점은 마지막 기록 그대로다(실제 선과 이어지게). 쪽수는 반올림하고 총 쪽수에서 자른다. average는 readingSpeed().average를 넘긴다.
+ * 기록이 없거나(일정 밖 기록만 있어도), 하루 평균이 없거나, 마지막 주차에 이미 기록이 있으면 빈 목록.
+ */
+export function projectionPoints(schedule: WeekInfo[], rows: { week: number; pages: number }[], average: number | null, totalPages: number | null): ProgressPoint[] {
+  const recorded = progressPoints(schedule, rows, totalPages);
+  const latest = recorded[recorded.length - 1];
+  const lastWeek = schedule[schedule.length - 1];
+  if (!latest || average === null || !lastWeek || latest.week === lastWeek.week) return [];
+  const from = schedule.find((w) => w.week === latest.week)!;
+  return [
+    latest,
+    ...schedule
+      .filter((w) => w.week > latest.week)
+      .map((w) => {
+        const raw = Math.round(latest.pages + daysBetween(from.dueDate, w.dueDate) * average);
+        const pages = totalPages === null ? raw : Math.min(totalPages, raw);
+        return { week: w.week, pages, percent: toPercent(pages, totalPages) };
+      }),
+  ];
 }
 
 export type ChartMode = 'percent' | 'pages';
@@ -128,4 +156,14 @@ export function readingSpeed(o: {
   const daysLeft = daysBetween(o.today, o.meetingDate);
   const needed = o.totalPages === null || daysLeft <= 0 ? null : Math.max(0, o.totalPages - (latest?.pages ?? 0)) / daysLeft;
   return { average, recent, needed };
+}
+
+/**
+ * "모두의 진도"에 보여 줄 기록이 아직 하나도 없는가. rows는 그 책의 기록만 넘긴다.
+ * 일정 밖 주차의 기록과 활동 멤버가 아닌 사람의 기록은 없는 것으로 센다(그래프에 점이 찍히지 않는 기록).
+ */
+export function hasNoProgress(schedule: WeekInfo[], rows: { member_id: string; week: number }[], memberIds: string[]): boolean {
+  const weeks = new Set(schedule.map((w) => w.week));
+  const members = new Set(memberIds);
+  return !rows.some((r) => weeks.has(r.week) && members.has(r.member_id));
 }

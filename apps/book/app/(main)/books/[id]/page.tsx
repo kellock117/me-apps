@@ -12,7 +12,6 @@ import { fmtDate, fmtScore } from '@/lib/format';
 import { bookAverage, pendingRatings } from '@/lib/stats';
 import { getView } from '@/lib/view';
 
-const STATUS: Record<string, string> = { done: '읽은 책', reading: '읽는 중', wishlist: '위시리스트' };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -48,25 +47,25 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
           <Cover title={book.title} authors={book.authors} genre={book.genre} coverPath={book.cover_path} />
         </div>
         <div className="min-w-0 flex-1 space-y-1.5">
-          <p className="text-xs font-medium text-accent">{STATUS[book.status] ?? book.status}</p>
           <h1 className="font-serif text-2xl font-bold leading-snug">{book.title}</h1>
           <p className="text-sm text-muted">{book.authors.join(', ') || '저자 정보 없음'}</p>
           <p className="text-sm text-muted">
             {book.pages ? `${book.pages}쪽` : '쪽수 미입력'} · {book.genre ?? '장르 미분류'}
           </p>
           {book.status === 'done' && (
-            <p className="pt-1 text-lg font-bold tabular-nums">
-              <span aria-hidden className="text-star">★</span> {fmtScore(avg)} <span className="text-sm font-normal text-muted">{n > 0 ? `(${n}명)` : '평점 없음'}</span>
-            </p>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1">
+              <p className="text-lg font-bold tabular-nums">
+                <span aria-hidden className="text-star">★</span> {fmtScore(avg)} <span className="text-sm font-normal text-muted">{n > 0 ? `(${n}명)` : '평점 없음'}</span>
+              </p>
+              {me && (
+                <Link href={`/rate?book=${book.id}`} className="inline-flex min-h-11 items-center rounded-xl border border-line px-3 text-sm font-medium text-accent">
+                  {myRating ? '평점 고치기' : '평점 추가하기'}
+                </Link>
+              )}
+            </div>
           )}
         </div>
       </div>
-
-      {me && book.status === 'done' && (
-        <Link href={`/rate?book=${book.id}`} className="flex min-h-12 items-center justify-center rounded-xl bg-accent px-4 font-semibold text-accent-ink">
-          {myRating ? '평점 고치기' : '평점 추가하기'}
-        </Link>
-      )}
 
       <Section title="모임 정보">
         <Card className="space-y-1.5 text-sm">

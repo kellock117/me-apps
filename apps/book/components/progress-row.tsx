@@ -94,12 +94,8 @@ export function ProgressRow({ bookId, week, dueLabel, open, current, saved, tota
           {state.error}
         </p>
       )}
-      {!editing && (state.warning || done) && (
-        <p className="mt-1 pl-[6.75rem] text-sm text-muted">
-          {done && <span className="font-medium text-accent">완독</span>}
-          {done && state.warning && ' · '}
-          {state.warning}
-        </p>
+      {!editing && done && (
+        <p className="mt-1 pl-[6.75rem] text-sm font-medium text-accent">완독</p>
       )}
     </li>
   );
