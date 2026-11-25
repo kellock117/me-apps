@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { GuestLogin } from '@me/ui/guest-login';
 import { NoticeBell } from '@/components/notice-bell';
+import { SwRegister } from '@/components/sw-register';
 import { TabBar } from '@/components/tab-bar';
 import { isLoggedIn } from '@/lib/auth/access';
 import { getCurrentMember } from '@/lib/auth/member';
@@ -50,6 +51,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       </header>
       <main className="mx-auto w-full max-w-md px-4 pb-28 pt-4">{children}</main>
       <TabBar />
+      <SwRegister />
     </>
   );
 }

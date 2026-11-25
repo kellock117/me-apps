@@ -41,6 +41,7 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // 정적 파일은 제외한다. (이후 단계의 /api/cron은 Bearer 토큰으로 따로 검증하므로 여기서도 제외한다)
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|robots.txt|api/cron).*)'],
+  // 정적 파일과 PWA 파일(manifest, 아이콘, 서비스 워커)은 제외한다. 잠그면 로그인 전에 설치 정보를 받을 수 없다.
+  // (/api/cron은 Bearer 토큰으로 따로 검증하므로 여기서도 제외한다)
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|robots.txt|manifest.webmanifest|icon|apple-icon|sw.js|api/cron).*)'],
 };

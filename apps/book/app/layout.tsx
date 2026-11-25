@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   title: '독서 모임',
   description: '우리 독서 모임의 기록',
   robots: { index: false, follow: false },
+  // 홈 화면에 추가했을 때 주소창 없는 앱처럼 열리게 (iOS)
+  appleWebApp: { capable: true, title: '독서', statusBarStyle: 'default' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
