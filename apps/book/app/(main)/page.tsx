@@ -92,6 +92,7 @@ export default async function HomePage() {
         meetingDates={data.meetings.map((m) => m.date)}
         members={activeMembers.map((m) => ({ id: m.id, name: m.name, color: m.color }))}
         rows={data.reading_progress}
+        today={today}
       />
 
       <Section title="우리 모임 숫자">

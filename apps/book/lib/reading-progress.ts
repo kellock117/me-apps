@@ -129,3 +129,13 @@ export function readingSpeed(o: {
   const needed = o.totalPages === null || daysLeft <= 0 ? null : Math.max(0, o.totalPages - (latest?.pages ?? 0)) / daysLeft;
   return { average, recent, needed };
 }
+
+/**
+ * "모두의 진도"에 보여 줄 기록이 아직 하나도 없는가. rows는 그 책의 기록만 넘긴다.
+ * 일정 밖 주차의 기록과 활동 멤버가 아닌 사람의 기록은 없는 것으로 센다(그래프에 점이 찍히지 않는 기록).
+ */
+export function hasNoProgress(schedule: WeekInfo[], rows: { member_id: string; week: number }[], memberIds: string[]): boolean {
+  const weeks = new Set(schedule.map((w) => w.week));
+  const members = new Set(memberIds);
+  return !rows.some((r) => weeks.has(r.week) && members.has(r.member_id));
+}

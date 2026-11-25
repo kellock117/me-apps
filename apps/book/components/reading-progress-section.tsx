@@ -1,12 +1,9 @@
 import { NoMeetingDialog } from '@/components/no-meeting-dialog';
 import { ProgressRow } from '@/components/progress-row';
 import { Card, Section } from '@me/ui/section';
-import { fmtDate } from '@/lib/format';
+import { fmtDate, fmtPerDay } from '@/lib/format';
 import { ProgressChart } from '@/components/charts/progress-chart';
 import { currentWeek, isWeekOpen, previousMeetingDate, progressPoints, readingSpeed, weekSchedule } from '@/lib/reading-progress';
-
-/** 쪽/일 표시: 소수 첫째 자리, 정수면 소수점 없이 */
-const fmtPerDay = (n: number | null) => (n === null ? '—' : `${Number.isInteger(n) ? n : n.toFixed(1)}쪽`);
 
 type Props = {
   book: { id: string; status: string; pages: number | null };

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkProgress, currentWeek, isWeekOpen, previousMeetingDate, previousPages, progressPoints, readingSpeed, seriesRows, weekSchedule } from './reading-progress';
+import { checkProgress, currentWeek, hasNoProgress, isWeekOpen, previousMeetingDate, previousPages, progressPoints, readingSpeed, seriesRows, weekSchedule } from './reading-progress';
 
 describe('weekSchedule: 전 모임일부터 7일씩 센 주차와 기준일', () => {
   it('모임 요일마다 한 주차, 마지막 주차의 기준일은 모임 전날', () => {
@@ -203,5 +203,25 @@ describe('seriesRows: 그래프에 넣을 주차별 줄', () => {
   it('퍼센트 모드는 percent를 쓰고, 퍼센트가 null인 점은 뺀다', () => {
     expect(seriesRows([1, 3], [{ id: 'a', points: s1 }], 'percent')).toEqual([{ week: 1, a: 10 }, { week: 3, a: 50 }]);
     expect(seriesRows([1], [{ id: 'a', points: [{ week: 1, pages: 30, percent: null }] }], 'percent')).toEqual([{ week: 1 }]);
+  });
+});
+
+describe('hasNoProgress: "모두의 진도"에 아직 아무 기록이 없는가', () => {
+  const schedule = weekSchedule('2026-11-07', '2026-12-05'); // 1~4주차
+
+  it('기록이 하나도 없으면 참', () => {
+    expect(hasNoProgress(schedule, [], ['a', 'b'])).toBe(true);
+  });
+
+  it('일정 밖 주차 기록만 있으면 없는 것으로 센다', () => {
+    expect(hasNoProgress(schedule, [{ member_id: 'a', week: 5 }], ['a', 'b'])).toBe(true);
+  });
+
+  it('활동 멤버가 아닌 사람의 기록은 세지 않는다', () => {
+    expect(hasNoProgress(schedule, [{ member_id: 'x', week: 1 }], ['a', 'b'])).toBe(true);
+  });
+
+  it('활동 멤버 한 명이라도 일정 안 기록이 있으면 거짓', () => {
+    expect(hasNoProgress(schedule, [{ member_id: 'b', week: 2 }], ['a', 'b'])).toBe(false);
   });
 });

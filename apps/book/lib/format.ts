@@ -21,3 +21,6 @@ export function coverUrl(path: string | null | undefined): string | null {
   const base = process.env.SUPABASE_URL;
   return base ? `${base}/storage/v1/object/public/covers/${path}` : null;
 }
+
+/** 하루 읽는 쪽수 표시: 소수 첫째 자리, 정수면 소수점 없이. 값이 없으면 "—". */
+export const fmtPerDay = (n: number | null) => (n === null ? '—' : `${Number.isInteger(n) ? n : n.toFixed(1)}쪽`);
