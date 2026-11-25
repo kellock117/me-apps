@@ -7,6 +7,9 @@ export type PushPayload = { title: string; body: string; url: string };
 
 export type PushResult = { sent: number; removed: number; failed: number };
 
+/** 푸시 서비스가 응답하지 않을 때 기다리는 한계. 모임 저장·크론이 한 기기 때문에 멈추지 않게 한다(넘으면 실패로 센다). */
+const PUSH_TIMEOUT_MS = 8000;
+
 let configured = false;
 
 /** VAPID 환경 변수가 모두 있을 때만 설정한다. 없으면 false(발송하지 않는다). */
@@ -42,7 +45,7 @@ export async function sendPushToMember(memberId: string, payload: PushPayload): 
   await Promise.all(
     subs.map(async (s) => {
       try {
-        await sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, body, { TTL: 60 * 60 * 12 });
+        await sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, body, { TTL: 60 * 60 * 12, timeout: PUSH_TIMEOUT_MS });
         result.sent += 1;
       } catch (e) {
         const status = (e as { statusCode?: number }).statusCode;

@@ -55,17 +55,21 @@ export async function saveMeeting(_prev: MeetingState, formData: FormData): Prom
     if (addError) return { errors: { form: ['참석자를 저장하지 못했어요. 다시 해 주세요'] }, values };
   }
 
-  // 알림은 저장(참석자 포함)이 모두 끝난 뒤에, 날짜가 실제로 바뀌었을 때만. 실패해도 저장 결과는 그대로다.
-  if (meeting.date !== input.date) await notifyMeetingChange({ type: 'meeting-datechange', meetingId: input.id, oldDate: meeting.date });
+  // 알림은 모든 저장(참석자·완료 처리 포함)이 성공한 맨 끝에서, 날짜가 실제로 바뀌었을 때만 보낸다. 중간에 실패해 오류를 보여 줬는데 알림만 나가는 일이 없게 한다. 실패해도 저장 결과는 그대로다.
+  const notifyDateChange = async () => {
+    if (meeting.date !== input.date) await notifyMeetingChange({ type: 'meeting-datechange', meetingId: input.id, oldDate: meeting.date });
+  };
 
   if (input.intent === 'finish') {
     if (!meeting.book_id) return { errors: { form: ['이 모임에는 책이 정해져 있지 않아요'] }, values };
     const { error: doneError } = await db.from('book_books').update({ status: 'done' }).eq('id', meeting.book_id);
     if (doneError) return { errors: { form: ['책 상태를 바꾸지 못했어요. 다시 해 주세요'] }, values };
+    await notifyDateChange();
     revalidatePath('/', 'layout');
     redirect(`/rate?book=${meeting.book_id}`);
   }
 
+  await notifyDateChange();
   revalidatePath('/', 'layout');
   redirect('/meetings?toast=saved');
 }

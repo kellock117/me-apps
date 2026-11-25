@@ -9,6 +9,8 @@ import { savePushSubscription } from '@/app/(main)/push-actions';
 export type PushStatus = 'loading' | 'unsupported' | 'needs-install' | 'denied' | 'off' | 'on';
 
 const isIos = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+/** 휴대폰·태블릿(iOS 또는 Android). 첫 접속 알림 안내창은 이런 기기에서만 띄운다. */
+export const isMobile = () => isIos() || /Android/.test(navigator.userAgent);
 const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || (navigator as Navigator & { standalone?: boolean }).standalone === true;
 
 /** VAPID 공개 키(base64url)를 구독 요청이 받는 바이트로 바꾼다. */

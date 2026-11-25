@@ -24,6 +24,7 @@
 ## 2등급: 곧 문제
 - [ ] (함께) 보안 점검: 범위를 `/grill-me`로 좁힌 뒤 이슈로 만든다(시크릿 스캔, 의존성 감사, 쿠키 속성·보안 헤더, rate-limit 등) <!-- id:security-review -->
 - [ ] (함께) 사용 가이드: 처음 쓰는 멤버가 화면별 기능(진도, 평점, 모임 정보 등)을 알 수 있게 안내한다. 책 상세에 정보가 많아져서 필요하다. `/grill-me`로 시작 <!-- id:usage-guide -->
+- [ ] (Claude) 푸시 계산용 데이터 읽기가 1000행에서 조용히 잘리지 않게 한다(`lib/push/data.ts`가 `book_reading_progress`·`book_ratings`·`book_push_sent`를 한 번에 읽음, PostgREST 기본 상한 1000행). 페이지로 나눠 읽거나 상한을 확인한다 <!-- id:push-data-1000-rows -->
 
 ## 3등급: 목표 직결 (구직 준비 12월 중순~말)
 - [ ] (직접) 워크아웃 게스트 화면 재확인: 팝업 → `/login` 링크로 바꾼 뒤 화면 <!-- id:workout-guest-check -->

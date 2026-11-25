@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useTransition } from 'react';
-import { enablePush, readPushStatus } from '@/lib/push/client';
+import { enablePush, isMobile, readPushStatus } from '@/lib/push/client';
 import { decideGuide, DEV_ALWAYS_KEY, GUIDE_KEYS, OPEN_INSTALL_GUIDE, type Guide } from '@/lib/push/guide';
 
 /** 단계별 설치 사진(public/guide). 설명 그림(SVG). 실제 iPhone 화면 사진으로 바꿔도 된다(파일만 교체). */
@@ -40,6 +40,7 @@ const mark = (key: string) => {
  * 권한 요청은 [알림 켜기]를 누른 동작 안에서만 한다(iOS는 사용자 동작 없이 시스템 창을 못 띄운다).
  */
 export function FirstRunGuide({ publicKey, savedEndpoints }: { publicKey: string; savedEndpoints: string[] }) {
+  const endpointsKey = savedEndpoints.join('|');
   const [guide, setGuide] = useState<Guide | null>(null);
   const [declined, setDeclined] = useState(false); // 알림 안내창에서 "아니요"를 눌러 다음 안내 문구를 보이는 중
   const [message, setMessage] = useState<string | null>(null);
@@ -52,14 +53,15 @@ export function FirstRunGuide({ publicKey, savedEndpoints }: { publicKey: string
       (s) => {
         // 개발 서버에서는 관리 화면 스위치가 꺼지지 않는 한 "닫았다" 기록을 무시하고 항상 띄운다(운영 빌드에서는 이 줄이 빠진다)
         const always = process.env.NODE_ENV !== 'production' && !devAlwaysOff();
-        if (alive) setGuide(decideGuide(s, always ? { install: false, ask: false } : { install: read(GUIDE_KEYS.install), ask: read(GUIDE_KEYS.ask) }));
+        if (alive) setGuide(decideGuide(s, always ? { install: false, ask: false } : { install: read(GUIDE_KEYS.install), ask: read(GUIDE_KEYS.ask) }, isMobile()));
       },
       () => {},
     );
     return () => {
       alive = false;
     };
-  }, [savedEndpoints]);
+  // 레이아웃이 다시 그려질 때마다 savedEndpoints는 내용이 같아도 새 배열이라, 값(문자열)으로 비교해 내용이 바뀔 때만 다시 판정한다
+  }, [endpointsKey]);
 
   useEffect(() => {
     const reopen = () => setGuide('install');

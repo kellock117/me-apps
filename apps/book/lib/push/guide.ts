@@ -18,10 +18,11 @@ export const GUIDE_KEYS = { install: 'book:guide:install-dismissed', ask: 'book:
 export const DEV_ALWAYS_KEY = 'book:guide:dev-always';
 
 /**
- * 홈 화면에 추가 안 함(iPhone) → 설치 안내, 추가함 + 아직 안 켬 → 알림 안내창.
+ * 모바일이 아니면 없음. 홈 화면에 추가 안 함(iPhone) → 설치 안내, 추가함 + 아직 안 켬 → 알림 안내창.
  * 켬·시스템에서 거절·지원 안 함·아직 모름(loading)이면 없음. 닫은 안내는 다시 자동으로 뜨지 않는다.
  */
-export function decideGuide(status: PushStatus, dismissed: { install: boolean; ask: boolean }): Guide | null {
+export function decideGuide(status: PushStatus, dismissed: { install: boolean; ask: boolean }, mobile: boolean): Guide | null {
+  if (!mobile) return null; // 데스크톱에서는 첫 접속 안내를 띄우지 않는다(🔔에서 직접 켤 수 있음)
   if (status === 'needs-install') return dismissed.install ? null : 'install';
   if (status === 'off') return dismissed.ask ? null : 'ask';
   return null;
