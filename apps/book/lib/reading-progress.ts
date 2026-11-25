@@ -50,18 +50,18 @@ export function previousPages(rows: { week: number; pages: number }[], week: num
 }
 
 export type ProgressCheck =
-  | { ok: true; /** 총 쪽수와 같음 = 완독 */ done: boolean; /** 앞 주차보다 줄어듦(저장은 된다) */ decreased: boolean }
-  | { ok: false; error: 'invalid' | 'over-total' };
+  | { ok: true; /** 총 쪽수와 같음 = 완독 */ done: boolean }
+  | { ok: false; error: 'invalid' | 'over-total' | 'decreased' };
 
-/** 입력값(누적 쪽수) 검증: 0 이상의 정수, 총 쪽수가 있으면 그 이하. totalPages가 null이면 상한을 보지 않는다. */
+/**
+ * 입력값(누적 쪽수) 검증: 0 이상의 정수, 총 쪽수가 있으면 그 이하, 앞 주차(previousPages) 이상. totalPages가 null이면 상한을 보지 않는다.
+ * 앞 주차와 같은 값은 받는다(그 주에 못 읽음).
+ */
 export function checkProgress(pages: number, opts: { totalPages: number | null; previous: number | null }): ProgressCheck {
   if (!Number.isInteger(pages) || pages < 0) return { ok: false, error: 'invalid' };
   if (opts.totalPages !== null && pages > opts.totalPages) return { ok: false, error: 'over-total' };
-  return {
-    ok: true,
-    done: opts.totalPages !== null && pages === opts.totalPages,
-    decreased: opts.previous !== null && pages < opts.previous,
-  };
+  if (opts.previous !== null && pages < opts.previous) return { ok: false, error: 'decreased' };
+  return { ok: true, done: opts.totalPages !== null && pages === opts.totalPages };
 }
 
 // ───────────── 그래프·속도 ─────────────

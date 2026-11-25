@@ -95,10 +95,10 @@ describe('previousPages: 앞 주차 중 값이 있는 가장 가까운 것', () 
 describe('checkProgress: 입력값 검증', () => {
   const opts = { totalPages: 300, previous: 100 };
   it('정상 값은 통과', () => {
-    expect(checkProgress(150, opts)).toEqual({ ok: true, done: false, decreased: false });
+    expect(checkProgress(150, opts)).toEqual({ ok: true, done: false });
   });
   it('0은 허용', () => {
-    expect(checkProgress(0, { totalPages: 300, previous: null })).toEqual({ ok: true, done: false, decreased: false });
+    expect(checkProgress(0, { totalPages: 300, previous: null })).toEqual({ ok: true, done: false });
   });
   it('음수·소수·숫자 아님은 거부', () => {
     expect(checkProgress(-1, opts)).toEqual({ ok: false, error: 'invalid' });
@@ -107,16 +107,16 @@ describe('checkProgress: 입력값 검증', () => {
   });
   it('총 쪽수보다 크면 거부, 같으면 완독', () => {
     expect(checkProgress(301, opts)).toEqual({ ok: false, error: 'over-total' });
-    expect(checkProgress(300, opts)).toEqual({ ok: true, done: true, decreased: false });
+    expect(checkProgress(300, opts)).toEqual({ ok: true, done: true });
   });
-  it('앞 주차보다 줄어도 저장은 되지만 줄었다고 알린다', () => {
-    expect(checkProgress(80, opts)).toEqual({ ok: true, done: false, decreased: true });
+  it('앞 주차보다 적으면 거부한다', () => {
+    expect(checkProgress(80, opts)).toEqual({ ok: false, error: 'decreased' });
   });
-  it('앞 주차와 같으면 줄어든 게 아니다', () => {
-    expect(checkProgress(100, opts).ok && checkProgress(100, opts)).toMatchObject({ decreased: false });
+  it('앞 주차와 같으면 통과한다', () => {
+    expect(checkProgress(100, opts)).toEqual({ ok: true, done: false });
   });
   it('총 쪽수를 모르면 상한 검사를 건너뛰고 완독 표시도 없다', () => {
-    expect(checkProgress(5000, { totalPages: null, previous: null })).toEqual({ ok: true, done: false, decreased: false });
+    expect(checkProgress(5000, { totalPages: null, previous: null })).toEqual({ ok: true, done: false });
   });
 });
 
