@@ -110,7 +110,7 @@ describe('planPushes · 본문 다섯 모양과 이동', () => {
   it('진도만: 그 책 상세로', () => {
     const p = forMember(planPushes(base({ progress: [] })), A)!;
     expect(p.body).toBe('『읽는 책』 2주차 진도를 아직 안 적었어요');
-    expect(p.url).toBe('/books/now');
+    expect(p.url).toBe('/books/now#progress');
   });
 
   it('별점만: 그 책 평점 화면으로', () => {
@@ -171,7 +171,7 @@ describe('planPushes · 관리자 테스트 케이스', () => {
 
   it('실제 데이터에 케이스 모양을 강제한다(이미 다 적은 멤버여도)', () => {
     expect(test('weekly-none')[0]).toMatchObject({ body: '진도·별점 다 적었어요. 이번 주도 함께 읽어요', url: '/' });
-    expect(test('weekly-progress')[0]).toMatchObject({ body: '『읽는 책』 1주차 진도를 아직 안 적었어요', url: '/books/now' });
+    expect(test('weekly-progress')[0]).toMatchObject({ body: '『읽는 책』 1주차 진도를 아직 안 적었어요', url: '/books/now#progress' });
     expect(test('weekly-rate')[0]).toMatchObject({ body: '『끝낸 책』 별점을 아직 안 남겼어요', url: '/rate?book=done' });
     expect(test('weekly-rate-many')[0]).toMatchObject({ body: '『끝낸 책』 외 1권 별점을 아직 안 남겼어요', url: '/?todo=1' });
     expect(test('weekly-both')[0]).toMatchObject({ body: '『읽는 책』 1주차 진도와 『끝낸 책』 별점을 아직 안 남겼어요', url: '/?todo=1' });
@@ -219,20 +219,20 @@ describe('planPushes · 모임 당일', () => {
   });
 
   it('완독 전: 진도 요청 문구, 책 상세로', () => {
-    expect(forMember(planPushes(day()), B)).toMatchObject({ body: '『읽는 책』 오늘 만나요. 마지막으로 얼마나 읽었는지 적어 주세요', url: '/books/now' });
+    expect(forMember(planPushes(day()), B)).toMatchObject({ body: '『읽는 책』 오늘 만나요. 마지막으로 얼마나 읽었는지 적어 주세요', url: '/books/now#progress' });
   });
 
   it('기록이 없어도 완독 전이다', () => {
-    expect(forMember(planPushes(day({ progress: [] })), A)!.url).toBe('/books/now');
+    expect(forMember(planPushes(day({ progress: [] })), A)!.url).toBe('/books/now#progress');
   });
 
   it('완독(마지막 기록 = 총 쪽수): "오늘 만나요", 모임 상세로', () => {
-    expect(forMember(planPushes(day()), A)).toMatchObject({ body: '오늘 만나요', url: '/meetings' });
+    expect(forMember(planPushes(day()), A)).toMatchObject({ body: '오늘 만나요', url: '/meetings#m-m2' });
   });
 
   it('마지막 기록이 총 쪽수보다 적으면(앞 주차에만 300쪽이 아니어도) 완독 전', () => {
     const p = day({ progress: [{ bookId: 'now', memberId: A, week: 4, pages: 299 }] });
-    expect(forMember(planPushes(p), A)!.url).toBe('/books/now');
+    expect(forMember(planPushes(p), A)!.url).toBe('/books/now#progress');
   });
 
   it('이미 보낸 기록이 있는 멤버는 뺀다', () => {
@@ -248,8 +248,8 @@ describe('planPushes · 모임 당일', () => {
 
   it('관리자 테스트: 완독 전·완독, 기록 키 없이', () => {
     const t = (c: 'meetingday-unfinished' | 'meetingday-done') => planPushes(day({ kind: { type: 'test', case: c, memberId: B }, today: '2026-11-26' }));
-    expect(t('meetingday-unfinished')[0]).toMatchObject({ memberId: B, key: null, title: '[테스트] 📚 오늘 모임이에요 · 11월 26일(목)', url: '/books/now' });
-    expect(t('meetingday-done')[0]).toMatchObject({ key: null, body: '오늘 만나요', url: '/meetings' });
+    expect(t('meetingday-unfinished')[0]).toMatchObject({ memberId: B, key: null, title: '[테스트] 📚 오늘 모임이에요 · 11월 26일(목)', url: '/books/now#progress' });
+    expect(t('meetingday-done')[0]).toMatchObject({ key: null, body: '오늘 만나요', url: '/meetings#m-m2' });
     expect(planPushes(day({ kind: { type: 'test', case: 'meetingday-done', memberId: B }, meetings: [] }))).toEqual([]);
   });
 });

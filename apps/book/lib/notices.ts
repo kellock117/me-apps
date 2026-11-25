@@ -44,7 +44,7 @@ export function pendingNotices(o: NoticeInput): Notice[] {
       if (o.progress.some((p) => p.bookId === b.id && p.memberId === o.memberId && p.week === week)) return [];
       const key = `progress:${b.id}:${week}`;
       if (dismissed.has(key)) return [];
-      return [{ kind: 'progress', key, bookId: b.id, title: b.title, week, dismissable: true, href: `/books/${b.id}` } as const];
+      return [{ kind: 'progress', key, bookId: b.id, title: b.title, week, dismissable: true, href: `/books/${b.id}#progress` } as const];
     });
 
   const rate: Notice[] = unratedBooks(o.books, o.meetings, o.ratings, o.memberId).map((b) => ({

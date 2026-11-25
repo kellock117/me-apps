@@ -25,7 +25,7 @@ describe('pendingNotices: 내가 할 일(평점·진도) 알림', () => {
   it('항목에 종류·책·주차·읽음 가능 여부·이동할 곳이 있다', () => {
     const list = pendingNotices(base);
     expect(list.find((n) => n.kind === 'rate')).toEqual({ kind: 'rate', key: 'rate:d', bookId: 'd', title: '책 d', dismissable: false, href: '/rate?book=d' });
-    expect(list.find((n) => n.kind === 'progress')).toEqual({ kind: 'progress', key: 'progress:r:2', bookId: 'r', title: '책 r', week: 2, dismissable: true, href: '/books/r' });
+    expect(list.find((n) => n.kind === 'progress')).toEqual({ kind: 'progress', key: 'progress:r:2', bookId: 'r', title: '책 r', week: 2, dismissable: true, href: '/books/r#progress' });
   });
 
   it('평점 알림은 숨김 키가 있어도 나온다', () => {

@@ -127,7 +127,7 @@ function planTest(input: PlanInput, kind: Extract<PlanKind, { type: 'test' }>): 
     const m = input.meetings.filter((x) => x.bookId === reading.id).sort((a, b) => b.date.localeCompare(a.date))[0] ?? meeting;
     const prev = previousMeetingDate(input.meetings.map((x) => x.date), m.date);
     const week = (prev && currentWeek(weekSchedule(prev, m.date), input.today)) || 1;
-    return { kind: 'progress', key: `progress:${reading.id}:${week}`, bookId: reading.id, title: reading.title, week, dismissable: true, href: `/books/${reading.id}` };
+    return { kind: 'progress', key: `progress:${reading.id}:${week}`, bookId: reading.id, title: reading.title, week, dismissable: true, href: `/books/${reading.id}#progress` };
   };
   const rateNotices = (n: number): Notice[] =>
     done.slice(0, n).map((b) => ({ kind: 'rate', key: `rate:${b.id}`, bookId: b.id, title: b.title, dismissable: false, href: `/rate?book=${b.id}` }));
@@ -176,11 +176,11 @@ const todayMeeting = (meetings: StatsMeeting[], today: string) => meetings.find(
 /** `📚 오늘 모임이에요 · 12월 13일(일)`. 시각은 쓰지 않는다. */
 const meetingDayTitle = (meetingDate: string) => `📚 오늘 모임이에요 · ${fmtMonthDayWeekday(meetingDate)}`;
 
-/** 완독 전: 마지막 진도를 적어 달라고 하고 책 상세로. 완독: 인사만 하고 모임 상세로. */
-function meetingDayMessage(book: { id: string; title: string }, finished: boolean): { body: string; url: string } {
+/** 완독 전: 마지막 진도를 적어 달라고 하고 책 상세로. 완독: 인사만 하고 모임 목록의 그 모임으로. */
+function meetingDayMessage(book: { id: string; title: string }, meetingId: string, finished: boolean): { body: string; url: string } {
   return finished
-    ? { body: '오늘 만나요', url: '/meetings' }
-    : { body: `『${book.title}』 오늘 만나요. 마지막으로 얼마나 읽었는지 적어 주세요`, url: `/books/${book.id}` };
+    ? { body: '오늘 만나요', url: `/meetings#m-${meetingId}` }
+    : { body: `『${book.title}』 오늘 만나요. 마지막으로 얼마나 읽었는지 적어 주세요`, url: `/books/${book.id}#progress` };
 }
 
 /** 완독 = 그 책의 마지막 기록(가장 큰 주차)의 쪽수가 총 쪽수와 같음. 총 쪽수가 없으면 알 수 없으므로 완독 전으로 본다. */
@@ -200,7 +200,7 @@ function planMeetingDay(input: PlanInput): PlannedPush[] {
 
   return input.members
     .filter((m) => m.status === 'active' && !already.has(m.id))
-    .map((m) => ({ memberId: m.id, key, title, ...meetingDayMessage(book, isFinished(book, m.id, input.progress)) }));
+    .map((m) => ({ memberId: m.id, key, title, ...meetingDayMessage(book, meeting.id, isFinished(book, m.id, input.progress)) }));
 }
 
 /**
@@ -211,7 +211,7 @@ function planMeetingDayTest(input: PlanInput, kind: Extract<PlanKind, { type: 't
   const meeting = todayMeeting(input.meetings, input.today) ?? nextMeeting(input.meetings, input.today);
   const book = meeting && input.books.find((b) => b.id === meeting.bookId);
   if (!meeting || !book) return [];
-  const msg = meetingDayMessage(book, kind.case === 'meetingday-done');
+  const msg = meetingDayMessage(book, meeting.id, kind.case === 'meetingday-done');
   return [{ memberId: kind.memberId, key: null, title: `[테스트] ${meetingDayTitle(input.today)}`, ...msg }];
 }
 

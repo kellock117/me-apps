@@ -20,7 +20,7 @@ const ddayLabel = (today: string, date: string) => {
   return n === 0 ? 'D-day' : n > 0 ? `D-${n}` : `D+${-n}`;
 };
 
-const meetingUrl = (meetingId: string) => `/meetings/${meetingId}/edit`;
+const meetingUrl = (meetingId: string) => `/meetings#m-${meetingId}`;
 
 /** 제목에 넣는 책 이름은 15자를 넘으면 `…`로 줄인다(글자 단위). */
 const shortTitle = (t: string) => {
