@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 400" role="img" font-family="-apple-system,Helvetica,sans-serif">
+<rect x="1" y="1" width="278" height="398" rx="28" fill="#8e8e93" stroke="#c7c7cc" stroke-width="2"/>
+<rect x="8" y="120" width="264" height="272" rx="20" fill="#f2f2f7"/>
+<rect x="20" y="136" width="240" height="40" rx="10" fill="#fff"/><text x="34" y="161" font-size="13" fill="#000">링크 복사</text>
+<rect x="20" y="184" width="240" height="40" rx="10" fill="#fff"/><text x="34" y="209" font-size="13" fill="#000">북마크 추가</text>
+<rect x="20" y="232" width="240" height="40" rx="10" fill="#fff" stroke="#ff3b30" stroke-width="3"/><text x="34" y="257" font-size="13" font-weight="700" fill="#000">홈 화면에 추가</text>
+<rect x="232" y="244" width="16" height="16" rx="3" fill="none" stroke="#000" stroke-width="1.6"/><path d="M240 247v10M235 252h10" stroke="#000" stroke-width="1.6"/>
+<rect x="20" y="280" width="240" height="40" rx="10" fill="#fff"/><text x="34" y="305" font-size="13" fill="#000">인쇄</text>
+<text x="140" y="352" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">목록을 위로 밀어서 찾아요</text>
+</svg>

@@ -4,7 +4,7 @@ import { isAdmin } from '@/lib/auth/admin';
 import { getClubData } from '@/lib/data';
 import { GENRES } from '@/lib/validation/admin';
 import { deleteBook, deleteMeeting, deleteRating } from './actions';
-import { AdminLoginForm, BookForm, DeleteButton, LogoutButton, MemberForm, TestPushButton } from './forms';
+import { AdminLoginForm, BookForm, DeleteButton, LogoutButton, DevGuideToggle, MemberForm, TestPushButton } from './forms';
 
 export const metadata: Metadata = { title: '관리 · 독서 모임', robots: { index: false } };
 
@@ -56,6 +56,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         <Card className="space-y-2 text-sm">
           <p className="text-muted">내 기기에만 가요. 🔔 아래에서 이 기기의 알림을 켜 둬야 받아요.</p>
           <TestPushButton />
+          {process.env.NODE_ENV !== 'production' && <DevGuideToggle />}
         </Card>
       </Section>
 

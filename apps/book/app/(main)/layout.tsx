@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { GuestLogin } from '@me/ui/guest-login';
+import { FirstRunGuide } from '@/components/first-run-guide';
 import { NoticeBell } from '@/components/notice-bell';
 import { SwRegister } from '@/components/sw-register';
 import { TabBar } from '@/components/tab-bar';
@@ -54,6 +55,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       <main className="mx-auto w-full max-w-md px-4 pb-28 pt-4">{children}</main>
       <TabBar />
       <SwRegister />
+      {vapidPublicKey && <FirstRunGuide publicKey={vapidPublicKey} savedEndpoints={savedEndpoints} />}
     </>
   );
 }
