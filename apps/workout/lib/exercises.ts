@@ -69,9 +69,6 @@ export const EXERCISES: Exercise[] = [
   { name: '한 다리 루마니안 데드리프트', part: 'lower', short: '한 다리 RDL', area: '뒷허벅지·엉덩이', scheme: '좌우 10회 × 3세트', defaultReps: 10, unit: '회',
     lv: { hams: 3, glutes: 3, erector: 2, abs: 1, obl: 1 },
     tips: ['무릎은 살짝 굽힌 채 고정하고 엉덩이를 뒤로 빼기', '등은 곧게, 골반은 수평 유지', '흔들리면 벽이나 의자를 가볍게 짚어도 괜찮아요'] },
-  { name: '한 다리 힙 브릿지', part: 'lower', short: '힙 브릿지', area: '엉덩이', scheme: '좌우 12~15회 × 3세트', defaultReps: 12, unit: '회',
-    lv: { glutes: 3, hams: 2, quads: 1, erector: 1, abs: 1 },
-    tips: ['꼭대기에서 엉덩이를 꽉 쥐고 1~2초 유지', '허리를 젖히지 말고 골반을 말아 올리기', '발뒤꿈치로 바닥을 밀기'] },
   { name: '한 발 카프 레이즈', part: 'lower', short: '카프 레이즈', area: '종아리', scheme: '좌우 15~20회 × 3세트', defaultReps: 15, unit: '회',
     lv: { calves: 3 },
     tips: ['계단 끝에서 하면 가동범위가 커져요', '맨 위에서 1초 멈추고 천천히 내려오기', '무릎을 펴면 비복근, 살짝 굽히면 가자미근 비중이 커져요'] },
@@ -87,9 +84,6 @@ export const EXERCISES: Exercise[] = [
   { name: '친업', part: 'upper', area: '이두', scheme: '3세트', defaultReps: 5, unit: '회',
     lv: { biceps: 3, lats: 3, midback: 2, rdelt: 1, abs: 1 },
     tips: ['손바닥이 나를 보게 어깨너비로 잡기', '팔꿈치를 앞으로 모아 이두에 힘을 싣기', '내려올 때 2~3초 버티고 팔을 끝까지 펴기'] },
-  { name: '의자 딥', part: 'upper', area: '삼두', scheme: '3세트', defaultReps: 10, unit: '회',
-    lv: { triceps: 3, pec: 1, fdelt: 1 },
-    tips: ['팔꿈치 90도까지만 내려가기', '어깨가 앞으로 말리지 않게 가슴 펴기', '팔꿈치는 뒤로 곧게 접기'] },
 ];
 
 /** 이름으로 종목 찾기 (없으면 undefined) */

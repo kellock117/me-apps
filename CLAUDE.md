@@ -64,6 +64,10 @@
 - 멤버 실명은 `getClubData()`에서 한 번에 가린다. 새 데이터 읽기 경로를 그 밖에 만들지 않는다. 파일로 된 글(`apps/book/content/*.md`)은 가릴 수 없으므로 실명을 쓰지 않는다.
 - 구조·한계·함정은 `docs/features/guest-mode.md`.
 
+## 운동 목록 변경 기록
+- `apps/workout/lib/exercises.ts`의 종목을 추가·제외·이름 변경하면, 같은 작업에서 `docs/changes/workout-exercises.md`(변경 기록 맨 위 + "현재 목록")를 함께 갱신한다. 갱신 없이 끝내지 않는다.
+- 제외·이름 변경해도 DB와 `scripts/fixtures`의 옛 기록은 건드리지 않는다. 이름을 바꾸면 DB의 같은 이름도 함께 바꾼다(`exercises.ts` 머리 주석).
+
 ## README와 앞으로 할 일
 - 루트 `README.md`는 남에게 보여 주는 소개서다(무엇을 만들었고, 어떤 기술·AI 활용을 했는지). 사용법·배포 절차는 넣지 않는다(그건 `docs/`).
 - 앱이나 기능을 새로 만들 계획·아이디어가 생기면 그 자리에서 README의 "앞으로" 목록에 적는다. 만들고 나면 "앱" 섹션으로 옮긴다.
