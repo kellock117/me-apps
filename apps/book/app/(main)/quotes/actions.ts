@@ -5,7 +5,7 @@ import { nextQuoteId, quoteIdForDay } from '@/lib/daily-quote';
 import { bookAverage, todayInSeoul } from '@/lib/stats';
 import { getView } from '@/lib/view';
 
-/** 모달에 보여 줄 문장 하나와 그 책 정보. 문장 전체가 아니라 이 하나만 클라이언트로 간다. */
+/** 문장 탭에 보여 줄 문장 하나와 그 책 정보. 문장 전체가 아니라 이 하나만 클라이언트로 간다. */
 export type DailyQuote = {
   id: string;
   text: string;
@@ -21,7 +21,7 @@ const seenSchema = z.array(z.string().max(64)).max(5000);
 
 /**
  * 오늘의 문장 하나를 가져온다. 읽기 전용이라 게스트도 쓴다(로그인 확인 없음). 게스트에게는 getClubData가 이미 멤버 이름을 가려서 준다.
- * @param seen 이 모달에서 이미 보여 준 문장 id. 비어 있으면 서울 날짜 기준 오늘의 문장, 아니면 안 본 것 중 무작위.
+ * @param seen 이 화면에서 이미 보여 준 문장 id. 비어 있으면 서울 날짜 기준 오늘의 문장, 아니면 안 본 것 중 무작위.
  * @returns 문장이 하나도 없으면 null
  */
 export async function getDailyQuote(seen: string[]): Promise<DailyQuote | null> {
