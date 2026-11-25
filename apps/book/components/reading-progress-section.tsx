@@ -42,35 +42,37 @@ export function ReadingProgressSection({ book, meeting, meetingDates, mine, toda
   const projection = projectionPoints(schedule, mine, speed.average, book.pages);
   const savedOf = (week: number) => mine.find((r) => r.week === week)?.pages ?? null;
   return (
-    <Section title="내 진도">
-      <Card className="mb-3 grid grid-cols-3 gap-2 text-center">
-        <Stat label="하루 평균" value={fmtPerDay(speed.average)} />
-        <Stat label="최근 주(하루)" value={fmtPerDay(speed.recent)} />
-        <Stat label="모임까지 하루 필요" value={fmtPerDay(speed.needed)} />
-      </Card>
-      {points.length > 0 && (
-        <Card className="mb-3">
-          <ProgressChart series={[{ id: 'me', name: '나', color: 'var(--accent)', points, projection }]} weeks={schedule.map((w) => w.week)} totalPages={book.pages} caption="내 읽기 진도" />
+    <div id="progress" className="scroll-mt-20">
+      <Section title="내 진도">
+        <Card className="mb-3 grid grid-cols-3 gap-2 text-center">
+          <Stat label="하루 평균" value={fmtPerDay(speed.average)} />
+          <Stat label="최근 주(하루)" value={fmtPerDay(speed.recent)} />
+          <Stat label="모임까지 하루 필요" value={fmtPerDay(speed.needed)} />
         </Card>
-      )}
-      <Card className="py-2">
-        <ul className="divide-y divide-line">
-          {schedule.map((w) => (
-            <ProgressRow
-              key={w.week}
-              bookId={book.id}
-              week={w.week}
-              dueLabel={fmtDate(w.dueDate)}
-              open={isWeekOpen(w.dueDate, today)}
-              current={w.week === current}
-              saved={savedOf(w.week)}
-              totalPages={book.pages}
-              readOnly={!reading}
-            />
-          ))}
-        </ul>
-      </Card>
-    </Section>
+        {points.length > 0 && (
+          <Card className="mb-3">
+            <ProgressChart series={[{ id: 'me', name: '나', color: 'var(--accent)', points, projection }]} weeks={schedule.map((w) => w.week)} totalPages={book.pages} caption="내 읽기 진도" />
+          </Card>
+        )}
+        <Card className="py-2">
+          <ul className="divide-y divide-line">
+            {schedule.map((w) => (
+              <ProgressRow
+                key={w.week}
+                bookId={book.id}
+                week={w.week}
+                dueLabel={fmtDate(w.dueDate)}
+                open={isWeekOpen(w.dueDate, today)}
+                current={w.week === current}
+                saved={savedOf(w.week)}
+                totalPages={book.pages}
+                readOnly={!reading}
+              />
+            ))}
+          </ul>
+        </Card>
+      </Section>
+    </div>
   );
 }
 

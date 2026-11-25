@@ -25,7 +25,7 @@ describe('새 모임', () => {
   it('활동 멤버 모두에게 단독 문구로 간다', () => {
     const out = planPushes(base());
     expect(out.map((p) => p.memberId)).toEqual(['a', 'b']);
-    expect(out[0]).toMatchObject({ key: 'meeting:m2', title: '📚 다음 모임이 정해졌어요 · 12월 13일(일) D-14', body: '『읽는 책』을 읽어요', url: '/meetings/m2/edit' });
+    expect(out[0]).toMatchObject({ key: 'meeting:m2', title: '📚 다음 모임이 정해졌어요 · 12월 13일(일) D-14', body: '『읽는 책』을 읽어요', url: '/meetings#m-m2' });
   });
   it('앞 모임이 있으면 회차 완료 문구(D-n 없음)로, 책 이름은 15자에서 줄이고 새 책은 줄이지 않는다', () => {
     const long = '가나다라마바사아자차카타파하가나다라';
@@ -45,7 +45,7 @@ describe('새 모임', () => {
       key: 'meeting:m2',
       title: '🎉 2회차 독서 모임 완료 · 『가나다라마바사아자차카타파하가…』',
       body: '다음 모임은 12월 13일(일), 『아주 아주 아주 아주 긴 새 책 이름입니다』로 이어가요',
-      url: '/meetings/m2/edit',
+      url: '/meetings#m-m2',
     });
   });
   it('15자 이하 책 이름은 그대로 둔다', () => {

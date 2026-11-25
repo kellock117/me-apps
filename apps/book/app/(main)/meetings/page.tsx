@@ -28,7 +28,7 @@ export default async function MeetingsPage() {
             const who = data.attendees.filter((a) => a.meeting_id === m.id).map((a) => memberById.get(a.member_id)).filter((x): x is NonNullable<typeof x> => !!x);
             const avg = m.book_id ? bookAverage(s.ratings, m.book_id).avg : null;
             return (
-              <li key={m.id} className="relative">
+              <li key={m.id} id={`m-${m.id}`} className="relative scroll-mt-20">
                 <span aria-hidden className={`absolute -left-[1.72rem] top-5 size-3 rounded-full border-2 border-paper ${upcoming ? 'bg-accent' : 'bg-line'}`} />
                 <div className={`flex gap-3 rounded-2xl border bg-surface p-3 ${upcoming ? 'border-accent border-2' : 'border-line'}`}>
                   <div className="w-16 shrink-0">

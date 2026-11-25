@@ -6,6 +6,7 @@
  * - 멤버는 supabase/seed.sql이 넣은 활동 멤버를 그대로 쓴다(없으면 멈춘다).
  * - 넣는 것: 읽은 책 3권(전원 평점+리뷰+문장 여러 개 / 일부만 평점 / 평점 없음), 읽는 중 1권, 읽고 싶은 1권.
  *   그래서 미평점 책 모달, 오늘의 문장(다른 문장 보기), 리뷰·문장 표시를 바로 눌러 볼 수 있다.
+ * - 모임 4개: 책 가(73일 전)·책 나(45일 전)의 옛 모임(88, 89)이 더 있고, 책 다·읽는 중 책에도 일부 멤버의 평점+리뷰, 읽는 중 책에 첫 멤버의 1·2주차 진도가 들어 있다.
  * - 진도 화면용 모임 2개: 책 다의 모임(17일 전, 앞 모임)과 읽는 중 책의 모임(12일 뒤). 그래서 1·2주차는 열려 있고 3·4주차는 닫혀 있다.
  *   모임은 회차 번호(90, 91)로 알아보고 날짜는 돌릴 때마다 오늘 기준으로 다시 맞춘다.
  * - 관리자 테스트 푸시(주차 알림 케이스)도 이 데이터로 만든다: 다음 모임(91), 읽는 중 책, 읽은 책 3권이 있으면 모든 케이스를 볼 수 있다.
@@ -55,6 +56,21 @@ async function main() {
   ];
   must(await db.from('book_ratings').upsert(ratings, { onConflict: 'book_id,member_id' }), '평점');
 
+  // 모임이 있는 책(다·읽는 중)에도 평점과 리뷰를 일부 멤버만 남겨 둔다(알림 시험과 리뷰 화면용)
+  const meetingRatings = [BOOKS[2].id, BOOKS[3].id].flatMap((bookId, b) =>
+    members.slice(0, 2).map((m, i) => ({ book_id: bookId, member_id: m.id, score: 4 - i * 0.5, review: `${m.name}의 ${b === 0 ? '다' : '읽는 중'} 책 리뷰예요.\n둘째 줄입니다.` })),
+  );
+  must(await db.from('book_ratings').upsert(meetingRatings, { onConflict: 'book_id,member_id' }), '모임 책 평점');
+
+  // 읽는 중 책 진도: 첫 멤버만 1·2주차를 적어 둔다(나머지는 주차 알림에 "진도를 아직 안 적었어요"가 뜬다)
+  must(
+    await db.from('book_reading_progress').upsert(
+      [1, 2].map((week) => ({ book_id: BOOKS[3].id, member_id: members[0]!.id, week, pages: week * 60 })),
+      { onConflict: 'book_id,member_id,week' },
+    ),
+    '진도',
+  );
+
   const quotes = members.flatMap((m, i) => [
     { book_id: A, member_id: m.id, ord: 0, text: `${m.name}가 밑줄 친 첫 번째 문장입니다.` },
     ...(i < 2 ? [{ book_id: A, member_id: m.id, ord: 1, text: `${m.name}가 밑줄 친 두 번째 문장입니다.` }] : []),
@@ -65,6 +81,8 @@ async function main() {
   must(
     await db.from('book_meetings').upsert(
       [
+        { number: 88, date: addDays(today, -73), book_id: A },
+        { number: 89, date: addDays(today, -45), book_id: B },
         { number: 90, date: addDays(today, -17), book_id: BOOKS[2].id },
         { number: 91, date: addDays(today, 12), book_id: BOOKS[3].id },
       ],
@@ -73,7 +91,7 @@ async function main() {
     '모임',
   );
 
-  console.log(`시험 데이터를 넣었어요: 책 ${BOOKS.length}권, 모임 2개, 평점 ${ratings.length}개, 문장 ${quotes.length}개 (멤버 ${members.length}명)`);
+  console.log(`시험 데이터를 넣었어요: 책 ${BOOKS.length}권, 모임 4개, 평점 ${ratings.length}개, 문장 ${quotes.length}개 (멤버 ${members.length}명)`);
 }
 
 main().catch((e) => {
