@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { disagreementRows, generosityRows, genreShare, heatmapRows, meetingTrend, tasteMatrix } from './chart-data';
+import { generosityRows, genreShare, heatmapRows, meetingTrend, tasteMatrix } from './chart-data';
 import type { StatsBook, StatsMeeting, StatsMember, StatsRating } from './stats';
 
 const M = (id: string, order: number, status: 'active' | 'pending' = 'active'): StatsMember => ({ id, name: id, rotationOrder: order, status });
@@ -39,14 +39,6 @@ describe('generosityRows', () => {
   it('비교 대상이 없으면 null, 후한 사람이 위', () => {
     const rows = generosityRows(members, [R('1', 'a', 5), R('1', 'b', 3)]);
     expect(rows.map((r) => [r.memberId, r.value])).toEqual([['a', 2], ['b', -2], ['c', null]]);
-  });
-});
-
-describe('disagreementRows', () => {
-  it('평가 2개 이상만, 표준편차 큰 순', () => {
-    const rows = disagreementRows([B('1'), B('2')], [R('1', 'a', 5), R('1', 'b', 1), R('2', 'a', 3), R('2', 'b', 4)]);
-    expect(rows.map((r) => r.bookId)).toEqual(['1', '2']);
-    expect(rows[0]!.stddev).toBe(2);
   });
 });
 

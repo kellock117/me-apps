@@ -1,5 +1,4 @@
 import {
-  disagreementByBook,
   generosityIndex,
   tasteDistance,
   bookAverage,
@@ -56,13 +55,6 @@ export function generosityRows(members: StatsMember[], ratings: StatsRating[]) {
     .filter((m) => m.status === 'active')
     .map((m) => ({ memberId: m.id, name: m.name, value: generosityIndex(ratings, m.id) }))
     .sort((a, b) => (b.value ?? -Infinity) - (a.value ?? -Infinity));
-}
-
-/** C5: 의견 차이 순위(표준편차 큰 순). */
-export function disagreementRows(books: StatsBook[], ratings: StatsRating[]) {
-  return disagreementByBook(ratings)
-    .map((d) => ({ ...d, title: books.find((b) => b.id === d.bookId)?.title ?? '' }))
-    .filter((d) => d.title !== '');
 }
 
 export const NO_GENRE = '미분류';
