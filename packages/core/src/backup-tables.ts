@@ -19,6 +19,7 @@ export const BOOK_TABLES: readonly TableSpec[] = [
   { name: 'book_quotes', conflictKey: 'book_id,member_id,ord' },
   { name: 'book_interests', conflictKey: 'book_id,member_id' },
   { name: 'book_reading_progress', conflictKey: 'book_id,member_id,week' },
+  { name: 'book_notice_dismissals', conflictKey: 'member_id,key' },
 ];
 
 /**

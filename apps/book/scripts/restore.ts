@@ -12,7 +12,7 @@ import { countAll, parseBackup, restoreAll } from '@me/core/backup';
 import { ALL_BACKUP_TABLES, BOOK_TABLES, LEGACY_COLUMN_RENAMES, LEGACY_TABLE_RENAMES, splitLegacyQuotes } from '@me/core/backup-tables';
 
 /** 나중에 만든 표라 옛 백업에는 없어도 복원이 막히지 않아야 하는 독서 표 */
-const OPTIONAL_BOOK_TABLES: ReadonlySet<string> = new Set(['book_quotes', 'book_reading_progress']);
+const OPTIONAL_BOOK_TABLES: ReadonlySet<string> = new Set(['book_quotes', 'book_reading_progress', 'book_notice_dismissals']);
 
 async function main() {
   const args = process.argv.slice(2);

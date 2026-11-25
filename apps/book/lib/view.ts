@@ -1,4 +1,6 @@
 import 'server-only';
+import { cache } from 'react';
+import { createAdminClient } from '@me/core/server/supabase';
 import { getClubData } from '@/lib/data';
 import { pendingNotices } from '@/lib/notices';
 import { todayInSeoul } from '@/lib/stats';
@@ -18,11 +20,19 @@ export async function getView() {
 }
 
 /**
- * 로그인한 멤버의 할 일 알림(🔔·할 일 모달). 저장하지 않고 요청마다 계산한다. 게스트에게는 부르지 않는다.
- * 숨김(읽음) 키는 아직 없어서 빈 목록이다.
+ * 이 멤버가 숨긴(읽음) 알림 키. 이름이 없는 표라 getClubData 밖에서 읽는다. 같은 요청(레이아웃 + 홈)에서는 한 번만 읽는다.
+ * 읽지 못하면 숨김 없이 보여 준다(알림이 더 보이는 쪽이 안전하다).
+ */
+const getDismissedKeys = cache(async (memberId: string): Promise<string[]> => {
+  const { data, error } = await createAdminClient().from('book_notice_dismissals').select('key').eq('member_id', memberId);
+  return error ? [] : data.map((r) => r.key);
+});
+
+/**
+ * 로그인한 멤버의 할 일 알림(🔔·할 일 모달). 알림은 저장하지 않고 요청마다 계산하고, 숨긴 진도 알림은 뺀다. 게스트에게는 부르지 않는다.
  */
 export async function getMyNotices(memberId: string) {
-  const { data, s, today } = await getView();
+  const [{ data, s, today }, dismissed] = await Promise.all([getView(), getDismissedKeys(memberId)]);
   const progress = data.reading_progress.map((r) => ({ bookId: r.book_id, memberId: r.member_id, week: r.week }));
-  return pendingNotices({ books: s.books, meetings: s.meetings, ratings: s.ratings, progress, memberId, today, dismissed: [] });
+  return pendingNotices({ books: s.books, meetings: s.meetings, ratings: s.ratings, progress, memberId, today, dismissed });
 }
