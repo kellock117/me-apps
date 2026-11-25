@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { getCurrentMember } from '@/lib/auth/member';
 import { createBook, findDuplicate, readBookFields } from '@/lib/books/create';
 import type { BookFormState } from '@/lib/books/form-state';
+import { notifyMeetingChange } from '@/lib/push/notify';
 import { createAdminClient } from '@me/core/server/supabase';
 import { selectExistingSchema, selectNewSchema } from '@/lib/validation/book';
 
@@ -70,13 +71,14 @@ export async function selectBook(_prev: BookFormState, formData: FormData): Prom
   // 3) 다음 회차 모임. 실패하면 책을 되돌린다.
   const { data: last } = await db.from('book_meetings').select('number').order('number', { ascending: false }).limit(1);
   const number = (last?.[0]?.number ?? 0) + 1;
-  const { error: meetingError } = await db.from('book_meetings').insert({ number, date, book_id: bookId });
-  if (meetingError) {
+  const { data: created, error: meetingError } = await db.from('book_meetings').insert({ number, date, book_id: bookId }).select('id').single();
+  if (meetingError || !created) {
     if (createdHere) await db.from('book_books').delete().eq('id', bookId);
     else await db.from('book_books').update({ status: 'wishlist', selected_by: null, selection_reason: null }).eq('id', bookId);
     return { errors: { form: ['모임을 만들지 못했어요. 다시 해 주세요'] }, values };
   }
 
+  await notifyMeetingChange({ type: 'meeting-new', meetingId: created.id });
   revalidatePath('/', 'layout');
   redirect('/?toast=selected');
 }

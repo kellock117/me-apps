@@ -178,6 +178,8 @@ const TEST_PUSH_OPTIONS = [
   ['weekly-d1', '주차 · D-1 (내일 모임)'],
   ['meetingday-unfinished', '모임 당일 · 완독 전 (진도 적어 달라)'],
   ['meetingday-done', '모임 당일 · 완독 (오늘 만나요)'],
+  ['meeting-new', '새 모임 (다음 모임이 정해졌어요)'],
+  ['meeting-datechange', '날짜 변경 (모임 날짜가 바뀌었어요)'],
 ] as const;
 
 /** 나에게 테스트 푸시 보내기: 케이스를 고르고 보낸다. 결과(보낸 기기 수 또는 이유)를 버튼 아래에 보여 준다. */
