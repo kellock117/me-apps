@@ -37,7 +37,9 @@ jobs:
           SUPABASE_SECRET_KEY: build-placeholder
           SITE_PASSWORD: build-placeholder
           WORKOUT_PASSWORD: build-placeholder
-      # 부팅 확인: 빌드된 앱을 띄워 로그인 화면·PWA 파일·잠금 응답을 본다(scripts/smoke.mjs). DB가 필요한 화면은 못 본다.
+      # 브라우저 확인에 쓸 Chromium(모바일 크기로 로그인 화면·서비스 워커를 본다)
+      - run: pnpm exec playwright-core install --with-deps chromium
+      # 부팅 확인: 빌드된 앱을 띄워 로그인 화면·PWA 파일·잠금 응답과 브라우저 동작을 본다(scripts/smoke.mjs). DB가 필요한 화면은 못 본다.
       - run: node scripts/smoke.mjs
       # 문서 링크·docs/ 경로가 실제 파일인지(scripts/check-docs.mjs). 문서를 옮기고 경로를 못 고친 PR을 막는다.
       - run: node scripts/check-docs.mjs
