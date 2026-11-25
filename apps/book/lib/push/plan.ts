@@ -4,7 +4,7 @@
  * 크론·관리자 테스트는 데이터를 모아 이 함수를 부르고, 결과를 보내고 기록만 한다.
  * 나중에 네이티브 앱이 필요해져도 이 계산은 그대로 쓰고 발송 모듈(send.ts)만 바꾼다.
  *
- * 지금 계산하는 것: 주차 알림. (모임 당일·새 모임·날짜 변경은 이후 티켓에서 kind와 함께 더한다.)
+ * 지금 계산하는 것: 주차 알림, 모임 당일 알림. (새 모임·날짜 변경은 이후 티켓에서 더한다.)
  */
 
 import { addDays, daysBetween } from '@me/core/date';
@@ -17,7 +17,7 @@ import type { StatsBook, StatsMeeting, StatsMember, StatsRating } from '../stats
 export type PlannedPush = { memberId: string; key: string | null; title: string; body: string; url: string };
 
 /** 관리자 테스트 케이스. 실제 DB 데이터에 이 모양의 할 일을 강제로 채운다. */
-export const TEST_CASES = ['weekly-none', 'weekly-progress', 'weekly-rate', 'weekly-both', 'weekly-rate-many', 'weekly-d1'] as const;
+export const TEST_CASES = ['weekly-none', 'weekly-progress', 'weekly-rate', 'weekly-both', 'weekly-rate-many', 'weekly-d1', 'meetingday-unfinished', 'meetingday-done'] as const;
 export type TestCase = (typeof TEST_CASES)[number];
 
 export type PlanKind =
@@ -34,7 +34,8 @@ export type PlanInput = {
   books: StatsBook[];
   meetings: StatsMeeting[];
   ratings: StatsRating[];
-  progress: { bookId: string; memberId: string; week: number }[];
+  /** pages = 그 주차까지의 누적 쪽수 */
+  progress: { bookId: string; memberId: string; week: number; pages: number }[];
   /** 멤버 id → 그 멤버가 숨긴(읽음) 알림 키 */
   dismissed: Record<string, string[]>;
   /** 이미 보낸 기록 */
@@ -150,6 +151,9 @@ function planTest(input: PlanInput, kind: Extract<PlanKind, { type: 'test' }>): 
       notices = p && done.length >= 1 ? [p, ...rateNotices(1)] : null;
       break;
     }
+    case 'meetingday-unfinished':
+    case 'meetingday-done':
+      return []; // planMeetingDayTest가 맡는다
   }
   if (!notices) return [];
 
@@ -158,7 +162,55 @@ function planTest(input: PlanInput, kind: Extract<PlanKind, { type: 'test' }>): 
   return [{ memberId: kind.memberId, key: null, title, body: weeklyBody(notices), url: weeklyUrl(notices) }];
 }
 
+// ───────────── 모임 당일 ─────────────
+
+/** 오늘 열리는 모임. 없으면 undefined. */
+const todayMeeting = (meetings: StatsMeeting[], today: string) => meetings.find((m) => m.date === today);
+
+/** `📚 오늘 모임이에요 · 12월 13일(일)`. 시각은 쓰지 않는다. */
+const meetingDayTitle = (meetingDate: string) => `📚 오늘 모임이에요 · ${fmtMonthDayWeekday(meetingDate)}`;
+
+/** 완독 전: 마지막 진도를 적어 달라고 하고 책 상세로. 완독: 인사만 하고 모임 상세로. */
+function meetingDayMessage(book: { id: string; title: string }, finished: boolean): { body: string; url: string } {
+  return finished
+    ? { body: '오늘 만나요', url: '/meetings' }
+    : { body: `『${book.title}』 오늘 만나요. 마지막으로 얼마나 읽었는지 적어 주세요`, url: `/books/${book.id}` };
+}
+
+/** 완독 = 그 책의 마지막 기록(가장 큰 주차)의 쪽수가 총 쪽수와 같음. 총 쪽수가 없으면 알 수 없으므로 완독 전으로 본다. */
+function isFinished(book: StatsBook, memberId: string, progress: PlanInput['progress']): boolean {
+  if (book.pages === null) return false;
+  const last = progress.filter((p) => p.bookId === book.id && p.memberId === memberId).sort((a, b) => b.week - a.week)[0];
+  return last !== undefined && last.pages === book.pages;
+}
+
+function planMeetingDay(input: PlanInput): PlannedPush[] {
+  const meeting = todayMeeting(input.meetings, input.today);
+  const book = meeting && input.books.find((b) => b.id === meeting.bookId);
+  if (!meeting || !book) return [];
+  const key = `meetingday:${meeting.id}:${input.today}`;
+  const already = new Set(input.sent.filter((s) => s.key === key).map((s) => s.memberId));
+  const title = meetingDayTitle(meeting.date);
+
+  return input.members
+    .filter((m) => m.status === 'active' && !already.has(m.id))
+    .map((m) => ({ memberId: m.id, key, title, ...meetingDayMessage(book, isFinished(book, m.id, input.progress)) }));
+}
+
+/**
+ * 관리자 테스트(모임 당일): 다음 모임(오늘 모임이 있으면 그 모임)의 책으로 만든다. 오늘이 모임 날인 것처럼 제목 날짜는 오늘을 쓴다.
+ * 보내는 날·보낸 기록은 보지 않는다. 모임이나 책이 없으면 빈 목록.
+ */
+function planMeetingDayTest(input: PlanInput, kind: Extract<PlanKind, { type: 'test' }>): PlannedPush[] {
+  const meeting = todayMeeting(input.meetings, input.today) ?? nextMeeting(input.meetings, input.today);
+  const book = meeting && input.books.find((b) => b.id === meeting.bookId);
+  if (!meeting || !book) return [];
+  const msg = meetingDayMessage(book, kind.case === 'meetingday-done');
+  return [{ memberId: kind.memberId, key: null, title: `[테스트] ${meetingDayTitle(input.today)}`, ...msg }];
+}
+
 /** 푸시 대상 계산의 입구. 결과는 보낼 순서대로. */
 export function planPushes(input: PlanInput): PlannedPush[] {
-  return input.kind.type === 'test' ? planTest(input, input.kind) : planWeekly(input);
+  if (input.kind.type === 'test') return input.kind.case.startsWith('meetingday-') ? planMeetingDayTest(input, input.kind) : planTest(input, input.kind);
+  return [...planWeekly(input), ...planMeetingDay(input)];
 }
