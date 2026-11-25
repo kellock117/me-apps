@@ -18,7 +18,6 @@
 | 5 | 아이디어, 하면 좋은 것 |
 
 ## 1등급: 막힘·장애
-- [ ] (함께) 독서 진도 알림(웹 푸시): 각 주차 입력 칸이 열리는 날(기준일) 18:00 KST에 아직 안 적은 멤버에게 책 세부 링크를 보낸다. PWA 설정(manifest, 서비스 워커, 푸시 키, 구독 테이블, 멤버별 "알림 켜기")이 필요하다. 카톡 단체방에는 공식 발송 수단이 없어 푸시로 간다. 독서 진도 입력 기능 뒤에 `/grill-me`로 시작 <!-- id:reading-push -->
 - [ ] (함께) 모임 완료 흐름: 모임 기록에서 "모임 완료"를 표시하면 곧바로 다음 모임 날짜와 책을 정하게 한다. 읽는 책과 다음 모임이 항상 있게 하는 전제다(독서 진도 기능은 이 흐름 없이도 동작). `/grill-me`로 시작 <!-- id:meeting-complete-flow -->
 
 ## 2등급: 곧 문제
@@ -29,6 +28,7 @@
 ## 3등급: 목표 직결 (구직 준비 12월 중순~말)
 - [ ] (직접) 워크아웃 게스트 화면 재확인: 팝업 → `/login` 링크로 바꾼 뒤 화면 <!-- id:workout-guest-check -->
 - [ ] (직접) iPhone 홈 화면 추가(PWA) 동작 확인 <!-- id:pwa-install-check -->
+- [ ] (직접) 푸시 운영 배포 준비: Vercel(book) 환경 변수에 `VAPID_PUBLIC_KEY`·`VAPID_PRIVATE_KEY`·`VAPID_SUBJECT` 추가, `CRON_SECRET` 있는지 확인, 첫 main 머지 때 GitHub Actions `production` 승인으로 마이그레이션 2개(`book_push_subscriptions`, `book_push_sent`) 적용, 터널 주소로 설치한 홈 화면 앱 삭제 뒤 운영 주소로 다시 설치해 알림이 오는지 확인(`docs/book/features/push.md`) <!-- id:push-prod-prep -->
 - [ ] (직접) iPhone 실기기에서 운동 앱 확인: 화면 잠금·백그라운드 후 타이머, 1:30 삑 소리, 시간·횟수 입력(`docs/workout/features/workout.md` 미검증 항목) <!-- id:workout-device-check -->
 - [ ] (Claude) ADR 소급 작성: 알라딘 종료 → 카카오·국립중앙도서관, 데이터 캐시 제거, RLS 켜고 정책 없음, 모노레포·테이블 접두사. `/grill-with-docs`로 사용자와 확인하며 `docs/adr/`에 쓴다 <!-- id:adr-backfill -->
 - [ ] (함께) 지표 기준선 측정: 백업 복원 소요 시간, Lighthouse, 테스트 수·커버리지, `npm audit`. 값은 `docs/reference/`에 기록한다 <!-- id:metrics-baseline -->
