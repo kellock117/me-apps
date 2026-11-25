@@ -6,6 +6,7 @@ import { Heatmap } from '@/components/charts/heatmap';
 import { TrendLine } from '@/components/charts/trend-line';
 import { Cover } from '@/components/cover';
 import { DailyQuoteButton } from '@/components/daily-quote';
+import { MemberProgressSection } from '@/components/member-progress-section';
 import { UnratedBooksModal } from '@/components/unrated-books-modal';
 import { Card, Section } from '@me/ui/section';
 import { getCurrentMember } from '@/lib/auth/member';
@@ -85,6 +86,14 @@ export default async function HomePage() {
           </Card>
         )}
       </Section>
+
+      <MemberProgressSection
+        book={reading}
+        meeting={reading ? meetingOfBook(reading.id) : undefined}
+        meetingDates={data.meetings.map((m) => m.date)}
+        members={activeMembers.map((m) => ({ id: m.id, name: m.name, color: m.color }))}
+        rows={data.reading_progress}
+      />
 
       <Section title="우리 모임 숫자">
         <dl className="grid grid-cols-2 gap-3">

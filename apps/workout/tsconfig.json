@@ -5,5 +5,5 @@
     "paths": { "@/*": ["./*"] }
   },
   "include": ["next-env.d.ts", "app", "components", "lib", "scripts", "proxy.ts", ".next/types/**/*.ts", "**/*.test.ts", ".next/dev/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", ".next/dev/types/validator.ts"]
 }

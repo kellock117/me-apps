@@ -18,6 +18,7 @@ export const BOOK_TABLES: readonly TableSpec[] = [
   // id가 아니라 (책, 멤버, 순서)로 같은 행을 알아본다: 옛 백업에서 변환한 행은 id가 없어서, 두 번 복원해도 늘어나지 않게
   { name: 'book_quotes', conflictKey: 'book_id,member_id,ord' },
   { name: 'book_interests', conflictKey: 'book_id,member_id' },
+  { name: 'book_reading_progress', conflictKey: 'book_id,member_id,week' },
 ];
 
 /**

@@ -25,3 +25,8 @@ function dayNumber(s: string): number {
 export function daysBetween(from: string, to: string): number {
   return dayNumber(to) - dayNumber(from);
 }
+
+/** ymd에서 n일 뒤(음수면 앞)의 'YYYY-MM-DD'. */
+export function addDays(ymd: string, n: number): string {
+  return new Date((dayNumber(ymd) + n) * 86_400_000).toISOString().slice(0, 10);
+}

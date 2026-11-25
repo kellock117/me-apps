@@ -19,7 +19,7 @@ function must<T>(res: { data: T | null; error: { message: string } | null }, wha
 export const getClubData = cache(async () => {
   await connection(); // 빌드 때 미리 렌더링하지 않고 요청 시점에 읽는다
   const db = createAdminClient();
-  const [members, books, meetings, attendees, ratings, quotes, interests] = await Promise.all([
+  const [members, books, meetings, attendees, ratings, quotes, interests, readingProgress] = await Promise.all([
     db.from('book_members').select('*').order('rotation_order'),
     db.from('book_books').select('*').order('created_at'),
     db.from('book_meetings').select('*').order('number'),
@@ -27,6 +27,7 @@ export const getClubData = cache(async () => {
     db.from('book_ratings').select('*'),
     db.from('book_quotes').select('*').order('ord'),
     db.from('book_interests').select('*'),
+    db.from('book_reading_progress').select('*'),
   ]);
   const all = {
     members: must(members, 'book_members'),
@@ -36,6 +37,7 @@ export const getClubData = cache(async () => {
     ratings: must(ratings, 'book_ratings'),
     quotes: must(quotes, 'book_quotes'),
     interests: must(interests, 'book_interests'),
+    reading_progress: must(readingProgress, 'book_reading_progress'),
   };
   return (await isGuest()) ? maskClubData(all) : all;
 });

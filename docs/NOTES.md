@@ -8,6 +8,10 @@
 - pnpm이 esbuild 빌드 스크립트를 막아서 `pnpm.onlyBuiltDependencies: ["esbuild"]`를 둔다(tsx가 필요로 함).
 - `next dev`가 가끔 레포 루트에 `.next`를 만든다. 지워도 된다.
 - Next 16은 `middleware.ts` 대신 `proxy.ts`를 쓴다.
+- zsh에서 `grep --include=*.ts`는 glob 오류가 난다. 따옴표로 감싸거나 `--exclude-dir=node_modules`로 거른다. macOS `sed -i`는 `sed -i ''`다(여러 줄 편집은 python이 안전).
+- 로컬 Supabase나 Docker가 꺼져 있으면 앱이 "fetch failed" 500만 보여 준다. 먼저 Docker와 `npx supabase status`를 본다.
+- `.claude/launch.json`(개발 서버 설정: book 3000, workout 3001)은 gitignore라서 새 체크아웃에는 없다.
+- `noUnusedLocals`가 켜져 있어 안 쓰는 변수·import는 `typecheck`에서 실패한다. `.next/dev/types/validator.ts`는 Next가 만드는 파일이라 workout tsconfig에서 제외했다.
 
 ## 이동·호환
 - 독서 전용이던 쿠키 이름은 `apps/book/lib/auth/cookies.ts`, 토스트 문구는 `apps/book/lib/toast-messages.ts`.

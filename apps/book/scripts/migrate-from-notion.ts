@@ -16,7 +16,6 @@ function arg(name: string): string | undefined {
   const i = process.argv.indexOf(name);
   return i >= 0 ? process.argv[i + 1] : undefined;
 }
-const flag = (name: string) => process.argv.includes(name);
 
 function need(name: string): string {
   const v = process.env[name];
