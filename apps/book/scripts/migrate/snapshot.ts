@@ -30,7 +30,6 @@ export const snapshotSchema = z.object({
       id: z.string(),
       title: z.string(), // "제N회 · …"
       date: z.string().nullable(),
-      place: z.string(),
       questions: z.string(),
       bookIds: z.array(z.string()),
       attendeeIds: z.array(z.string()),

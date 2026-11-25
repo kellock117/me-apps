@@ -4,7 +4,7 @@ import { useActionState } from 'react';
 import { saveMeeting, type MeetingState } from './actions';
 
 type Props = {
-  meeting: { id: string; date: string; place: string; questions: string };
+  meeting: { id: string; date: string; questions: string };
   members: { id: string; name: string }[];
   attendeeIds: string[];
   /** 책이 아직 읽는 중일 때만 "모임 끝" 버튼을 보인다 */
@@ -31,18 +31,6 @@ export function MeetingForm({ meeting, members, attendeeIds, canFinish }: Props)
         {e.date && (
           <p role="alert" className="mt-2 text-sm font-medium text-danger">
             {e.date[0]}
-          </p>
-        )}
-      </div>
-
-      <div>
-        <label htmlFor="place" className="mb-2 block text-sm font-medium">
-          장소
-        </label>
-        <input id="place" name="place" defaultValue={v?.place ?? meeting.place} autoComplete="off" className={input} />
-        {e.place && (
-          <p role="alert" className="mt-2 text-sm font-medium text-danger">
-            {e.place[0]}
           </p>
         )}
       </div>

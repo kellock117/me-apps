@@ -209,7 +209,6 @@ export type Database = {
           date: string;
           id: string;
           number: number;
-          place: string | null;
           questions: string | null;
         };
         ComputedFields: never;
@@ -219,7 +218,6 @@ export type Database = {
           date: string;
           id?: string;
           number: number;
-          place?: string | null;
           questions?: string | null;
         };
         Update: {
@@ -228,7 +226,6 @@ export type Database = {
           date?: string;
           id?: string;
           number?: number;
-          place?: string | null;
           questions?: string | null;
         };
         Relationships: [

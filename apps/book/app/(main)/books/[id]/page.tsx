@@ -76,7 +76,7 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
           {book.selection_reason && <p className="whitespace-pre-line">{book.selection_reason}</p>}
           {book.recommend_reason && <p className="whitespace-pre-line text-muted">추천 이유: {book.recommend_reason}</p>}
           <p>
-            <span className="text-muted">모임</span> {meeting ? `${meeting.number}회 · ${fmtDate(meeting.date)}${meeting.place ? ` · ${meeting.place}` : ''}` : '아직 모임 기록이 없어요'}
+            <span className="text-muted">모임</span> {meeting ? `${meeting.number}회 · ${fmtDate(meeting.date)}` : '아직 모임 기록이 없어요'}
           </p>
           {book.status === 'wishlist' && <p className="text-muted">관심 있는 멤버 {interested}명</p>}
         </Card>

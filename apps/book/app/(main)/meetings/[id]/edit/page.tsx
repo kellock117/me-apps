@@ -28,7 +28,7 @@ export default async function EditMeetingPage({ params }: { params: Promise<{ id
         </p>
       </div>
       <MeetingForm
-        meeting={{ id: meeting.id, date: meeting.date, place: meeting.place ?? '', questions: meeting.questions ?? '' }}
+        meeting={{ id: meeting.id, date: meeting.date, questions: meeting.questions ?? '' }}
         members={members.map((m) => ({ id: m.id, name: m.name }))}
         attendeeIds={attendeeIds}
         canFinish={book?.status === 'reading'}
