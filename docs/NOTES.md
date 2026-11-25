@@ -34,7 +34,7 @@
 - 시크릿 이름이 바뀌었다: 기존 `VERCEL_PROJECT_ID` → `VERCEL_PROJECT_ID_BOOK`. 새로 `VERCEL_PROJECT_ID_WORKOUT`이 필요하다. 머지 전에 GitHub에서 추가해야 한다.
 - 이 워크플로는 아직 GitHub에서 돌려 보지 않았다 (PR을 올려야 verify를 확인할 수 있고, vercel 잡은 main 머지 때만 돈다).
   > ⚠️ 폐기 (2026-11-25): verify는 PR #71부터 GitHub에서 돌고 있다. vercel 잡은 main 머지 때 돈다.
-- **main 보호(2026-11-25)**: 저장소 규칙 "main: verify 필수"(ruleset)가 PR을 거치게 하고 `verify` 통과를 머지 조건으로 건다(승인 인원 0, 강제 푸시·삭제 금지). 저장소 관리자는 우회할 수 있다(장애 때 직접 푸시). Allow auto-merge와 머지 뒤 브랜치 자동 삭제도 켰다. PR을 올린 뒤 `gh pr merge <번호> --auto --merge`를 걸면 verify 통과 때 GitHub이 머지한다. 마이그레이션이 든 PR은 머지 뒤 `production` 승인 단계에서 기다린다. 규칙이 실제로 막는지(verify 실패 PR)는 아직 확인하지 않았다.
+- **main 보호(2026-11-25)**: 저장소 규칙 "main: verify 필수"(ruleset)가 PR을 거치게 하고 `verify` 통과를 머지 조건으로 건다(승인 인원 0, 강제 푸시·삭제 금지). 저장소 관리자는 우회할 수 있다(장애 때 직접 푸시). Allow auto-merge와 머지 뒤 브랜치 자동 삭제도 켰다. PR을 올린 뒤 `gh pr merge <번호> --auto --merge`를 걸면 verify 통과 때 GitHub이 머지한다. 마이그레이션이 든 PR은 머지 뒤 `production` 승인 단계에서 기다린다. 규칙은 확인했다(2026-11-25): verify가 실패한 PR에 auto-merge를 걸어도 `BLOCKED`로 열려 있었다. 다만 관리자 우회가 켜져 있어서 관리자 계정이 직접 머지하면 실패한 PR도 들어갈 수 있다. 우회를 끄려면 규칙의 `bypass_actors`를 비운다.
 - `db:types`는 임시 파일(`database.ts.tmp`)에 쓴 뒤 옮긴다. 예전 방식(`> database.ts`)은 `supabase` 실행이 실패하면 파일을 빈 파일로 만들었다(이번에 실제로 겪음, git으로 복구). 생성 결과는 줄 모양이 지금 파일과 다르지만 내용은 같다. 확인: 직접 쓴 workout 3개 테이블 타입이 생성본과 열·null 여부가 모두 일치했다.
 - 로컬 Supabase는 Docker Desktop을 켜야 한다 (`open -a Docker`). 이미지가 캐시돼 있으면 `supabase start`가 1분 안에 끝난다.
 - `next dev`가 `AGENTS.md`를 자동 생성/재생성한다. 각 앱 next.config에 `agentRules: false`를 두어 앱 폴더에는 만들지 않게 했다. 루트 `AGENTS.md`(CLAUDE.md가 `@AGENTS.md`로 읽음)만 커밋한다.
