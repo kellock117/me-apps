@@ -29,7 +29,7 @@
 - 운동 원본은 Supabase만. 노션 🏋️ DB는 더 쓰지 않기로 정했다(2026-11-17, DB 자체는 남아 있다).
 
 ## CI
-- `.github/workflows/deploy.yml`: verify(전체 `pnpm turbo typecheck test build`) → supabase(db push) → vercel(앱 matrix). 비밀 값 없이 도는 verify는 자리표시 env로 빌드한다.
+- `.github/workflows/deploy.yml`: verify(전체 `pnpm turbo typecheck test build`) → supabase(db push) → vercel(앱 matrix). 비밀 값 없이 도는 verify는 자리표시 env로 빌드한 뒤, `scripts/smoke.mjs`로 빌드된 앱을 띄워 `/login`·PWA 파일·잠금 응답(리다이렉트·401)을 확인한다. DB가 필요한 화면, 서버 액션, 브라우저 동작, 실제 환경 변수는 못 잡는다.
 - Vercel 잡은 `turbo-ignore <앱>`으로 "그 앱 또는 의존 패키지가 바뀐 경우"만 배포한다. 수동 실행(workflow_dispatch)은 항상 배포한다. 마이그레이션(supabase/)만 바뀐 커밋은 앱을 다시 배포하지 않는다.
 - 시크릿 이름이 바뀌었다: 기존 `VERCEL_PROJECT_ID` → `VERCEL_PROJECT_ID_BOOK`. 새로 `VERCEL_PROJECT_ID_WORKOUT`이 필요하다. 머지 전에 GitHub에서 추가해야 한다.
 - 이 워크플로는 아직 GitHub에서 돌려 보지 않았다 (PR을 올려야 verify를 확인할 수 있고, vercel 잡은 main 머지 때만 돈다).

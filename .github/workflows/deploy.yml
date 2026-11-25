@@ -37,6 +37,8 @@ jobs:
           SUPABASE_SECRET_KEY: build-placeholder
           SITE_PASSWORD: build-placeholder
           WORKOUT_PASSWORD: build-placeholder
+      # 부팅 확인: 빌드된 앱을 띄워 로그인 화면·PWA 파일·잠금 응답을 본다(scripts/smoke.mjs). DB가 필요한 화면은 못 본다.
+      - run: node scripts/smoke.mjs
 
   # 2) DB 마이그레이션: main에서만, "production" 환경 승인 규칙을 따른다. (DB 하나를 모든 앱이 함께 쓴다)
   supabase:
